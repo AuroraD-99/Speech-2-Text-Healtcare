@@ -1,0 +1,12 @@
+2025-04-30 12:20:41,171 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-04-30 12:21:44,647 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-04-30 12:21:51,186 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-04-30 12:21:57,995 [Voice_to_text] - INFO - Transcription completed for registrazione.wav.
+2025-04-30 12:21:57,995 [Voice_to_text] - DEBUG - Transcription:  Molto piacere, il mio nome è Gennaro Yannis 
+2025-04-30 12:23:06,833 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-04-30 12:23:12,871 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-04-30 12:24:28,055 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-04-30 12:24:33,827 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-04-30 12:24:33,828 [Voice_to_text] - DEBUG - Transcription info: it
+2025-04-30 12:24:40,467 [Voice_to_text] - INFO - Transcription completed for registrazione.wav.
+2025-04-30 12:24:40,467 [Voice_to_text] - DEBUG - Transcription:  Molto piacere, il mio nome è Gennaro Yannis 
