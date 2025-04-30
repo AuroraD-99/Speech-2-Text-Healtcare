@@ -12,7 +12,7 @@ class voice_to_text:
         self.device = device
         self.logger = Logger("Voice_to_text").get_logger()
         self.logger.info(f"Model loaded on {self.device} with size {model_size}.")
-
+        
     def transcribe(self, audio_path: str) -> str:
         segments, info = self.model.transcribe(audio_path, beam_size=5)
         self.logger.info(f"Transcribing {audio_path}...")
@@ -76,4 +76,4 @@ class voice_to_text:
 # Example usage
 if __name__ == "__main__":
     v2t = voice_to_text()
-    transcription = v2t.transcribe("registrazione.wav")
+    audio = v2t.record_audio()
