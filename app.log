@@ -1,0 +1,6 @@
+2025-05-01 10:02:32,782 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:05:15,979 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:05:29,181 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-05-01 10:05:29,181 [Voice_to_text] - DEBUG - Language info: it
+2025-05-01 10:05:35,906 [Voice_to_text] - INFO - Transcription completed for registrazione.wav.
+2025-05-01 10:05:35,906 [Voice_to_text] - DEBUG - Transcription:  Buongiorno, il mio nome è Gennaro Iannicelli. 
