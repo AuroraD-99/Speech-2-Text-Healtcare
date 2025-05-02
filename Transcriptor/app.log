@@ -13,3 +13,44 @@
 2025-04-30 22:13:24,634 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
 2025-04-30 22:16:28,295 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
 2025-04-30 22:18:00,058 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:28:55,947 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:28:55,948 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-01 10:28:55,948 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-01 10:29:45,028 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:29:45,029 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-01 10:29:45,029 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-01 10:30:07,876 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:30:24,696 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:30:39,516 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-05-01 10:30:39,516 [Voice_to_text] - DEBUG - Language info: it
+2025-05-01 10:30:46,925 [Voice_to_text] - INFO - Transcription completed for registrazione.wav.
+2025-05-01 10:30:46,925 [Voice_to_text] - DEBUG - Transcription:  Le rosse sono rosse, le viola sono blu, mi chiamo Gennaro e mi piacciono di più 
+2025-05-01 10:34:02,133 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:34:02,850 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-01 10:34:14,225 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-05-01 10:34:14,225 [Voice_to_text] - DEBUG - Language info: en
+2025-05-01 10:34:20,380 [Voice_to_text] - INFO - Transcription completed for registrazione.wav.
+2025-05-01 10:34:20,380 [Voice_to_text] - DEBUG - Transcription:  Ciao ciao ciao ciao ciao 
+2025-05-01 10:35:49,788 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:35:50,490 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-01 10:35:52,496 [Voice_to_text] - INFO - Interruzione manuale della registrazione.
+2025-05-01 10:35:52,510 [Voice_to_text] - INFO - Registrazione completata e salvata in: registrazione.wav
+2025-05-01 10:35:58,504 [Voice_to_text] - INFO - Transcribing registrazione.wav...
+2025-05-01 10:35:58,504 [Voice_to_text] - DEBUG - Language info: nn
+2025-05-01 10:37:39,919 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:37:40,115 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-01 10:37:40,627 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-01 10:37:43,967 [Voice_to_text] - INFO - Interruzione manuale della registrazione.
+2025-05-01 10:37:43,980 [Voice_to_text] - INFO - Registrazione completata e salvata in: registrazione.wav
+2025-05-01 10:43:55,809 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:43:55,810 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-01 10:43:55,810 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-01 10:44:18,606 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-01 10:44:18,607 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-01 10:44:18,608 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-01 10:44:18,819 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-01 10:44:19,330 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-01 10:44:21,596 [Voice_to_text] - INFO - Interruzione manuale della registrazione.
+2025-05-01 10:44:21,610 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-01_10-44-18.wav
+2025-05-01 10:44:21,610 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-01_10-44-18.wav.
+2025-05-01 10:44:21,650 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-01_10-44-18.wav.
