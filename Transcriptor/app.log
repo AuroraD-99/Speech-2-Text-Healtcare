@@ -54,3 +54,8 @@
 2025-05-01 10:44:21,610 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-01_10-44-18.wav
 2025-05-01 10:44:21,610 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-01_10-44-18.wav.
 2025-05-01 10:44:21,650 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-01_10-44-18.wav.
+2025-05-04 11:17:35,660 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-04 11:17:42,456 [Voice_to_text] - INFO - Transcribing test_audio.wav...
+2025-05-04 11:17:42,456 [Voice_to_text] - DEBUG - Language info: it
+2025-05-04 11:17:51,314 [Voice_to_text] - INFO - Transcription completed for test_audio.wav.
+2025-05-04 11:17:51,314 [Voice_to_text] - DEBUG - Transcription:  Test per i modelli da voce a testo. Adesso dirò alcune parole mediche a caso.  Vaccinazione, paracentesi, glicosuria, emogasanalisi, catabolismo. 

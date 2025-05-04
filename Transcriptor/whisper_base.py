@@ -89,6 +89,6 @@ class voice_to_text:
 
 if __name__ == "__main__":
     transcriptor = voice_to_text()
-    audio_filename = transcriptor.record_audio()
+    audio_filename = "test_audio.wav"  # Sostituisci con il tuo file audio
     transcription = transcriptor.transcribe(audio_filename)
     print(f"Transcription: {transcription}")
