@@ -2,6 +2,7 @@ from log import Logger
 import time
 from whisper_base import voice_to_text
 from audio_enhancer import AudioEnhancer
+import json
 
 
 class TranscriptionPipeline:
@@ -21,6 +22,27 @@ class TranscriptionPipeline:
         
         self.audio_enhancer.run(audio_filename)
         self.logger.info(f"Audio enhanced and saved as {audio_filename}.")
+        
+        
+        transcription, language = self.transcriptor.transcribe(audio_filename)
+        self.logger.info(f"Transcription completed: {transcription}.")
+        self.logger.info(f"Language detected: {language}.")
+        
+        
+        # Save transcription to a JSON file
+        transcription_data = {
+            "filename": audio_filename,
+            "transcription": transcription,
+            "language": language,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        json_filename = audio_filename.replace(".wav", ".json")
+        with open(json_filename, 'w') as json_file:
+            json.dump(transcription_data, json_file, indent=4)
+        self.logger.info(f"Transcription saved to {json_filename}.")
+        self.logger.info("Transcription pipeline completed successfully.")
+        
+        
         
         
         

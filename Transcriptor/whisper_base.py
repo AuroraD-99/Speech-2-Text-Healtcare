@@ -23,7 +23,7 @@ class voice_to_text:
             text += segment.text + " "
         self.logger.info(f"Transcription completed for {audio_path}.")
         self.logger.debug(f"Transcription: {text}")
-        return text.strip()
+        return text.strip(), info.language
 
     def play_beep(self):
         """Riproduce un beep cross-platform."""
