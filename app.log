@@ -63,3 +63,4 @@
 2025-05-04 11:34:36,542 [TranscriptionPipeline] - INFO - Language detected: it.
 2025-05-04 11:34:36,543 [TranscriptionPipeline] - INFO - Transcription saved to 2025-05-04_11-34-11.json.
 2025-05-04 11:34:36,543 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-07 12:08:53,430 [Dashboard] - INFO - Dashboard initialized successfully.
