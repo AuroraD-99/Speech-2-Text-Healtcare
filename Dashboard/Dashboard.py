@@ -41,4 +41,4 @@ class Dashboard:
         Runs the dashboard application, setting up the sidebar and main content.
         """
         
-        st.image(self.image_sidebar, use_column_width=True)
+        

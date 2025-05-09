@@ -192,3 +192,26 @@
 2025-05-08 15:15:26,474 [TranscriptionPipeline] - INFO - Transcription completed: I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby.  I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby..
 2025-05-08 15:15:26,474 [TranscriptionPipeline] - INFO - Language detected: en.
 2025-05-08 15:15:26,475 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-09 10:06:44,211 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 10:54:38,383 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-09 10:54:38,383 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-09 10:54:38,410 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-09 10:54:38,411 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-09 10:54:38,544 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-09 10:54:39,111 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-09 10:54:48,743 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-09_10-54-38.wav
+2025-05-09 10:54:48,744 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-09_10-54-38.wav.
+2025-05-09 10:54:49,058 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-09_10-54-38.wav.
+2025-05-09 10:54:55,574 [Voice_to_text] - INFO - Transcribing 2025-05-09_10-54-38.wav...
+2025-05-09 10:54:55,574 [Voice_to_text] - DEBUG - Language info: it
+2025-05-09 10:55:03,493 [Voice_to_text] - INFO - Transcription completed for 2025-05-09_10-54-38.wav.
+2025-05-09 10:55:03,493 [Voice_to_text] - DEBUG - Transcription:  cosa c'entra la scheda video in questo momento se io fossi fuoco arderei il  mondo guarda veramente spacco tutto 
+2025-05-09 10:55:03,494 [TranscriptionPipeline] - INFO - Transcription completed: cosa c'entra la scheda video in questo momento se io fossi fuoco arderei il  mondo guarda veramente spacco tutto.
+2025-05-09 10:55:03,494 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-09 10:55:03,495 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-09 11:01:27,249 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 11:20:25,201 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-09 11:26:00,084 [DashboardDriver] - INFO - Running command: streamlit run
