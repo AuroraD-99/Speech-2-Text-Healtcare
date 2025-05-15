@@ -1,0 +1,219 @@
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+from log import Logger
+import os
+import time
+import uuid
+
+# Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
+# Struttura clinical report: sottoparte della struttura FSE
+# Struttura operatore ospedaliero: username, password, anagrafica, ruolo
+
+class DB:
+    def __init__(self, uri="mongodb://localhost:27017/", db_name="clinical_report_transcriptions"):
+        """
+        Inizializza la connessione al database MongoDB.
+        """
+        try:
+            # Connessione al database MongoDB
+            self.client = MongoClient(uri)
+            self.db = self.client[db_name]
+            # Definizione delle collezioni separate
+            self.transcriptions = self.db["transcriptions"]
+            self.reports_collection = self.db["clinical_reports"]
+            self.operators_collection = self.db["operators"]
+            # Logger per il monitoraggio
+            self.logger = Logger(self.__class__.__name__).get_logger()
+            self.logger.info("Connected to MongoDB successfully.")
+        except ConnectionFailure as e:
+            self.logger.error(f"Failed to connect to MongoDB: {e}")
+            raise
+
+    # Inserisce una trascrizione nella collezione 'transcriptions'
+    def insert_transcription(self, audio_filename, transcription, language, audio_filepath):
+        transcription_data = {
+            "transcription_id": str(uuid.uuid4()),  # Genera un ID unico per la trascrizione
+            "filename": audio_filename,
+            "transcription": transcription,
+            "language": language,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "audio_filepath": audio_filepath
+        }
+        result = self.transcriptions.insert_one(transcription_data)
+        return result.inserted_id
+
+    # Ottiene tutte le trascrizioni dalla collezione 'transcriptions'
+    def get_all_transcriptions(self):
+        return list(self.transcriptions.find())
+
+    # Trova una trascrizione per 'filename'
+    def find_transcription_by_filename(self, filename):
+        return self.transcriptions.find_one({"filename": filename})
+
+    # Aggiorna la trascrizione per 'filename'
+    def update_transcription(self, filename, new_transcription):
+        result = self.transcriptions.update_one(
+            {"filename": filename},
+            {"$set": {"transcription": new_transcription, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}}
+        )
+        return result.modified_count
+
+    # Elimina una trascrizione per 'filename' e rimuove il file audio associato
+    def delete_transcription(self, filename):
+        transcription = self.transcriptions.find_one({"filename": filename})
+        if transcription:
+            audio_filepath = transcription.get("audio_filepath")
+            if audio_filepath and os.path.exists(audio_filepath):
+                os.remove(audio_filepath)
+            result = self.transcriptions.delete_one({"filename": filename})
+            return result.deleted_count
+        return 0
+
+    # Elimina tutte le trascrizioni e i file audio associati
+    def delete_all_transcriptions(self):
+        transcriptions = self.transcriptions.find()
+        for transcription in transcriptions:
+            audio_filepath = transcription.get("audio_filepath")
+            if audio_filepath and os.path.exists(audio_filepath):
+                os.remove(audio_filepath)
+        result = self.transcriptions.delete_many({})
+        return result.deleted_count
+    
+    def insert_clinical_report(self, report):
+        """
+        Insert a clinical report into the 'clinical_reports' collection.
+        """
+        # Campi obbligatori: report_id
+        report["report_id"] = str(uuid.uuid4())  # Genera un ID unico per il report
+        report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        result = self.reports_collection.insert_one(report)
+        return result.inserted_id
+    
+    def get_clinical_reports_by_patient(self, patient_id):
+        """
+        Returns all clinical reports for a specific patient.
+        """
+        return list(self.reports_collection.find({"patient_id": patient_id}))
+    
+    def get_all_clinical_reports_by_doctor_cf(self, doctor_cf):
+        """
+        Returns all clinical reports for a specific doctor.
+        """
+        return list(self.reports_collection.find({"doctor_cf": doctor_cf}))
+    
+    
+    def get_all_clinical_reports(self):
+        """
+        Returns all clinical reports.
+        """
+        return list(self.reports_collection.find())
+    
+    def find_clinical_report_by_patient(self, patient_name):
+        """
+        returns a clinical report for a specific patient.
+        """
+        return self.reports_collection.find_one({"name": patient_name})
+    
+    def update_clinical_report(self, report_id, new_report):
+        """
+        Update a clinical report by report_id.
+        """
+        result = self.reports_collection.update_one(
+            {"report_id": report_id},
+            {"$set": new_report}
+        )
+        return result.modified_count
+    
+    def delete_clinical_report(self, report_id):
+        """
+        Delete a clinical report by report_id.
+        """
+        result = self.reports_collection.delete_one({"report_id": report_id})
+        return result.deleted_count
+    
+    def delete_all_clinical_reports_of_a_patient(self, patient_name):
+        """
+        Delete all clinical reports of a patient.
+        """
+        result = self.reports_collection.delete_many({"name": patient_name})
+        return result.deleted_count
+    
+    def group_clinical_reports_by_patient_name(self, patient_name):
+        """
+        Group clinical reports by patient name.
+        """
+        pipeline = [
+            {"$match": {"name": patient_name}},
+            {"$group": {"_id": "$name", "reports": {"$push": "$$ROOT"}}}
+        ]
+        return list(self.reports_collection.aggregate(pipeline))
+        
+
+    """# Inserisce un documento FSE nella collezione 'fse'
+    def insert_fse(self, pdf_informations):
+        if not pdf_informations or "filename" not in pdf_informations:
+            raise ValueError("Il campo 'filename' è obbligatorio per inserire un FSE.")
+        
+        pdf_informations["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        result = self.fse_collection.insert_one(pdf_informations)
+        return result.inserted_id
+
+    # Ottiene tutti i documenti FSE dalla collezione 'fse'
+    def get_all_fse(self):
+        return list(self.fse_collection.find())
+
+    # Trova un documento FSE per 'filename'
+    def find_fse_by_name(self, name):
+        return self.fse_collection.find_one({"name": name})
+
+    # Aggiorna un documento FSE per 'filename'
+    def update_fse(self, filename, new_pdf_informations):
+        result = self.fse_collection.update_one(
+            {"filename": filename},
+            {"$set": new_pdf_informations}
+        )
+        return result.modified_count
+
+    # Elimina un documento FSE per 'filename'
+    def delete_fse(self, filename):
+        result = self.fse_collection.delete_one({"filename": filename})
+        return result.deleted_count
+
+    # Elimina tutti i documenti FSE
+    def delete_all_fse(self):
+        result = self.fse_collection.delete_many({})
+        return result.deleted_count"""
+
+    # Chiude la connessione al database
+    def close(self):
+        self.client.close()
+
+
+
+if __name__ == "__main__":
+    # Esempio di utilizzo
+    db = DB()
+    db.insert_clinical_report({
+        "report_id": "12345",
+        "cf_paziente": "ABC123",
+        "cf_medico": "XYZ789",
+        
+        "name": "Mario Rossi",
+        "Patologia":"Morto"
+    })
+    
+    
+    db.insert_clinical_report({
+        "report_id": "12345",
+        "cf_paziente": "ABC123",
+        "cf_medico": "XYZ789",
+        
+        "name": "Mario Rossi",
+        "Patologia":"Ho sbagliato è ancora vivo"
+    })
+    
+    print(db.group_clinical_reports_by_patient_name("Mario Rossi"))
+    db.delete_all_clinical_reports_of_a_patient("Mario Rossi")
+    print(db.get_all_clinical_reports())
+    
+    db.close()

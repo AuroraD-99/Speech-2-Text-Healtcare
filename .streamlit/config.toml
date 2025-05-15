@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#E87722"  # Arancione brillante della volpe
-backgroundColor = "#F4E1C1"  # Crema chiaro per un look morbido
-secondaryBackgroundColor = "#F0F2F6"  # Leggero grigio per separare sezioni
-textColor = "#262730"  # Grigio antracite per leggibilità
+primaryColor = "#F5EEDD"  
+backgroundColor = "#7AE2CF" 
+secondaryBackgroundColor = "#077A7D" 
+textColor = "#262730"  
 font = "sans serif"

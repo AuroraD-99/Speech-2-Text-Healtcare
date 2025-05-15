@@ -64,3 +64,171 @@
 2025-05-04 11:34:36,543 [TranscriptionPipeline] - INFO - Transcription saved to 2025-05-04_11-34-11.json.
 2025-05-04 11:34:36,543 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
 2025-05-07 12:08:53,430 [Dashboard] - INFO - Dashboard initialized successfully.
+2025-05-08 14:34:43,759 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 14:34:43,770 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 14:34:43,770 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 14:34:43,900 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 14:34:44,530 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 14:35:04,333 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_14-34-43.wav
+2025-05-08 14:35:04,333 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_14-34-43.wav.
+2025-05-08 14:35:04,742 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_14-34-43.wav.
+2025-05-08 14:35:11,578 [Voice_to_text] - INFO - Transcribing 2025-05-08_14-34-43.wav...
+2025-05-08 14:35:11,578 [Voice_to_text] - DEBUG - Language info: la
+2025-05-08 14:35:19,908 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_14-34-43.wav.
+2025-05-08 14:35:19,908 [Voice_to_text] - DEBUG - Transcription:  If there is a light, you can always see. If there is a world, we can always be. If there is a dark that we shouldn't doubt, and there is a light, don't let it go out. 
+2025-05-08 14:35:19,908 [TranscriptionPipeline] - INFO - Transcription completed: If there is a light, you can always see. If there is a world, we can always be. If there is a dark that we shouldn't doubt, and there is a light, don't let it go out..
+2025-05-08 14:35:19,909 [TranscriptionPipeline] - INFO - Language detected: la.
+2025-05-08 14:35:19,909 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 14:37:57,853 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 14:37:57,854 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 14:37:58,178 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 14:37:58,178 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 14:37:58,178 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 14:37:58,178 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 14:37:58,271 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 14:37:58,779 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 14:38:12,287 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_14-37-58.wav
+2025-05-08 14:38:12,287 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_14-37-58.wav.
+2025-05-08 14:38:12,404 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_14-37-58.wav.
+2025-05-08 14:38:18,136 [Voice_to_text] - INFO - Transcribing 2025-05-08_14-37-58.wav...
+2025-05-08 14:38:18,137 [Voice_to_text] - DEBUG - Language info: it
+2025-05-08 14:38:26,930 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_14-37-58.wav.
+2025-05-08 14:38:26,930 [Voice_to_text] - DEBUG - Transcription:  Se Nimmondo ci fosse un po' di bene e ognun si considerasse suo fratello, ci sarebbero  meno pene e il mondo sarebbe assai più bello. 
+2025-05-08 14:38:26,931 [TranscriptionPipeline] - INFO - Transcription completed: Se Nimmondo ci fosse un po' di bene e ognun si considerasse suo fratello, ci sarebbero  meno pene e il mondo sarebbe assai più bello..
+2025-05-08 14:38:26,931 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-08 14:38:26,931 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 14:59:12,510 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 14:59:12,520 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 14:59:12,585 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-08 14:59:12,597 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 14:59:12,597 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 14:59:12,598 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 14:59:12,598 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 14:59:12,739 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 14:59:13,255 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 14:59:40,259 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_14-59-12.wav
+2025-05-08 14:59:40,260 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_14-59-12.wav.
+2025-05-08 14:59:41,085 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_14-59-12.wav.
+2025-05-08 14:59:47,972 [Voice_to_text] - INFO - Transcribing 2025-05-08_14-59-12.wav...
+2025-05-08 14:59:47,972 [Voice_to_text] - DEBUG - Language info: it
+2025-05-08 15:00:08,924 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_14-59-12.wav.
+2025-05-08 15:00:08,924 [Voice_to_text] - DEBUG - Transcription:  Il mio cane si chiama Macchia, io mi chiamo Gennaro Giannicelli e questo oggi sono qui  per presentarvelo.  E' un cane a quattro zampe di colore nero, ha due orecchie, due occhi ed un naso,  ha la coda ed è il cane più bello dell'universo.  E' un cane a quattro zampe di colore nero, ha due orecchie, due occhi ed un naso, ha la 
+2025-05-08 15:00:08,925 [TranscriptionPipeline] - INFO - Transcription completed: Il mio cane si chiama Macchia, io mi chiamo Gennaro Giannicelli e questo oggi sono qui  per presentarvelo.  E' un cane a quattro zampe di colore nero, ha due orecchie, due occhi ed un naso,  ha la coda ed è il cane più bello dell'universo.  E' un cane a quattro zampe di colore nero, ha due orecchie, due occhi ed un naso, ha la.
+2025-05-08 15:00:08,925 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-08 15:00:08,926 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 15:07:01,114 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 15:07:01,128 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 15:07:01,170 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-08 15:07:01,171 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 15:07:01,171 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 15:07:01,171 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 15:07:01,172 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 15:07:01,288 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 15:07:01,808 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 15:07:34,576 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_15-07-01.wav
+2025-05-08 15:07:34,577 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_15-07-01.wav.
+2025-05-08 15:07:35,145 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_15-07-01.wav.
+2025-05-08 15:07:41,626 [Voice_to_text] - INFO - Transcribing 2025-05-08_15-07-01.wav...
+2025-05-08 15:07:41,626 [Voice_to_text] - DEBUG - Language info: it
+2025-05-08 15:07:59,960 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_15-07-01.wav.
+2025-05-08 15:07:59,960 [Voice_to_text] - DEBUG - Transcription:  Il sabato del villaggio è una poesia di Giacomo Leopardi e all'incirca recita così  La donzelletta vien dalla campagna in sul callar del sole con il suo fascio d'erba  e reca in mano un mazzodin di rose e viola onde siccome suole ornare ella si appresta  di mani al di di festa il petto e il crine 
+2025-05-08 15:07:59,961 [TranscriptionPipeline] - INFO - Transcription completed: Il sabato del villaggio è una poesia di Giacomo Leopardi e all'incirca recita così  La donzelletta vien dalla campagna in sul callar del sole con il suo fascio d'erba  e reca in mano un mazzodin di rose e viola onde siccome suole ornare ella si appresta  di mani al di di festa il petto e il crine.
+2025-05-08 15:07:59,961 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-08 15:07:59,962 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 15:11:55,183 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 15:11:55,184 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 15:11:55,189 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-08 15:11:55,189 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 15:11:55,190 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 15:11:55,190 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 15:11:55,191 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 15:11:55,293 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 15:11:55,796 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 15:12:13,713 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_15-11-55.wav
+2025-05-08 15:12:13,713 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_15-11-55.wav.
+2025-05-08 15:12:13,859 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_15-11-55.wav.
+2025-05-08 15:12:19,655 [Voice_to_text] - INFO - Transcribing 2025-05-08_15-11-55.wav...
+2025-05-08 15:12:19,655 [Voice_to_text] - DEBUG - Language info: it
+2025-05-08 15:12:26,917 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_15-11-55.wav.
+2025-05-08 15:12:26,917 [Voice_to_text] - DEBUG - Transcription:  Senti nell'aria c'è già la nostra canzone d'amore che fa come un pensiero che sa di felicità. 
+2025-05-08 15:12:26,918 [TranscriptionPipeline] - INFO - Transcription completed: Senti nell'aria c'è già la nostra canzone d'amore che fa come un pensiero che sa di felicità..
+2025-05-08 15:12:26,918 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-08 15:12:26,919 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 15:13:11,816 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 15:13:11,817 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 15:13:11,821 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-08 15:13:11,821 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 15:13:11,822 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 15:13:11,822 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 15:13:11,822 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 15:13:11,910 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 15:13:12,420 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 15:13:28,796 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_15-13-11.wav
+2025-05-08 15:13:28,796 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_15-13-11.wav.
+2025-05-08 15:13:28,934 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_15-13-11.wav.
+2025-05-08 15:13:34,996 [Voice_to_text] - INFO - Transcribing 2025-05-08_15-13-11.wav...
+2025-05-08 15:13:34,997 [Voice_to_text] - DEBUG - Language info: it
+2025-05-08 15:13:43,277 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_15-13-11.wav.
+2025-05-08 15:13:43,277 [Voice_to_text] - DEBUG - Transcription:  opzione 2 salvare il percorso del file audio sul disco consigliato se i file  sono grandi invece di salvare il binario nel db puoi solo memorizzare il  percorso 
+2025-05-08 15:13:43,278 [TranscriptionPipeline] - INFO - Transcription completed: opzione 2 salvare il percorso del file audio sul disco consigliato se i file  sono grandi invece di salvare il binario nel db puoi solo memorizzare il  percorso.
+2025-05-08 15:13:43,278 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-08 15:13:43,279 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-08 15:14:45,790 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-08 15:14:45,791 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-08 15:14:45,796 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-08 15:14:45,796 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-08 15:14:45,796 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-08 15:14:45,797 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-08 15:14:45,797 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-08 15:14:45,892 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-08 15:14:46,406 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-08 15:15:11,671 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-08_15-14-45.wav
+2025-05-08 15:15:11,671 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-08_15-14-45.wav.
+2025-05-08 15:15:11,872 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-08_15-14-45.wav.
+2025-05-08 15:15:17,966 [Voice_to_text] - INFO - Transcribing 2025-05-08_15-14-45.wav...
+2025-05-08 15:15:17,966 [Voice_to_text] - DEBUG - Language info: en
+2025-05-08 15:15:26,473 [Voice_to_text] - INFO - Transcription completed for 2025-05-08_15-14-45.wav.
+2025-05-08 15:15:26,474 [Voice_to_text] - DEBUG - Transcription:  I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby.  I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby. 
+2025-05-08 15:15:26,474 [TranscriptionPipeline] - INFO - Transcription completed: I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby.  I'm just a holy fool, but baby, it's so cruel, I'm still in love with Judas, baby..
+2025-05-08 15:15:26,474 [TranscriptionPipeline] - INFO - Language detected: en.
+2025-05-08 15:15:26,475 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-09 10:06:44,211 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 10:54:38,383 [Voice_to_text] - INFO - Model loaded on cpu with size medium.
+2025-05-09 10:54:38,383 [TranscriptionPipeline] - INFO - Transcription pipeline initialized.
+2025-05-09 10:54:38,410 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - FSE pipeline initialized with transcription pipeline and database.
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - FSE pipeline initialized
+2025-05-09 10:54:38,410 [FSEPipeline] - INFO - Starting FSE pipeline...
+2025-05-09 10:54:38,411 [TranscriptionPipeline] - INFO - Starting transcription pipeline...
+2025-05-09 10:54:38,544 [Voice_to_text] - INFO - Preparazione della registrazione...
+2025-05-09 10:54:39,111 [Voice_to_text] - INFO - Inizia a parlare ora (premi Invio per terminare)...
+2025-05-09 10:54:48,743 [Voice_to_text] - INFO - Registrazione completata e salvata in: 2025-05-09_10-54-38.wav
+2025-05-09 10:54:48,744 [TranscriptionPipeline] - INFO - Audio recorded and saved as 2025-05-09_10-54-38.wav.
+2025-05-09 10:54:49,058 [TranscriptionPipeline] - INFO - Audio enhanced and saved as 2025-05-09_10-54-38.wav.
+2025-05-09 10:54:55,574 [Voice_to_text] - INFO - Transcribing 2025-05-09_10-54-38.wav...
+2025-05-09 10:54:55,574 [Voice_to_text] - DEBUG - Language info: it
+2025-05-09 10:55:03,493 [Voice_to_text] - INFO - Transcription completed for 2025-05-09_10-54-38.wav.
+2025-05-09 10:55:03,493 [Voice_to_text] - DEBUG - Transcription:  cosa c'entra la scheda video in questo momento se io fossi fuoco arderei il  mondo guarda veramente spacco tutto 
+2025-05-09 10:55:03,494 [TranscriptionPipeline] - INFO - Transcription completed: cosa c'entra la scheda video in questo momento se io fossi fuoco arderei il  mondo guarda veramente spacco tutto.
+2025-05-09 10:55:03,494 [TranscriptionPipeline] - INFO - Language detected: it.
+2025-05-09 10:55:03,495 [TranscriptionPipeline] - INFO - Transcription pipeline completed successfully.
+2025-05-09 11:01:27,249 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-09 11:20:25,201 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-09 11:26:00,084 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 12:57:41,820 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-12 12:58:32,520 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-12 12:58:53,832 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-12 13:04:59,956 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-12 16:28:24,924 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:29:44,408 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:31:27,661 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:34:29,510 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:35:19,393 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:37:33,179 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:39:34,554 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:40:15,913 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:40:58,032 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:42:40,229 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-12 16:47:22,457 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-13 16:37:13,335 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-15 10:46:25,752 [DB] - INFO - Connected to MongoDB successfully.
