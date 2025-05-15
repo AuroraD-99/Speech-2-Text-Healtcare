@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import time
 import logging 
@@ -21,8 +22,10 @@ from ctransformers import AutoModelForCausalLM as cAutoModelForCausalLM
 from chromadb import Client
 from sentence_transformers import SentenceTransformer
 
-from FSE_generator import LLMWrapper 
-from RAG_manager import RAGManager
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from LLM.FSE_generator import LLMWrapper 
+from LLM.RAG_manager import RAGManager
 
 
 class FSEManager:
@@ -153,72 +156,75 @@ class FSEManager:
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL FSE ----------------------------------------
 
-    def FSE_manager(self, transcribed_text_path):
+    def FSE_manager(self, timestamp, record):
 
-        #Caricamento testo trascritto (per il momento lo considero come salvato in JSON) - DA CAMBIARE
-        self.transcribed_text_path = transcribed_text_path
+        self.timestamp = timestamp
+        self.record = record
 
-        with open(self.transcribed_text_path, "r", encoding="utf-8") as f:
-            self.transcribed_data = [json.loads(line) for line in f]
+        try:
+            #Prelevo il testo trascritto
+            report_text = self.record.get("referto") if isinstance(self.record, dict) else self.record
 
-        for timestamp, record in enumerate(self.transcribed_data):
-            try:
-                #Prelevo il testo trascritto
-                report_text = record.get("referto") if isinstance(record, dict) else record
+            self.logger.debug(f"[{self.timestamp}] Elaborazione record...")
 
-                self.logger.debug(f"[{timestamp}] Elaborazione record...")
+            #Conviene utilizzare un NER?
 
-                #Conviene utilizzare un NER?
+            if self.function_mode == "Emergency":
+                #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
+                self.logger.debug(f"Modalità di funzionamento: Emergency...")
+                self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
+                context = self.retrieve_context(report_text)
+                report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
 
-                if self.function_mode == "Emergency":
-                    #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
-                    self.logger.debug(f"Modalità di funzionamento: Emergency...")
-                    self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                    context = self.retrieve_context(report_text)
-                    report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
+                #genero la scheda di ammissione al PS
+                self.logger.debug(f"Procedo alla generazione della scheda di ammissione al PS...")
+                scheda_ps = self.llm.generate_scheda_from_report(report_text) 
+                self.llm.check_json_format(scheda_ps)
 
-                    #genero la scheda di ammissione al PS
-                    self.logger.debug(f"Procedo alla generazione della scheda di ammissione al PS...")
-                    scheda_ps = self.llm.generate_scheda_from_report(report_text) 
-                    self.llm.check_json_format(scheda_ps)
-
-                    #Configurazione del formato del file JSON di output
-                    full_output = {
+                #Configurazione del formato del file JSON di output
+                full_output = {
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                         "type": self.function_mode,
                         "scheda_ps": scheda_ps
-                    }
+                }
 
-                else:
-                    self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
-                    self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                    context = self.retrieve_context(report_text)
-                    report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
+            else:
+                self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
+                self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
+                context = self.retrieve_context(report_text)
+                report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
 
-                    self.logger.debug(f"Procedo alla generazione del referto clinico...")
-                    clinical_report = self.llm.generate_clinical_report(report_text, report_with_context) 
-                    self.llm.check_json_format(clinical_report)
+                self.logger.debug(f"Procedo alla generazione del referto clinico...")
+                clinical_report = self.llm.generate_clinical_report(report_text, report_with_context) 
+                self.llm.check_json_format(clinical_report)
 
-                    #Configurazione del formato del file JSON di output
-                    full_output = {
+                #Configurazione del formato del file JSON di output
+                full_output = {
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                         "type": self.function_mode,
                         "clinical_report": clinical_report
-                    }
+                }
 
-                #self.llm.check_json_format(full_output)
+            #self.llm.check_json_format(full_output)
 
-                #Salvataggio in formato JSON dell'output - realizzato su una cartella tmp e poi usa un meccanismo di garbage collection
-                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", prefix="fse_", dir="/tmp", delete=False, encoding="utf-8") as tmp_file:
+            #vanno aggiunti i codici fiscali del medico e del paziente
+            #check sul codice fiscale del paziente
+            #check sulla struttura in base alle richieste del DB
+            #modifica/validazione del referto
+            self.logger.debug(f"Procedo alla validazione del referto prodotto...")
+            validated_report_text = self.check_json_structure()
 
-                    self.llm.save_to_json(full_output, tmp_file)
-                    out_file = tmp_file.name
-                    self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
+            #Salvataggio in formato JSON dell'output - realizzato su una cartella tmp e poi usa un meccanismo di garbage collection
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", prefix="fse_", dir="/tmp", delete=False, encoding="utf-8") as tmp_file:
 
-                return full_output, out_file
+                self.llm.save_to_json(full_output, tmp_file)
+                out_file = tmp_file.name
+                self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
 
-            except Exception as e:
-                self.logger.error(f"[{timestamp}] Errore durante la generazione FSE: {e}")
+            return full_output, out_file
+
+        except Exception as e:
+            self.logger.error(f"[{timestamp}] Errore durante la generazione FSE: {e}")
            
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
 
@@ -230,6 +236,9 @@ class FSEManager:
             return "Nessun contesto rilevante trovato."
         else:
             return "\n\n".join([doc for doc in results["documents"][0]])
+        
+    def check_json_structure(self): #deve controllare che il json abbia questa struttura
+        return
 
 #------------------------------------- MAIN DI PROVA ----------------------------------------
 

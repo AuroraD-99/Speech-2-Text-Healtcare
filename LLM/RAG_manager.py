@@ -1,4 +1,5 @@
 import os
+import sys
 import hashlib
 import json
 from typing import List, Dict, Literal
@@ -6,7 +7,9 @@ from log import Logger
 from sentence_transformers import SentenceTransformer
 from chromadb import Client 
 
-from Database. import DBManager
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Database.mongodb import DB
 
 #check su cosa va nel RAG
 
@@ -21,13 +24,15 @@ class RAGManager:
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
         self.embedder = SentenceTransformer("distiluse-base-multilingual-cased-v2")
 
-        self.db_manager = DBManager()
+        self.db_manager = DB()
 
 
     def inizialize_RAG_from_DB(self): #funzione richiamata quando viene avviata una sessione del sistema (dopo il login da interfaccia)
         self.logger.info("Inizializzazione del RAG a partire dal database")
 
-        documents = self.db_manager.get_validated_documents()  # Recupera tutto ciò che serve dal database 
+        #SERVE IL CODICE FISCALE DEL MEDICO
+
+        documents = self.db_manager.get_all_clinical_reports_by_doctor_cf()  # Recupera tutto ciò che serve dal database in base al codice fiscale del medico
         #potrebbe essere necessario limitare il numero di campioni recuperati dal database => si potrebbero recuperare solo i documenti relativi allo stesso medico ad esempio
 
         if not documents:

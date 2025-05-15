@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import time
@@ -12,12 +13,12 @@ from json2pdf_converter import generate
 from chromadb import Client
 from sentence_transformers import SentenceTransformer
 
-from LLM.FSE_generator import LLMWrapper 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from LLM.RAG_manager import RAGManager
 from LLM.FSE_pipeline import FSEManager
-from Transcriptor. import TranscriptorManager #fare l'import per la trascrizione
-from Database. import DBManager
-
+from Transcriptor.transcription_pipeline import TranscriptionPipeline
+from Database.mongodb import DB
 
 class PipelineManager:
     def __init__(self, function_mode="Emergency", env_file="key.env"):
@@ -33,7 +34,7 @@ class PipelineManager:
         self.function_mode = function_mode
 
         #inizializzazione del database
-        self.DM_manager = DBManager()
+        self.DB_manager = DB()
 
         #inizializzazione del RAG
         self.chroma_path = os.getenv("CHROMA_DB_PATH")
@@ -44,7 +45,7 @@ class PipelineManager:
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
 
         #inizializzazione del trascrittore
-        self.transcriptor = TranscriptorManager()
+        self.transcriptor = TranscriptionPipeline()
 
         #inizializzazione del modello
         self.FSE_manager = FSEManager(self.chroma_client, self.function_mode, self.env_file)
@@ -62,47 +63,50 @@ class PipelineManager:
 
         #acquisizione del testo trascritto
         self.logger.debug(f"Procedo all'acquisizione della nuova trascrizione...")
-        report_text = self.transcriptor.
+        report_text = self.transcriptor.run()
 
         #check sull'anagrafica del paziente nel DB
         #estraggo l'anagrafica del paziente per verificare che l'FSE a lui relativo esista
         self.logger.debug(f"Procedo all'estrazione dell'anagrafica del paziente ed alla verifica sulla presenza del suo FSE...")
-        anagrafica = self.extract_anagrafica(report_text)
+        anagrafica = self.extract_anagrafica(report_text["transcription"])
 
-        if not self.DB_manager.check_existing_FSE(anagrafica):#aggiungo la scheda al FSE del paziente se già esiste, altrimenti genero un FSE e poi aggiungo la scheda
+        #possiamo estrarre l'anagrafica a monte sia per paziente che per il medico a monte
+        #e poi inserirla dopo la generazione del referto
+        #=> vanno cambiati i prompt e le strutture del json
+        #l'anagrafica del medico viene acquisita con il login
+
+        """if not self.DB_manager.check_existing_FSE(anagrafica):#aggiungo la scheda al FSE del paziente se già esiste, altrimenti genero un FSE e poi aggiungo la scheda
             self.logger.debug(f"[{timestamp}] Generazione FSE...")
             #richiamare la funzione del DB_Manager per la generazione di un nuovo FSE per il paziente
-            self.DB_manager.create_new_FSE(anagrafica)
-
+            self.DB_manager.create_new_FSE(anagrafica)"""
 
         #salvataggio della coppia audio + testo nel database 
         self.logger.debug(f"Procedo all'update della trascrizione e dell'audio nel DB...")
-        self.DB_manager.
+        # Store transcription in the database
+        self.DB_manager.insert_transcription( #va cambiata la struttura perchè è cambiata in DB
+            audio_filename=report_text["filename"],
+            transcription=report_text["transcription"],
+            language=report_text["language"],
+            timestamp=report_text["timestamp"],
+            audio_filepath=report_text["audio_filepath"]
+        )
 
         #generazione del documento dalla LLM
         self.logger.debug(f"Procedo alla generazione del nuovo referto...")
-        clinical_report, out_file = self.FSE_manager.FSE_manager(transcribed_test_path) #per il momento questa funzione prende il path del documento JSON in cui è salvata la trascrizione
-
-        #modifica/validazione del referto
-        self.logger.debug(f"Procedo alla validazione del referto prodotto...")
-        validated_report_text = 
+        clinical_report, out_file = self.FSE_manager.FSE_manager(report_text["timestamp"], report_text["transcription"]) 
 
         #salvataggio del documento nel DB
         self.logger.debug(f"Aggiunta referto all'FSE del paziente...")
-        success = self.DB_manager.update_document(document_id, new_data)
-        if success:
-            self.logger.info(f"FSE {document_id} modificato con successo in MongoDB")
-        else:
-            self.logger.warning(f"FSE {document_id} non trovato o non modificato")
+        document_id = self.DB_manager.insert_clinical_report(clinical_report)
 
-        self.logger.debug(f"**** Rimozione del referto pazienre dalla cartella temporanea... ****")
+        self.logger.debug(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
         os.remove(out_file) #per la rimozione del file dalla cartella /tmp/ 
 
         #salvataggio su RAG 
         self.logger.debug(f"Procedo all'update del nuovo documento nel RAG...")
-        report_text_RAG = self.anonimizza_referto(validated_report_text)
+        report_text_RAG = self.anonimizza_referto(report_text)
         #questo va fatto solo dopo che il medico ha approvato la revisione del referto
-        rag_docs = self.RAGManager.rag_element_generator(timestamp, report_text, clinical_report)
+        rag_docs = self.RAGManager.rag_element_generator(report_text["timestamp"], report_text, clinical_report)
         self.RAGManager.add_to_RAG(rag_docs)
    
 
@@ -185,7 +189,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     manager = PipelineManager(
-        transcribed_text_path = "C:/Users/HP/Desktop/BD/Speech-2-Voice-Healtcare/transcription_example.jsonl",
         function_mode="Follow_up"
     )
 

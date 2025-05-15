@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import transformers
 import torch
@@ -7,6 +8,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from log import Logger
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class LLMWrapper:
     def __init__(self, model):
@@ -117,7 +120,60 @@ class LLMWrapper:
                     "Il tuo compito è analizzare un testo discorsivo fornito in seguito, comprendere le informazioni cliniche essenziali, e riscriverle in forma di referto professionale, chiaro e strutturato."
                     "Compila il referto clinico in italiano formato JSON. Usa solo i dati presenti nel testo.\n\n"
                 ) 
-        
+    
+        """    🧾 Intestazione / Identificativi
+        Nome e cognome del paziente
+
+        Data di nascita
+
+        Codice fiscale / ID paziente
+
+        Numero del referto / identificativo visita
+
+        Data e ora della visita
+
+        Reparto / ambulatorio di riferimento
+
+        Nome e qualifica del medico specialista
+
+        🩺 Contenuto clinico
+        Motivo della visita (o del ricovero)
+
+        Es. “Controllo post-operatorio”, “Dolore toracico acuto”, “Follow-up oncologico”
+
+        Anamnesi
+
+        Personale e familiare (patologie pregresse, farmaci, allergie, abitudini)
+
+        Anamnesi recente / evento attuale
+
+        Esame obiettivo
+
+        Risultati dell’osservazione clinica diretta (es. PA, FC, stato neurologico, esame addominale…)
+
+        Esami eseguiti / indagini
+
+        Analisi di laboratorio, imaging, ECG, ecc. con risultati sintetici o allegati
+
+        Diagnosi / sospetto diagnostico
+
+        Formulazione clinica o differenziale
+
+        Terapia consigliata / eseguita
+
+        Farmaci, dosaggi, durata, interventi
+
+        Indicazioni e follow-up
+
+        Controlli successivi, esami da effettuare, invio ad altri specialisti
+
+        🖋️ Chiusura
+        Firma del medico (digitale o manoscritta)
+
+        Timbro del medico o struttura sanitaria
+
+        Data di redazione del referto"""
+                
     def generate_clinical_report(self, referto, report_with_context): #DA CONTROLLARE
         prompt = self.__generate_prompt_report() 
         full_prompt = f"{prompt}\n\nReferto da analizzare:\n{referto}\n\nPuoi fare riferimento ai seguenti esempi\n{report_with_context}"
