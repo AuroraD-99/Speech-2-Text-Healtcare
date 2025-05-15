@@ -1,44 +1,63 @@
 import streamlit as st
-import os 
-import sys
-import requests
-from PIL import Image
-import dotenv
-
-
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from log import Logger
 
 class Dashboard:
-    def __init__(self, env_file = "key.env"):
-        """
-        Initializes the dashboard pipeline by loading environment variables 
-        and setting up the logger and session state.
-        
-        Args:
-            env_file (str): The path to the environment file containing necessary credentials and configurations.
-        
-        Raises:
-            Exception: If environment variables cannot be loaded or other initialization errors occur.
-        """
-        
-        dotenv.load_dotenv(env_file, override=True)
-        self.logger = Logger(self.__class__.__name__).get_logger()
-        #self.logo = os.getenv('AI_IMAGE_UI')
-        #self.controller_url = os.getenv('CONTROLLER_API_URL', 'http://127.0.0.1:8003')
-        # Load image into the sidebar
-        #self.image_sidebar = Image.open(self.logo)
+    def __init__(self):
+        self.scope_options = ["Pronto Soccorso", "Visite Ordinarie"]
+        self.users = {
+            "medico1": "password1",
+            "medico2": "password2"
+        }
 
-        # Initialize session state
-        #self._initialize_session_state()
-        
-        self.logger.info("Dashboard initialized successfully.")
-        
-        
+        # Inizializzazione stato
+        st.session_state.setdefault('logged_in', False)
+        st.session_state.setdefault('username', "")
+        st.session_state.setdefault('scope', "")
+        st.session_state.setdefault('patients', ["Mario Rossi", "Pepp Scuppett"])
+        st.session_state.setdefault('_just_logged_in', False)
+
+    def login_screen(self):
+        st.title("Selettore per PS o VO")
+        st.session_state.scope = st.selectbox("Seleziona lo scopo di utilizzo", self.scope_options)
+
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login"):
+            if username in self.users and self.users[username] == password:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.session_state._just_logged_in = True  # Trucchetto per mostrare subito la home
+                st.rerun()  # Se sei in 1.45.0 e questa non c’è, ometti: funziona comunque
+            else:
+                st.error("Credenziali errate")
+
+    def main_screen(self):
+        st.sidebar.title(f"Lista pazienti del Dott. {st.session_state.username.capitalize()}")
+
+        if st.sidebar.button("Nuovo paziente"):
+            st.info("Nuovo paziente selezionato (placeholder)")
+        if st.sidebar.button("Elimina tutti i pazienti"):
+            st.session_state.patients = []
+            st.success("Tutti i pazienti eliminati")
+
+        for p in st.session_state.patients:
+            st.sidebar.write(p)
+
+        st.title("Nuovo paziente")
+        if st.button("Clicca qui per iniziare la registrazione"):
+            st.info("Registrazione in corso...")
+
+        st.markdown("### PDF da compilare")
+        st.write("📄 Documento FSE/PS verrà mostrato qui")
+
     def run(self):
-        """
-        Runs the dashboard application, setting up the sidebar and main content.
-        """
-        
-        
+        if st.session_state.logged_in:
+            self.main_screen()
+        else:
+            self.login_screen()
+
+
+# Esecuzione
+if __name__ == "__main__":
+    dashboard = Dashboard()
+    dashboard.run()

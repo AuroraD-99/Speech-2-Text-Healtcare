@@ -1,180 +1,27 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from log import Logger
-import os 
+import os
 import time
 
 
-Scheda_FSE = {
-    "filename": ,
-    "transcription": ,
-    "language": ,
-    "timestamp": ,
-    "audio_filepath": ,
-    "scheda": {
-        "Chiamata":{
-            "data":,
-            "H chiamata":,
-            "H partenza":,
-            "H sul posto":,
-            "H partenza posto",
-            "H in PS":,
-            "H libero e operativo":,
-            "luogo intervento":,
-            "condizione riferita":,
-            "recapito telefonico":
-        },
-        "Ambulanza":{
-          "CRI":,
-          "SEL":,  
-        },
-        "Equipaggio":{
-            "Aut.":,
-            "Socc1":,
-            "Socc2":,
-            "IP":,
-            "Medico":,
-        },
-        "Causa trasporto non effettuato":,
-        "Attivazioni/Autorità presenti":{
-            "Descrizione":,
-            "Referto":,
-        },
-        "Dati anagrafica paziente":{
-            "Cognome Nome":,
-            "Sesso":,
-            "Nato il":,
-            "A":,
-            "Prov_nascita":,
-            "Residente a":,
-            "Prov_residenza":,
-            "Via":,
-            "N":,
-            "Telefono":,
-            "Dati dichiarati da":,
-        },
-        "Decesso":{
-            "Ora decesso":,
-            "Firma":,
-        },
-        "Rifiuto (firma dell'interessato)":{
-          "Firma":,  
-        },
-        "Rilevazioni":{
-            "Parametri":{
-                "Coscienza":,
-                "Cute":,
-                "Respiro":,
-                "Sp02":,
-                "FC bpm":,
-                "PA mmHg":,
-                "Glic, Mg/dl":,
-                "Temp. C°":,
-            },
-            "Glasgow Coma Scale":{
-                "Apertura occhi":,
-                "Risposta verbale":,
-                "Risposta motoria":,
-            },
-            "Pupille":,
-            "Lesioni riscontrate":
-        }
-        "Provvedimenti":{
-            "Respiro":,
-            "Circolo":,
-            "Immobilizzazione":,
-            "Altro":,
-            "Infusioni/Farmaci":,
-        }
-        "Annotazioni":
-    }
-    
-    "FSE":{
-        "Dati identificativi amministrativi":{
-            "Nome":,
-            "Età":,
-            "Sesso":,
-        },
-        "Referto laboratorio":{
-            "Esame":,
-            "Risultati":,
-            "Data":,
-        },
-        "Referto radiologia":{
-            "Esame":,
-            "Referto":,
-            "Data":,
-        },
-        "Referto specialisitca ambulatoriale":{
-            "Descrizione visita":,
-            "Note":,
-        },
-        "Referto anatomia patologica":{
-            "Descrizione":,
-            "Referto":,
-        },
-        "Verbale pronto soccorso":{
-            "Motivo accesso":,
-            "Trattamento":,
-        },
-        "Lettera dimissione":{
-            "Diagnosi dimissione":,
-            "Terapia domiciliare":,
-        },
-        "Profilo sanitario sintetico":{
-            "Condizioni pregresse":,
-            "Allergie":,
-        },
-        "Prescrizione farmaceutica":{
-            "Farmaci":,
-        },
-        "Prescrizione specialistica":{
-            "Esami prescritti":,
-        },
-        "Cartella clinica":{
-            "Contenuto":,
-        },
-        "Erogazione farmaci":{
-            "Farmaci erogati":,
-            "Farmaci acquistati privato":,
-        },
-        "Scheda singola vaccinazione":{
-            "Vaccino":,
-            "Dose":,
-            "Data":,
-        },
-        "Certificato stato vaccinale":{
-            "Vaccini completati":,
-            "Note":,
-        },
-        "Erogazione prestazione specialistica":{
-            "Prestazioni":,
-        },
-        "Taccuino personale assistito":{
-            "Note personali":,
-        },
-        "Tessera portatore impianto":{
-            "Impianto":,
-        },
-        "Lettera invito screening prevenzione":{
-            "Programma":,
-            "Data invito":,
-        },
-    }
-}
-
 class DB:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="transcriptions_db", collection_name="transcriptions"):
+    def __init__(self, uri="mongodb://localhost:27017/", db_name="transcriptions_db"):
         try:
+            # Connessione al database MongoDB
             self.client = MongoClient(uri)
             self.db = self.client[db_name]
-            self.collection = self.db[collection_name]
+            # Definizione delle collezioni separate
+            self.transcriptions = self.db["transcriptions"]
+            self.fse_collection = self.db["fse"]
+            # Logger per il monitoraggio
             self.logger = Logger(self.__class__.__name__).get_logger()
             self.logger.info("Connected to MongoDB successfully.")
         except ConnectionFailure as e:
             self.logger.error(f"Failed to connect to MongoDB: {e}")
             raise
 
+    # Inserisce una trascrizione nella collezione 'transcriptions'
     def insert_transcription(self, audio_filename, transcription, language, audio_filepath):
         transcription_data = {
             "filename": audio_filename,
@@ -183,65 +30,101 @@ class DB:
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "audio_filepath": audio_filepath
         }
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        result = self.collection.insert_one(transcription_data)
+        result = self.transcriptions.insert_one(transcription_data)
         return result.inserted_id
 
+    # Ottiene tutte le trascrizioni dalla collezione 'transcriptions'
     def get_all_transcriptions(self):
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        return list(self.collection.find())
+        return list(self.transcriptions.find())
 
-    def find_by_filename(self, filename):
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        return self.collection.find_one({"filename": filename})
+    # Trova una trascrizione per 'filename'
+    def find_transcription_by_filename(self, filename):
+        return self.transcriptions.find_one({"filename": filename})
 
+    # Aggiorna la trascrizione per 'filename'
     def update_transcription(self, filename, new_transcription):
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        result = self.collection.update_one(
+        result = self.transcriptions.update_one(
             {"filename": filename},
             {"$set": {"transcription": new_transcription, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}}
         )
         return result.modified_count
 
+    # Elimina una trascrizione per 'filename' e rimuove il file audio associato
     def delete_transcription(self, filename):
-        
-        """ 
-        Delete a transcription by filename and remove the associated audio file.
-        """
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        transcription = self.collection.find_one({"filename": filename})
+        transcription = self.transcriptions.find_one({"filename": filename})
         if transcription:
             audio_filepath = transcription.get("audio_filepath")
             if audio_filepath and os.path.exists(audio_filepath):
                 os.remove(audio_filepath)
-            result = self.collection.delete_one({"filename": filename})
+            result = self.transcriptions.delete_one({"filename": filename})
             return result.deleted_count
         return 0
 
-    
+    # Elimina tutte le trascrizioni e i file audio associati
     def delete_all_transcriptions(self):
-        """ 
-        Delete all transcriptions and remove all associated audio files.
-        """
-        self.collection = self.db["transcriptions"] if "transcriptions" in self.db.list_collection_names() else self.db.create_collection("transcriptions")
-        transcriptions = self.collection.find()
+        transcriptions = self.transcriptions.find()
         for transcription in transcriptions:
             audio_filepath = transcription.get("audio_filepath")
             if audio_filepath and os.path.exists(audio_filepath):
                 os.remove(audio_filepath)
-        result = self.collection.delete_many({})
+        result = self.transcriptions.delete_many({})
         return result.deleted_count
-    
-    
 
+    # Inserisce un documento FSE nella collezione 'fse'
+    def insert_fse(self, pdf_informations):
+        if not pdf_informations or "filename" not in pdf_informations:
+            raise ValueError("Il campo 'filename' è obbligatorio per inserire un FSE.")
+        
+        pdf_informations["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        result = self.fse_collection.insert_one(pdf_informations)
+        return result.inserted_id
+
+    # Ottiene tutti i documenti FSE dalla collezione 'fse'
+    def get_all_fse(self):
+        return list(self.fse_collection.find())
+
+    # Trova un documento FSE per 'filename'
+    def find_fse_by_filename(self, filename):
+        return self.fse_collection.find_one({"filename": filename})
+
+    # Aggiorna un documento FSE per 'filename'
+    def update_fse(self, filename, new_pdf_informations):
+        result = self.fse_collection.update_one(
+            {"filename": filename},
+            {"$set": new_pdf_informations}
+        )
+        return result.modified_count
+
+    # Elimina un documento FSE per 'filename'
+    def delete_fse(self, filename):
+        result = self.fse_collection.delete_one({"filename": filename})
+        return result.deleted_count
+
+    # Elimina tutti i documenti FSE
+    def delete_all_fse(self):
+        result = self.fse_collection.delete_many({})
+        return result.deleted_count
+
+    # Chiude la connessione al database
     def close(self):
         self.client.close()
-        
-        
-    
-        
-        
+
+
+
 if __name__ == "__main__":
+    # Esempio di utilizzo
     db = DB()
-    # Example usage
-    db.delete_all_transcriptions()
+    db.insert_transcription("example.wav", "This is a test transcription.", "en", "/path/to/audio/example.wav")
+    transcriptions = db.get_all_transcriptions()
+    print(transcriptions)
+    
+    
+    fse_test = {
+        "filename": "test_fse.pdf",
+        "transcription": "This is a test FSE transcription.",
+        "language": "it",
+    }
+    db.insert_fse(fse_test)
+    fse = db.get_all_fse()
+
+    db.close()
