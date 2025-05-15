@@ -5,3 +5,4 @@ key.env
 **/*.json
 *.jsonl
 *.wav
+*.conda
