@@ -1,1 +1,7 @@
 key.env
+**/*.log
+*.log
+*.json
+**/*.json
+*.jsonl
+*.wav
