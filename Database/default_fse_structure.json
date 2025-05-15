@@ -1,0 +1,156 @@
+{
+  "filename": "",
+  "transcription": "",
+  "language": "",
+  "timestamp": "",
+  "audio_filepath": "",
+  "scheda": {
+    "Chiamata": {
+      "data": "",
+      "H chiamata": "",
+      "H partenza": "",
+      "H sul posto": "",
+      "H partenza posto": "",
+      "H in PS": "",
+      "H libero e operativo": "",
+      "luogo intervento": "",
+      "condizione riferita": "",
+      "recapito telefonico": ""
+    },
+    "Ambulanza": {
+      "CRI": "",
+      "SEL": ""
+    },
+    "Equipaggio": {
+      "Aut.": "",
+      "Socc1": "",
+      "Socc2": "",
+      "IP": "",
+      "Medico": ""
+    },
+    "Causa trasporto non effettuato": "",
+    "Attivazioni/Autorità presenti": {
+      "Descrizione": "",
+      "Referto": ""
+    },
+    "Dati anagrafica paziente": {
+      "Cognome Nome": "",
+      "Sesso": "",
+      "Nato il": "",
+      "A": "",
+      "Prov_nascita": "",
+      "Residente a": "",
+      "Prov_residenza": "",
+      "Via": "",
+      "N": "",
+      "Telefono": "",
+      "Dati dichiarati da": ""
+    },
+    "Decesso": {
+      "Ora decesso": "",
+      "Firma": ""
+    },
+    "Rifiuto (firma dell'interessato)": {
+      "Firma": ""
+    },
+    "Rilevazioni": {
+      "Parametri": {
+        "Coscienza": "",
+        "Cute": "",
+        "Respiro": "",
+        "Sp02": "",
+        "FC bpm": "",
+        "PA mmHg": "",
+        "Glic, Mg/dl": "",
+        "Temp. C°": ""
+      },
+      "Glasgow Coma Scale": {
+        "Apertura occhi": "",
+        "Risposta verbale": "",
+        "Risposta motoria": ""
+      },
+      "Pupille": "",
+      "Lesioni riscontrate": ""
+    },
+    "Provvedimenti": {
+      "Respiro": "",
+      "Circolo": "",
+      "Immobilizzazione": "",
+      "Altro": "",
+      "Infusioni/Farmaci": ""
+    },
+    "Annotazioni": ""
+  },
+  "FSE": {
+    "Dati identificativi amministrativi": {
+      "Nome": "",
+      "Età": "",
+      "Sesso": ""
+    },
+    "Referto laboratorio": {
+      "Esame": "",
+      "Risultati": "",
+      "Data": ""
+    },
+    "Referto radiologia": {
+      "Esame": "",
+      "Referto": "",
+      "Data": ""
+    },
+    "Referto specialisitca ambulatoriale": {
+      "Descrizione visita": "",
+      "Note": ""
+    },
+    "Referto anatomia patologica": {
+      "Descrizione": "",
+      "Referto": ""
+    },
+    "Verbale pronto soccorso": {
+      "Motivo accesso": "",
+      "Trattamento": ""
+    },
+    "Lettera dimissione": {
+      "Diagnosi dimissione": "",
+      "Terapia domiciliare": ""
+    },
+    "Profilo sanitario sintetico": {
+      "Condizioni pregresse": "",
+      "Allergie": ""
+    },
+    "Prescrizione farmaceutica": {
+      "Farmaci": ""
+    },
+    "Prescrizione specialistica": {
+      "Esami prescritti": ""
+    },
+    "Cartella clinica": {
+      "Contenuto": ""
+    },
+    "Erogazione farmaci": {
+      "Farmaci erogati": "",
+      "Farmaci acquistati privato": ""
+    },
+    "Scheda singola vaccinazione": {
+      "Vaccino": "",
+      "Dose": "",
+      "Data": ""
+    },
+    "Certificato stato vaccinale": {
+      "Vaccini completati": "",
+      "Note": ""
+    },
+    "Erogazione prestazione specialistica": {
+      "Prestazioni": ""
+    },
+    "Taccuino personale assistito": {
+      "Note personali": ""
+    },
+    "Tessera portatore impianto": {
+      "Impianto": ""
+    },
+    "Lettera invito screening prevenzione": {
+      "Programma": "",
+      "Data invito": ""
+    }
+  }
+}
