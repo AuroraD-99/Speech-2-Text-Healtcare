@@ -231,3 +231,4 @@
 2025-05-12 16:42:40,229 [DashboardDriver] - INFO - Running command: streamlit run
 2025-05-12 16:47:22,457 [DashboardDriver] - INFO - Running command: streamlit run
 2025-05-13 16:37:13,335 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-15 10:46:25,752 [DB] - INFO - Connected to MongoDB successfully.

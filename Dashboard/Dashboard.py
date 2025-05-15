@@ -27,7 +27,7 @@ class Dashboard:
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.session_state._just_logged_in = True  # Trucchetto per mostrare subito la home
-                st.rerun()  # Se sei in 1.45.0 e questa non c’è, ometti: funziona comunque
+                st.rerun()
             else:
                 st.error("Credenziali errate")
 
