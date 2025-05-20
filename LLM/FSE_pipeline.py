@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import time
+from datetime import datetime
 import logging 
 import tempfile   
 
@@ -49,11 +50,13 @@ class FSEManager:
 
         self.model_path = os.getenv("MODEL_PATH_M")
         self.cpu_model_path = os.getenv("CPU_MODEL_PATH_M")
+        self.cpu_model_path_ = os.getenv("CPU_MODEL_PATH_")
 
         self.logger.debug(f"MODEL PATH {self.cpu_model_path}, MODEL TYPE {self.model_type}")
+    
 
         #Configurazione del modello
-        if not os.path.exists(self.model_path):
+        if not os.path.exists(self.model_path) or os.path.exists(self.model_path):
             #se il path del modello non esiste, il modello viene scaricato al path specificato
             self.model_download()
 
@@ -65,13 +68,12 @@ class FSEManager:
         #---------------------------------------------- Configurazione RAG --------------------------------------------------------------
         self.chroma_client = chroma_client 
 
-        #self.embedding_model = os.getenv("EMBEDDING_MODEL")
-
         self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
-        #self.embedder = SentenceTransformer(self.embedding_model)
         #--------------------------------------------------------------------------------------------------------------------------------
 
         self.JSON_path = os.getenv("JSON_PATH")
+        if not os.path.exists(self.JSON_path):
+            os.makedirs(self.JSON_path, exist_ok=True)
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
 
@@ -102,7 +104,7 @@ class FSEManager:
             else:
                 self.logger.info("Tutti i file del modello GPU sono già presenti.")
         
-        else:
+        else: #RIVEDER I PATH DEI MODELLI
             # CPU (quantizzato, GGUF)
             self.logger.info("Ambiente CPU rilevato. Verifica modello GGUF...")
             gguf_repo = "DeepMount00/Mistral-Ita-7b-GGUF"
@@ -117,9 +119,11 @@ class FSEManager:
                     hf_hub_download(
                         repo_id=gguf_repo,
                         filename=gguf_filename,
-                        local_dir=self.cpu_model_path,
-                        local_dir_use_symlinks=False 
+                        local_dir=self.cpu_model_path
                     )
+
+                    self.logger.info(f"Modello scaricato in {self.cpu_model_path}")
+
                 except Exception as e:
                     raise RuntimeError(f"Errore durante il download del modello GGUF: {e}")
             else:
@@ -151,9 +155,11 @@ class FSEManager:
         else:
             self.logger.debug("CUDA non disponibile. Caricamento modello quantizzato per CPU con `ctransformers`.")
 
+            model_file = os.path.join(self.cpu_model_path, "mistral_ita-7b-Q4_K_M.gguf")
+
             model = cAutoModelForCausalLM.from_pretrained(
-                model_path_or_repo_id=self.CPU_model_name,
-                model_file=self.cpu_model_path, #"mistral_ita-7b-Q4_K_M.gguf",
+                model_path_or_repo_id=model_file, #self.CPU_model_name,
+                #model_file=model_file, #"mistral_ita-7b-Q4_K_M.gguf",
                 model_type="mistral",
                 gpu_layers=0,
                 context_length=4096,
@@ -217,7 +223,11 @@ class FSEManager:
             #self.llm.check_json_format(full_output)
 
             #Salvataggio in formato JSON dell'output 
-            out_file = os.path.join(self.JSON_path, timestamp)
+            
+
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
+            out_file = os.path.join(self.JSON_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
+
             self.llm.save_to_json(full_output, out_file)
             self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
 
@@ -255,8 +265,8 @@ class FSEManager:
         for doc_id in similar_ids:
             try:
                 document = self.reports_collection.find_one({"_id": ObjectId(doc_id)})
-                if document and ("clinical_report" or "scheda_ps") in document:
-                    context_snippets.append(document["clinical_report"])
+                if document and ("clinical_report" in document or "scheda_ps" in document):
+                    context_snippets.append(document.get("clinical_report") or document.get("scheda_ps"))
             except Exception as e:
                 self.logger.warning(f"Impossibile recuperare referto per ID {doc_id}: {e}")
 

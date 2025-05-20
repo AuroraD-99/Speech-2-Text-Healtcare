@@ -66,6 +66,7 @@ class PipelineManager:
     #---------------------------------------------- FUNZIONI PER LA GESTIONE DELLA PIPELINE ----------------------------------------------
 
     def Pipeline_manager(self):
+        #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
 
         #acquisizione del testo trascritto
         self.logger.debug(f"Procedo all'acquisizione della nuova trascrizione...")
@@ -131,7 +132,7 @@ class PipelineManager:
         #salvataggio su RAG -> VA CAMBIATO PERCHè ATTUALMENTE PRENDE IL REFERTO PRODOTTO E LO INSERISCE SENZA VALIDAZIONE
         #DEVE PRENDERE IL REFERTO VALIDATO PER L'INSERIMENTO NEL RAG
         self.logger.debug(f"Procedo all'update del nuovo documento nel RAG...")
-        report_text_RAG = self.anonimizza_referto(report_text)
+        report_text_RAG = self.anonimizza_referto(report_text["transcription"])
 
         #questo va fatto solo dopo che il medico ha approvato la revisione del referto
         rag_docs = self.RAGManager.rag_element_generator(report_text["timestamp"], report_text, clinical_report)
