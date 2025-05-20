@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from json_repair import repair_json
 import transformers
 import torch
 
@@ -54,19 +55,6 @@ class LLMWrapper:
                 "descrizione": "Polizia Locale",
                 "referto": "Intervento per incidente stradale"
             },
-            "Dati anagrafica paziente": {
-                "Cognome Nome": "Giulia Verdi",
-                "sesso": "F",
-                "nato il": "1979-08-12",
-                "a": "Milano",
-                "Prov_nascita": "MI",
-                "Residente a": "Milano",
-                "Prov_residenza": "MI",
-                "Via": "Via Dante",
-                "N": "45",
-                "Telefono": "3391122334",
-                "Dati dichiarati da": "Paziente"
-            },
             "Decesso": {"Ora decesso": "", "Firma": ""},
             "Rifiuto (firma dell'interessato)": {"Firma": ""},
             "Rilevazioni": {
@@ -99,14 +87,18 @@ class LLMWrapper:
         }
 
         return (
-            "Sei un medico. Compila la seguente scheda di ammissione PS in italiano in formato JSON. "
-            "Usa solo i dati presenti nel testo. Se mancano, inserisci 'N/A'. Rispondi solo con JSON.\n\n"
+            "Sei un medico d’emergenza. Ricevi un testo discorsivo da una trascrizione. "
+            "Compila in formato JSON una scheda di Pronto Soccorso (PS), riempiendo i seguenti campi obbligatori. "
+            "Non inventare nulla: se un’informazione è assente, inserisci 'N/A'. L'anagrafica del paziente è già stata inserita."
+            "Rispondi in italiano e con JSON ben formattato, senza testo introduttivo.\n\n"
+            "Esempio di struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
         )
 
-    def generate_scheda_from_report(self, referto_ps, report_with_context): #DA CONTROLLARE
+
+    def generate_scheda_from_report(self, referto_ps, report_with_context = None): #DA CONTROLLARE
         prompt = self.__generate_prompt_scheda()
-        full_prompt = f"{prompt}\n\nReferto da analizzare:\n{referto_ps}\n\nPuoi fare riferimento ai seguenti esempi\n{report_with_context}"
+        full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto_ps}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
             return result #[0]["generated_text"].replace(full_prompt, "").strip()
@@ -114,69 +106,42 @@ class LLMWrapper:
             self.logger.error(f"Errore nella generazione scheda: {e}")
             return "{}"
         
-    def __generate_prompt_report(self): #VEDERE SE BISOGNA CAMBIARLO
+    def __generate_prompt_report(self):
+        esempio_referto = {
+              "Intestazione": {
+                "Data visita": "N/A",
+                "Ora visita": "N/A",
+                "Ambulatorio": "N/A",
+                "Medico": "N/A"
+              },
+              "Motivo della visita": "N/A",
+              "Anamnesi": {
+                "Personale": "N/A",
+                "Familiare": "N/A",
+                "Evento attuale": "N/A"
+              },
+              "Esame obiettivo": "N/A",
+              "Esami eseguiti": "N/A",
+              "Diagnosi": "N/A",
+              "Terapia": "N/A",
+              "Follow-up": "N/A",
+              "Firma medico": "N/A",
+              "Data redazione": "N/A"
+            }
+        
         return (
-                    "Sei un assistente medico specializzato nella redazione di referti clinici formali."
-                    "Il tuo compito è analizzare un testo discorsivo fornito in seguito, comprendere le informazioni cliniche essenziali, e riscriverle in forma di referto professionale, chiaro e strutturato."
-                    "Compila il referto clinico in italiano formato JSON. Usa solo i dati presenti nel testo.\n\n"
-                ) 
-    
-        """    🧾 Intestazione / Identificativi
-        Nome e cognome del paziente
+            "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico formale, "
+            "chiaro e strutturato, in formato JSON. Non inserire dati inventati. Se una sezione è assente, scrivi 'N/A'.\n\n"
+            "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente. "
+            "Rispondi in italiano e con JSON ben formattato. L'anagrafica del paziente è già stata inserita."
+            "Esempio di struttura attesa:\n"
+            f"{json.dumps(esempio_referto, ensure_ascii=False, indent=2)}"
+        )
 
-        Data di nascita
-
-        Codice fiscale / ID paziente
-
-        Numero del referto / identificativo visita
-
-        Data e ora della visita
-
-        Reparto / ambulatorio di riferimento
-
-        Nome e qualifica del medico specialista
-
-        🩺 Contenuto clinico
-        Motivo della visita (o del ricovero)
-
-        Es. “Controllo post-operatorio”, “Dolore toracico acuto”, “Follow-up oncologico”
-
-        Anamnesi
-
-        Personale e familiare (patologie pregresse, farmaci, allergie, abitudini)
-
-        Anamnesi recente / evento attuale
-
-        Esame obiettivo
-
-        Risultati dell’osservazione clinica diretta (es. PA, FC, stato neurologico, esame addominale…)
-
-        Esami eseguiti / indagini
-
-        Analisi di laboratorio, imaging, ECG, ecc. con risultati sintetici o allegati
-
-        Diagnosi / sospetto diagnostico
-
-        Formulazione clinica o differenziale
-
-        Terapia consigliata / eseguita
-
-        Farmaci, dosaggi, durata, interventi
-
-        Indicazioni e follow-up
-
-        Controlli successivi, esami da effettuare, invio ad altri specialisti
-
-        🖋️ Chiusura
-        Firma del medico (digitale o manoscritta)
-
-        Timbro del medico o struttura sanitaria
-
-        Data di redazione del referto"""
                 
-    def generate_clinical_report(self, referto, report_with_context): #DA CONTROLLARE
+    def generate_clinical_report(self, referto, report_with_context = None): #DA CONTROLLARE
         prompt = self.__generate_prompt_report() 
-        full_prompt = f"{prompt}\n\nReferto da analizzare:\n{referto}\n\nPuoi fare riferimento ai seguenti esempi\n{report_with_context}"
+        full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
             return result #[0]["generated_text"].replace(full_prompt, "").strip()
@@ -193,8 +158,12 @@ class LLMWrapper:
             else:
                 return False
             return True
-        except Exception:
-            return False
+        except  json.JSONDecodeError:
+            try:
+                fixed = repair_json(document)
+                return json.loads(fixed)
+            except Exception as e:
+                return {}
     
     def save_to_json(self, result, file_path="output.json"):
         self.logger.info(f"Salvataggio su {file_path}")
@@ -203,4 +172,4 @@ class LLMWrapper:
                 json.dump(result, f, ensure_ascii=False, indent=2)
         except Exception as e:
             self.logger.error(f"Errore nel salvataggio JSON: {e}")
-
+ 

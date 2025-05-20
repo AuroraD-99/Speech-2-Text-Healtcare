@@ -4,10 +4,12 @@ from log import Logger
 import os
 import time
 import uuid
+import numpy as np
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
 # Struttura operatore ospedaliero: username, password, anagrafica, ruolo
+#Struttura embedding: è necessaria per ottimizzare il RAG, così ogni volta che viene inizializzato il sistema non è necessario ricalcolare gli embeddings
 
 class DB:
     def __init__(self, uri="mongodb://localhost:27017/", db_name="clinical_report_transcriptions"):
@@ -20,8 +22,9 @@ class DB:
             self.db = self.client[db_name]
             # Definizione delle collezioni separate
             self.transcriptions = self.db["transcriptions"]
-            self.reports_collection = self.db["clinical_reports"]
+            self.reports_collection = self.db["clinical_reports"] #deve contenere anche l'id dell'embedding
             self.operators_collection = self.db["operators"]
+            self.RAG_embedding_cache = self.db["RAG_embeddings_cache"]
             # Logger per il monitoraggio
             self.logger = Logger(self.__class__.__name__).get_logger()
             self.logger.info("Connected to MongoDB successfully.")
@@ -30,11 +33,12 @@ class DB:
             raise
 
     # Inserisce una trascrizione nella collezione 'transcriptions'
-    def insert_transcription(self, audio_filename, transcription, language, audio_filepath):
+    def insert_transcription(self, audio_filename, transcription, embedding_id, language, audio_filepath):
         transcription_data = {
             "transcription_id": str(uuid.uuid4()),  # Genera un ID unico per la trascrizione
             "filename": audio_filename,
             "transcription": transcription,
+            "embedding_id": embedding_id, #id dell'embedding
             "language": language,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "audio_filepath": audio_filepath
@@ -75,7 +79,10 @@ class DB:
         for transcription in transcriptions:
             audio_filepath = transcription.get("audio_filepath")
             if audio_filepath and os.path.exists(audio_filepath):
-                os.remove(audio_filepath)
+                try:
+                    os.remove(audio_filepath)
+                except FileNotFoundError:
+                    self.logger.warning(f"File non trovato: {audio_filepath}")
         result = self.transcriptions.delete_many({})
         return result.deleted_count
     
@@ -183,6 +190,26 @@ class DB:
     def delete_all_fse(self):
         result = self.fse_collection.delete_many({})
         return result.deleted_count"""
+
+    def insert_embedding(self, embedding_data: dict) -> bool:
+        try:
+            if not isinstance(embedding_data, dict):
+                raise TypeError("embedding_data must be a dict")
+
+            # Convertiamo eventuali numpy array
+            if isinstance(embedding_data.get("embedding"), np.ndarray):
+                embedding_data["embedding"] = embedding_data["embedding"].tolist()
+
+            result = self.RAG_embedding_cache.insert_one(embedding_data)
+            return result.inserted_id
+        except Exception as e:
+            print(f"[ERROR] insert_embedding: {e}")
+            return False
+
+
+    def get_embedding_by_id(self, doc_id: str) -> dict:
+        """Recupera un embedding dato un ID."""
+        return self.collection.find_one({"_id": doc_id})    
 
     # Chiude la connessione al database
     def close(self):

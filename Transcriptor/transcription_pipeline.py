@@ -13,6 +13,9 @@ class TranscriptionPipeline:
         self.logger = Logger("TranscriptionPipeline").get_logger()
         self.logger.info(f"Transcription pipeline initialized.")
 
+        self.audio_path = os.getenv("AUDIO_PATH")
+        os.makedirs(self.audio_path, exist_ok=True)
+
     def run(self):
         """Run the transcription pipeline."""
         self.logger.info("Starting transcription pipeline...")
@@ -29,7 +32,8 @@ class TranscriptionPipeline:
         self.logger.info(f"Language detected: {language}.")
         
         # Move the audio file to a different directory
-        audio_filepath = f"assets/audios/{audio_filename}"
+        #audio_filepath = f"assets/audios/{audio_filename}"
+        audio_filepath = os.path.join(self.audio_path, audio_filename)
         os.rename(audio_filename, audio_filepath)
         
         
@@ -44,11 +48,8 @@ class TranscriptionPipeline:
         self.logger.info("Transcription pipeline completed successfully.")
         
         return transcription_data
+             
         
-        
-        
-        
-        
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     pipeline = TranscriptionPipeline()
-    pipeline.run()
+    pipeline.run()"""
