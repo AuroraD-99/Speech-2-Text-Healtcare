@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 import logging 
 import tempfile   
+from bson import ObjectId
 
 import argparse
 from dotenv import load_dotenv
@@ -77,7 +78,7 @@ class FSEManager:
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
 
-    def model_download(self): #OK 
+    def model_download(self):
         self.logger.info(f"Controllo modello in: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -132,7 +133,7 @@ class FSEManager:
         self.logger.info("Download completato.")
 
 
-    def model_configuration(self): #OK 
+    def model_configuration(self):
         self.logger.debug(f"Inizializzazione modello da: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -184,7 +185,7 @@ class FSEManager:
                 #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
                 self.logger.debug(f"Modalità di funzionamento: Emergency...")
                 self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.retrieve_context(embedding, doc_type_filter=self.function_mode) #COME FUNZIONA ESATTAMENTE?
+                context = self.retrieve_context(embedding) #COME FUNZIONA ESATTAMENTE?
                 #report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
 
                 #genero la scheda di ammissione al PS
@@ -223,8 +224,6 @@ class FSEManager:
             #self.llm.check_json_format(full_output)
 
             #Salvataggio in formato JSON dell'output 
-            
-
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
             out_file = os.path.join(self.JSON_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
 
@@ -238,12 +237,14 @@ class FSEManager:
            
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
     #DeepMount00/Mistral-RAG
-   
-    def retrieve_context(self, embedding, top_k=1, doc_type_filter=None):
+
+    def retrieve_context(self, embedding, top_k=1): #DA CONTROLLARE - FUNZIONA BENE SUGLI EMBEDDING SUDDIVISI IN CHUNK?
         """
-        Recupera i clinical_report più simili, in base all'embedding e (opzionalmente) al tipo.
+        Recupera i referti clinici più simili da ChromaDB in base all'embedding fornito.
+        Applica eventualmente un filtro per tipo di documento.
         """
-        filter_metadata = {"type": doc_type_filter} if doc_type_filter else {}
+
+        filter_metadata = {"type": self.function_mode}
 
         try:
             results = self.collection.query(
@@ -253,27 +254,36 @@ class FSEManager:
             )
         except Exception as e:
             self.logger.error(f"Errore nella query per il contesto: {e}")
-            return "Errore nel recupero del contesto."
+            self.logger.info(f"Errore nel recupero del contesto.") 
 
         documents = results.get("documents", [[]])[0]
         similar_ids = results.get("ids", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0]
 
         if not documents or not similar_ids:
-            return "Nessun contesto rilevante trovato."
+            self.logger.info(f"Nessun contesto rilevante trovato.")
+            return
 
         context_snippets = []
-        for doc_id in similar_ids:
+        for i, doc_id in enumerate(similar_ids):
             try:
-                document = self.reports_collection.find_one({"_id": ObjectId(doc_id)})
-                if document and ("clinical_report" in document or "scheda_ps" in document):
-                    context_snippets.append(document.get("clinical_report") or document.get("scheda_ps"))
+                metadata = metadatas[i]
+                referto_testo = metadata.get("clinical_report") or metadata.get("scheda_ps") or documents[i]
+
+                if referto_testo:
+                    cleaned = self.clean_text(referto_testo)
+                    context_snippets.append(cleaned)
+
             except Exception as e:
                 self.logger.warning(f"Impossibile recuperare referto per ID {doc_id}: {e}")
+                return
 
         if not context_snippets:
-            return "Nessun referto rilevante trovato."
+            self.logger.info(f"Nessun referto rilevante trovato.")
+            return
 
         return "\n\n".join(context_snippets)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gestione referti vocali e generazione FSE")

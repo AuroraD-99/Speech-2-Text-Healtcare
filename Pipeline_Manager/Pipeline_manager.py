@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import time
+from datetime import datetime, timedelta
 import logging    
 
 import argparse
@@ -19,6 +20,7 @@ from LLM.RAG_manager import RAGManager
 from LLM.FSE_pipeline import FSEManager
 from Transcriptor.transcription_pipeline import TranscriptionPipeline
 from Database.mongodb import DB
+from Pipeline_Manager.Anagrafica import Anagrafica
 
 class PipelineManager:
     def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
@@ -34,6 +36,10 @@ class PipelineManager:
         self.function_mode = function_mode
         #l'anagrafica del medico viene acquisita con il login
         self.anagrafica_medico = anagrafica_medico #è del tipo {"name": , "surname": , "CF": , "specializzazione": } - RICONTROLLARE
+        #controllo sull'anagrafica del medico
+        self.logger.info(f"Anagrafica medico: {self.anagrafica_medico}")
+
+        self.update_time = datetime.now() + timedelta(hours=2)
 
         #embedder per effettuare l'embedding della trascrizione
         self.embedding_model = os.getenv("EMBEDDING_MODEL")
@@ -55,6 +61,8 @@ class PipelineManager:
 
         #inizializzazione del modello
         self.FSE_manager = FSEManager(self.chroma_client, self.function_mode, self.env_file)
+
+        self.anagrafica = Anagrafica()
         
         #--------------------------------------------------- Salvataggio in PDF ---------------------------------------------------------
         self.PDF_output = os.getenv("PDF_PATH")
@@ -68,173 +76,91 @@ class PipelineManager:
     def Pipeline_manager(self):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
 
+        """Serve una logica di reset o re-inizializzazione del RAGManager e PipelineManager. Al login di un medico dovresti:
+            Ricreare un’istanza del PipelineManager
+            Chiudere o invalidare quelle precedenti"""
+        
         #acquisizione del testo trascritto
-        self.logger.debug(f"Procedo all'acquisizione della nuova trascrizione...")
+        self.logger.info(f"Procedo all'acquisizione della nuova trascrizione...")
         report_text = self.transcriptor.run()
 
-        #print(report_text)
-
         #estrazione e check sulla validità dell'anagrafica del paziente nel DB
-        self.logger.debug(f"Procedo all'estrazione dell'anagrafica del paziente ed alla verifica sulla presenza del suo FSE...")
+        self.logger.info(f"Procedo all'estrazione dell'anagrafica del paziente ed alla verifica sulla presenza del suo FSE...")
         try:
-            anagrafica_paziente = self.extract_anagrafica(report_text["transcription"])
+            anagrafica_paziente = self.anagrafica.extract_anagrafica(report_text["transcription"])
+            #Controllo sull'anagrafica estratta
+            self.logger.info(f"Anagrafica paziente estratta: {anagrafica_paziente}")
+
+            #check sull'anagrafica di base (codice fiscale, nominativo e recapito telefonico) del paziente
+            self.anagrafica.check_anagrafica(anagrafica_paziente)
         except Exception as e:
             self.logger.warning(f"****Anagrafica del paziente non specificata, dovrai inserirla necessariamente in fase di convalida del documento****")
-
-        """if not self.DB_manager.check_existing_FSE(anagrafica):#aggiungo la scheda al FSE del paziente se già esiste, altrimenti genero un FSE e poi aggiungo la scheda
-            self.logger.debug(f"[{timestamp}] Generazione FSE...")
-            #richiamare la funzione del DB_Manager per la generazione di un nuovo FSE per il paziente
-            self.DB_manager.create_new_FSE(anagrafica)"""
         
-        #Generazione dell'embedding della trascrizione per il RAG
-        embedding = self.embedder.encode(report_text["transcription"])
-        
-        embedding_doc = {
-            "embedding": embedding.tolist() if hasattr(embedding, "tolist") else embedding
-        }
 
+        #Generazione dell'embedding della trascrizione per il RAG - prima procedo all'anonimizzazione del referto
+        self.logger.info(f"Procedo all'update del nuovo documento nel RAG...")
+        self.logger.info(f"Procedo al calcolo dell'embedding del testo...")
+        report_text_RAG = self.anagrafica.anonimizza_referto(report_text["transcription"])
+
+        #Controllo sul referto anonimizzato
+        self.logger.info(f"Report anonimizzato: {report_text_RAG}")
+        
+        #embedding = self.RAGManager.compute_embedding(report_text_RAG, self.collection, embedding = self.embedder)
         #salvataggio embedding nel DB
-        try:
-            embedding_id = self.DB_manager.insert_embedding(embedding_doc) #salvo l'embedding del testo e ottengo il suo id
+        embedding_id, embedding = self.RAGManager.compute_embedding(report_text_RAG, self.function_mode) 
 
+        try:
             #salvataggio della coppia audio + testo nel database 
-            self.logger.debug(f"Procedo all'update della trascrizione e dell'audio nel DB...")
+            self.logger.info(f"Procedo all'update della trascrizione e dell'audio nel DB...")
+
             # Store transcription in the database
             self.DB_manager.insert_transcription( 
                 audio_filename=report_text["filename"],
                 transcription=report_text["transcription"],
-                embedding_id=embedding_id,
+                embedding_id=embedding_id, #id dell'embedding è utilizzato come id anche per le altre collezioni
                 language=report_text["language"],
                 audio_filepath=report_text["audio_filepath"] 
             )
         except Exception as e:
             self.logger.warning(f"Errore nel salvataggio: {e}")
 
-        #generazione del documento dalla LLM
+        #-------------------------------------------------------------------------------------------------------------------------
+
+        #generazione del documento dalla LLM - do alla LLM il referto anonimizzato
         self.logger.debug(f"Procedo alla generazione del nuovo referto...")
-        clinical_report = self.FSE_manager.FSE_manager(report_text["timestamp"], report_text["transcription"], embedding, self.anagrafica_medico, anagrafica_paziente) 
+        clinical_report = self.FSE_manager.FSE_manager(report_text["timestamp"], 
+                                                       report_text_RAG, 
+                                                       embedding, 
+                                                       self.anagrafica_medico, 
+                                                       anagrafica_paziente) 
+        
+        #salvataggio del documento nel DB
+        self.logger.info(f"Aggiunta referto all'FSE del paziente...")
+        document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
 
-        #vanno aggiunti i codici fiscali del medico e del paziente
-        #check sul codice fiscale del paziente
-        #check sulla struttura in base alle richieste del DB
+        self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
+        if os.path.exists(clinical_report[1]): #il check non dovrebbe essere necessario ma è meglio metterlo
+            os.remove(clinical_report[1])
 
-        #modifica/validazione del referto
-        self.logger.debug(f"Procedo alla validazione del referto prodotto...")
+        #modifica/validazione del referto - DA RIVEDERE --------------------------------------------------------------------------
+        self.logger.info(f"Procedo alla validazione del referto prodotto...")
         #validated_report_text = self.FSE_manager.check_json_structure(clinical_report[0])
 
-        #salvataggio del documento nel DB
-        self.logger.debug(f"Aggiunta referto all'FSE del paziente...")
-        document_id = self.DB_manager.insert_clinical_report(clinical_report[0])
+        
+        #NON SERVE PIù PERCHè ORA C'è IL REFRESH PERIODICO DEL RAG
+        """#recupero del referto validato -> VEDERE SE CI SONO MODIFICHE DA FARE
+        validated_report = self.DB_manager.get_validated_clinical_report(embedding_id)
+        #salvataggio dell'embedding nel DB
+        embedding_doc = self.RAGManager.prepare_embedding_doc(embedding_id, embedding, self.function_mode, validated_report)
+        self.DB_manager.insert_embedding(embedding_doc) #salvo l'embedding del testo e ottengo il suo id"""
 
-        self.logger.debug(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
-        os.remove(clinical_report[1]) 
-
-        #salvataggio su RAG -> VA CAMBIATO PERCHè ATTUALMENTE PRENDE IL REFERTO PRODOTTO E LO INSERISCE SENZA VALIDAZIONE
-        #DEVE PRENDERE IL REFERTO VALIDATO PER L'INSERIMENTO NEL RAG
-        self.logger.debug(f"Procedo all'update del nuovo documento nel RAG...")
-        report_text_RAG = self.anonimizza_referto(report_text["transcription"])
-
-        #questo va fatto solo dopo che il medico ha approvato la revisione del referto
-        rag_docs = self.RAGManager.rag_element_generator(report_text["timestamp"], report_text, clinical_report)
-        self.RAGManager.add_to_RAG(rag_docs)
+        #REFRESH PERIODICO DEL RAG OGNI 2 ORE
+        if datetime.now() == self.update_time:
+            self.logger.info(f"Sincronizzazione RAG - MongoDB in corso ...")
+            self.RAGManager.sync_chroma_from_mongo() #fa la sincronizzazione periodica tra il RAG e MongoDB
+            self.update_time = datetime.now() + timedelta(hours=2)
+            self.logger.info(f"Sincronizzazione RAG - MongoDB terminata ...")
    
-
-    #------------------------------------- FUNZIONI PER IL SALVATAGGIO DEL FSE ----------------------------------------
-
-    def save_FSE_to_PDF(self): #RICONTROLLARE + VA INSERITO IN UN FILE A PARTE
-        self.logger.info("Esportazione FSE in PDF in corso ...")
-        for filename in os.listdir(self.JSON_output):
-            if filename.endswith(".json"):
-                path = os.path.join(self.JSON_output, filename)
-                with open(path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-
-                output_pdf = os.path.join(self.PDF_output, filename.replace(".json", ".pdf"))
-
-                generate(
-                    json_file_path=path,
-                    template_directory_path=self.template_directory,
-                    output_html_path=self.output_html_path,
-                    output_pdf_path=output_pdf,
-                    options={
-                        'encoding': 'UTF-8',
-                        'margin-top': '0px',
-                        'margin-right': '30px',
-                        'margin-bottom': '30px',
-                        'margin-left': '30px',
-                        'footer-right': "Page [page] of [topage]",
-                        'footer-font-size': "9",
-                        'orientation': 'Portrait',
-                        'page-size': 'A4',
-                    },
-                    template_name=self.template_name,
-                    data_variables={"data": data}
-                )
-
-
-    #------------------------------------- PER LA GESTIONE DEL CONTINUOUS RAG ----------------------------------------
-
-    def anonimizza_referto(self, testo): #VA MIGLIORATO
-        #funzione per mascherare nomi propri, CF, date, numeri identificativi, indirizzi ecc.
-        #è necessaria per il continuous RAG in modo che i dati sensibili dei pazienti non vengano considerati
-        patterns = {
-            r"\b[Cc]odice\s?[Ff]iscale\b.*?:?\s?[A-Z0-9]{16}": "[CODICE_FISCALE]",
-            r"\b[Nn]ome\b.*?:?\s?[A-Z][a-z]+": "[NOME]",
-            r"\b[Cc]ognome\b.*?:?\s?[A-Z][a-z]+": "[COGNOME]",
-            r"\b\d{2}/\d{2}/\d{4}\b": "[DATA]",
-            r"\b\d{1,2}-\d{1,2}-\d{4}\b": "[DATA]",
-            r"\b\d{1,2}:\d{2}\b": "[ORA]",
-            r"\b[\d]{11}\b": "[NUM_TESSERA]",
-            r"\bVia\s[\w\s]+": "[INDIRIZZO]",
-        }
-        for pattern, replacement in patterns.items():
-            testo = re.sub(pattern, replacement, testo)
-        return testo
-
-    def extract_anagrafica(self, text): #VA MIGLIORATO
-        # Estrattore di dati anagrafici da testo libero
-        patterns = {
-            "codice_fiscale": r"\b[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]\b",
-            "nominativo": {
-                "nome": r"\b[Nn]ome\b[:\s]*([A-Z][a-z]+)",
-                "cognome": r"\b[Cc]ognome\b[:\s]*([A-Z][a-z]+)"
-            },
-            "sesso": r"\b[Ss]esso\b[:\s]*(Maschio|Femmina|M|F)\b",
-            "data_nascita": r"\b(\d{2}[/-]\d{2}[/-]\d{4})\b",
-            "luogo_nascita": {
-                "città": r"[Nn]ato(?:\s*a)?[:\s]*([A-Z][a-z\s']+)",
-                "provincia": r"[Pp]rov(?:incia)?[:\s]*\(?([A-Z]{2})\)?"
-            },
-            "residenza": {
-                "città": r"[Rr]esidenza[:\s]*(?:in\s)?([A-Z][a-z\s']+)",
-                "provincia": r"[Pp]rov(?:incia)?[:\s]*\(?([A-Z]{2})\)?",
-                "indirizzo": r"[Ii]ndirizzo[:\s]*(Via\s[\w\s']+)"
-            },
-            "recapito_telefonico": r"\b(3\d{2}[-\s]?\d{6,7})\b",
-            "dati_dichiarati_da": r"[Dd]ichiarat[oa]\s+da[:\s]*([A-Z][a-z]+\s[A-Z][a-z]+)"
-        }
-
-        extracted = {}
-
-        for key, pattern in patterns.items():
-            if isinstance(pattern, dict):
-                extracted[key] = {}
-                for subkey, subpattern in pattern.items():
-                    if subpattern:
-                        match = re.search(subpattern, text)
-                        extracted[key][subkey] = match.group(1).strip() if match else "N/A"
-                    else:
-                        extracted[key][subkey] = "N/A"
-            else:
-                if pattern:
-                    match = re.search(pattern, text)
-                    extracted[key] = match.group(1).strip() if match else "N/A"
-                else:
-                    extracted[key] = "N/A"
-
-        self.logger.debug(f"L'anagrafica del paziente è: {extracted}")
-        return extracted
-
 
 #------------------------------------- MAIN DI PROVA ----------------------------------------
 # Entrypoint
