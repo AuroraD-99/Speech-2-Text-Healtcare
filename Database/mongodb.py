@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 import numpy as np
+from typing import List
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -31,6 +32,8 @@ class DB:
         except ConnectionFailure as e:
             self.logger.error(f"Failed to connect to MongoDB: {e}")
             raise
+
+    #-------------------------------------------- TRANSCRIPTION -------------------------------------------------------------
 
     # Inserisce una trascrizione nella collezione 'transcriptions'
     def insert_transcription(self, audio_filename, transcription, embedding_id, language, audio_filepath):
@@ -86,15 +89,22 @@ class DB:
         result = self.transcriptions.delete_many({})
         return result.deleted_count
     
-    def insert_clinical_report(self, report):
+    #--------------------------------------------- CLINICAL REPORT -------------------------------------------------------------
+    
+    def insert_clinical_report(self, report_id, report):
         """
         Insert a clinical report into the 'clinical_reports' collection.
         """
+        #si potrebbe anche aggiungere una voce che indica la validazione del referto per facilitare l'inserimento nel RAG
+
         # Campi obbligatori: report_id
-        report["report_id"] = str(uuid.uuid4())  # Genera un ID unico per il report
+        report["report_id"] = report_id #str(uuid.uuid4())  # ID unico per il report: coincide anche con quello per gli embedding e il referto
+        #VA AGGIUNTO ANCHE L'ID DEL REFERTO NEL RAG PER IL RECUPERO
         report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        report["validated"] = False
         result = self.reports_collection.insert_one(report)
         return result.inserted_id
+
     
     def get_clinical_reports_by_patient(self, patient_id):
         """
@@ -108,7 +118,18 @@ class DB:
         """
         return list(self.reports_collection.find({"doctor_cf": doctor_cf}))
     
-    
+    def get_validated_clinical_report(self, report_id: str) -> dict:
+        #Recupera un referto validato. Se non è validato, restituisce None e mostra un warning.
+
+        report = self.reports_collection.find_one({"report_id": report_id, "validated": True})
+        
+        if not report:
+            print(f"[WARNING] Il referto con ID {report_id} non è ancora stato validato o non esiste.")
+            return None
+        
+        return report
+
+       
     def get_all_clinical_reports(self):
         """
         Returns all clinical reports.
@@ -127,6 +148,7 @@ class DB:
         """
         result = self.reports_collection.update_one(
             {"report_id": report_id},
+            {"validater": True},
             {"$set": new_report}
         )
         return result.modified_count
@@ -190,6 +212,8 @@ class DB:
     def delete_all_fse(self):
         result = self.fse_collection.delete_many({})
         return result.deleted_count"""
+    
+    #--------------------------------------------------- EMBEDDING ------------------------------------------------------
 
     def insert_embedding(self, embedding_data: dict) -> bool:
         try:
@@ -209,7 +233,12 @@ class DB:
 
     def get_embedding_by_id(self, doc_id: str) -> dict:
         """Recupera un embedding dato un ID."""
-        return self.collection.find_one({"_id": doc_id})    
+        return self.RAG_embedding_cache.find_one({"_id": doc_id})  
+
+    def get_embeddings_by_doc_cf(self, cf: str) -> List[dict]: 
+        return list(self.RAG_embedding_cache.find({"metadata.medico_cf": cf}))
+     
+    #------------------------------------------------------------------------------------------------------------------------
 
     # Chiude la connessione al database
     def close(self):

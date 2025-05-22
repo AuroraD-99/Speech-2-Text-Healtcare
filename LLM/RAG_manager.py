@@ -1,9 +1,11 @@
 import os
 import sys
 import hashlib
+from datetime import datetime, timedelta
 import json
 from typing import List, Dict, Literal
 from log import Logger
+import logging
 
 from sklearn.preprocessing import normalize
 
@@ -16,11 +18,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Database.mongodb import DB
 
-#check su cosa va nel RAG
-
 class RAGManager:
     def __init__(self, chroma_path: str, cf = None):
-        self.logger = Logger(self.__class__.__name__).get_logger()
+        #self.logger = Logger(self.__class__.__name__).get_logger()
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger("RAG_Manager")
 
         self.chroma_path = os.getenv("CHROMA_DB_PATH") #./rag_data o /var/lib/rag_data
         self.chroma_client = Client() #con Client viene inizializzata una sessione temporanea in RAM quindi una volta terminata vengono persi tutti i dati
@@ -29,17 +31,32 @@ class RAGManager:
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
         self.embedder = SentenceTransformer("distiluse-base-multilingual-cased-v2")
 
+        self.cf = cf
+
         self.db_manager = DB()
 
-        self.inizialize_RAG_from_DB(cf)
+        self.inizialize_RAG_from_DB()
 
+    #per la preparazione del testo fornito  
+    def clean_text(self, text):
+        return text.strip().replace("\n", " ").replace("  ", " ")
 
-    def inizialize_RAG_from_DB(self, cf): #funzione richiamata quando viene avviata una sessione del sistema (dopo il login da interfaccia)
+    def split_and_clean(self, text): #pulisce il testo da caratteri per la formattazione e lo suddivide in chunck
+        cleaned = self.clean_text(text)
+        splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=50)
+        return splitter.split_text(cleaned)
+    
+    #per la generazione dell'id univoco (da utilizzare sia per il RAG che per il DB)
+    def compute_id(self, content: str, doc_type: str = "") -> str:
+        return f"{doc_type}_{hashlib.md5(content.encode('utf-8')).hexdigest()}"
+  
+    #per l'inizializzazione del RAG
+    def inizialize_RAG_from_DB(self): #funzione richiamata quando viene avviata una sessione del sistema (dopo il login da interfaccia)
         try:
             self.logger.info("Inizializzazione del RAG a partire dal database")
 
              # Recupera tutto ciò che serve dal database in base al codice fiscale del medico
-            documents = self.db_manager.get_all_clinical_reports_by_doctor_cf(cf) #la funzione ritorna trasrizioni+clinical_report+operatori
+            documents = self.db_manager.get_all_clinical_reports_by_doctor_cf(self.cf) #la funzione ritorna trasrizioni+clinical_report+operatori
             if not documents:
                 self.logger.warning("Nessun documento trovato per l'inizializzazione.")
                 return
@@ -49,90 +66,80 @@ class RAGManager:
 
         except Exception as e:
             self.logger.warning("Impossibile effettuate il caricamento dei referti nel RAG perchè non risultano referti prodotti del medico")
-    
-    def compute_id(self, content: str, doc_type: str) -> str:
-        # Crea un ID unico per evitare duplicazioni
-        raw_id = f"{doc_type}_{hashlib.md5(content.encode('utf-8')).hexdigest()}"
-        return raw_id
-    
-    def rag_element_generator(self, timestamp, report_text_RAG, scheda_ps=None, clinical_report=None): 
-        return [
-            {"text": report_text_RAG, "type": "referto", "metadata": {"timestamp": timestamp}},
-            {"text": scheda_ps, "type": "scheda_ps", "metadata": {"timestamp": timestamp}} if scheda_ps else None,
-            {"text": clinical_report, "type": "referto_clinico", "metadata": {"timestamp": timestamp}} if clinical_report else None,
-        ]
 
     def add_to_RAG(self, documents: List[Dict[str, str]]):
-        for doc in documents:
-            if not doc or not doc.get("text", "").strip():
-                continue
 
+        for doc in documents:
             raw_text = doc.get("text", "")
             doc_type = doc.get("type", "generico")
             metadata = doc.get("metadata", {})
-            
-            # Pulizia testo
-            cleaned_text = self.clean_text(raw_text)
-
-            # Estrazione elementi RAG (es. tabelle, paragrafi, etc.)
-            for elem in self.rag_element_generator(**doc):
-                if elem:
-                    elem_id = self.compute_id(elem["text"], elem["type"])
-                    if not self.collection.peek(ids=[elem_id]):
-                        self.collection.add(
-                            documents=[elem["text"]],
-                            metadatas=[elem["metadata"]],
-                            ids=[elem_id]
-                        )
-
-            # Split del testo in chunk
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=512,
-                chunk_overlap=50
-            )
-            chunks = text_splitter.split_text(cleaned_text)
-
-            # Preparazione dati per inserimento in blocco
-            documents_to_add = []
-            embeddings_to_add = []
-            ids_to_add = []
-            metadatas_to_add = []
+            chunks = self.split_and_clean(raw_text)
 
             for chunk in chunks:
                 chunk_id = self.compute_id(chunk, doc_type)
-                if self.collection.peek(ids=[chunk_id]):
-                    continue
-                embedding = self.embedder.encode(chunk)
-                embedding = normalize([embedding])[0]
-                
-                documents_to_add.append(chunk)
-                embeddings_to_add.append(embedding)
-                ids_to_add.append(chunk_id)
-                metadatas_to_add.append({"type": doc_type, **metadata})
+                if not self.collection.peek(ids=[chunk_id]):
+                    record = self.db_manager.get_embedding_by_id(chunk_id)
+                    if record:
+                        self.collection.add(
+                            documents=[chunk],
+                            embeddings=[record["embedding"]],
+                            ids=[chunk_id],
+                            metadatas=[metadata]
+                        )
 
-            # Inserimento batch dei chunk
-            if documents_to_add:
-                self.collection.add(
-                    documents=documents_to_add,
-                    embeddings=embeddings_to_add,
-                    ids=ids_to_add,
-                    metadatas=metadatas_to_add
-                )
-                self.logger.info(f"Aggiunti {len(documents_to_add)} chunk del documento '{doc_type}' all'indice RAG.")
+    def compute_embedding(self, text: str, doc_type: str):
+        doc_id = self.compute_id(text, doc_type) #calcolo l'id da utilizzare sia per il RAG che per il DB
+        embedding = self.embedder.encode(text) #calcolo l'embedding del testo
+        embedding = normalize([embedding])[0] #normalizzo l'embedding del testo
+        return doc_id, embedding
 
-    def clean_text(self, text):
-        return text.strip().replace("\n", " ").replace("  ", " ")
+    def prepare_embedding_doc(self, doc_id, embedding, doc_type: str, metadata: dict) -> str: #VA CAMBIATA PERCHè SERVONO ANCHE I REFERTI
+        #preparo i dati da inserire nel RAG
+        embedding_data = {
+            "_id": doc_id, #id del testo
+            "type": doc_type, #testo -> non serve si può togliere
+            "embedding": embedding.tolist(), #embedding del testo
+            "referto": metadata, #passo in metadata i referti relativi al testo
+            "timestamp": datetime.now()
+        }
+        return embedding_data
 
-    def compute_hash(self, text):
-        return hashlib.md5(text.encode("utf-8")).hexdigest()
+    def sync_chroma_from_mongo(self, from_date: datetime = None):
+        """
+        Sincronizza embedding da MongoDB a ChromaDB per il medico loggato.
+        Può filtrare solo quelli aggiornati nelle ultime X ore.
+        """
+        try:
+            self.logger.info("Inizio sincronizzazione da MongoDB a ChromaDB")
 
-    def get_or_compute_embedding(self, text, collection, embedder):
-        doc_id = self.compute_hash(text)
-        result = collection.find_one({"_id": doc_id})
-        
-        if result and "embedding" in result:
-            return result["embedding"]  # già calcolato
+            if from_date is None:
+                from_date = datetime.now() - timedelta(hours=2)
 
-        embedding = embedder.encode(text).tolist()
-        collection.insert_one({"_id": doc_id, "text": text, "embedding": embedding})
-        return embedding
+            all_embeddings = self.db_manager.get_embeddings_by_doc_cf(self.cf)
+
+            # Filtro per timestamp recente
+            recent_embeddings = [
+                e for e in all_embeddings
+                if e.get("timestamp") and isinstance(e["timestamp"], datetime) and e["timestamp"] > from_date
+            ]
+
+            new_embeddings = []
+            for emb in recent_embeddings:
+                try:
+                    # Verifica se l'embedding è già presente
+                    found = self.collection.get(emb["_id"])
+                    if not found:
+                        self.collection.add(
+                            documents=[emb["text"]],
+                            embeddings=[emb["embedding"]],
+                            ids=[emb["_id"]],
+                            metadatas=[emb.get("metadata", {})]
+                        )
+                        new_embeddings.append(emb["_id"])
+                except Exception as e:
+                    self.logger.warning(f"Errore con embedding ID {emb['_id']}: {e}")
+
+            self.logger.info(f"Sincronizzati {len(new_embeddings)} nuovi embedding.")
+
+        except Exception as e:
+            self.logger.error(f"Errore nella sincronizzazione: {e}")

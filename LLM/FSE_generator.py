@@ -165,11 +165,12 @@ class LLMWrapper:
             except Exception as e:
                 return {}
     
-    def save_to_json(self, result, file_path="output.json"):
-        self.logger.info(f"Salvataggio su {file_path}")
+    def save_to_json(self, result, file_path="output.json"): #DA RICONTROLLARE
+        self.logger.info(f"Salvataggio su {file_path}: IN CORSO")
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(result, f, ensure_ascii=False, indent=2)
+            self.logger.info(f"Salvataggio su {file_path}: COMPLETATO")
         except Exception as e:
             self.logger.error(f"Errore nel salvataggio JSON: {e}")
  

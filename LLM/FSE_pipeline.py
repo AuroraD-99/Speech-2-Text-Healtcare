@@ -2,8 +2,10 @@ import os
 import sys
 import re
 import time
+from datetime import datetime
 import logging 
 import tempfile   
+from bson import ObjectId
 
 import argparse
 from dotenv import load_dotenv
@@ -49,11 +51,13 @@ class FSEManager:
 
         self.model_path = os.getenv("MODEL_PATH_M")
         self.cpu_model_path = os.getenv("CPU_MODEL_PATH_M")
+        self.cpu_model_path_ = os.getenv("CPU_MODEL_PATH_")
 
         self.logger.debug(f"MODEL PATH {self.cpu_model_path}, MODEL TYPE {self.model_type}")
+    
 
         #Configurazione del modello
-        if not os.path.exists(self.model_path):
+        if not os.path.exists(self.model_path) or os.path.exists(self.model_path):
             #se il path del modello non esiste, il modello viene scaricato al path specificato
             self.model_download()
 
@@ -65,17 +69,16 @@ class FSEManager:
         #---------------------------------------------- Configurazione RAG --------------------------------------------------------------
         self.chroma_client = chroma_client 
 
-        #self.embedding_model = os.getenv("EMBEDDING_MODEL")
-
         self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
-        #self.embedder = SentenceTransformer(self.embedding_model)
         #--------------------------------------------------------------------------------------------------------------------------------
 
         self.JSON_path = os.getenv("JSON_PATH")
+        if not os.path.exists(self.JSON_path):
+            os.makedirs(self.JSON_path, exist_ok=True)
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
 
-    def model_download(self): #OK 
+    def model_download(self):
         self.logger.info(f"Controllo modello in: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -102,7 +105,7 @@ class FSEManager:
             else:
                 self.logger.info("Tutti i file del modello GPU sono già presenti.")
         
-        else:
+        else: #RIVEDER I PATH DEI MODELLI
             # CPU (quantizzato, GGUF)
             self.logger.info("Ambiente CPU rilevato. Verifica modello GGUF...")
             gguf_repo = "DeepMount00/Mistral-Ita-7b-GGUF"
@@ -117,9 +120,11 @@ class FSEManager:
                     hf_hub_download(
                         repo_id=gguf_repo,
                         filename=gguf_filename,
-                        local_dir=self.cpu_model_path,
-                        local_dir_use_symlinks=False 
+                        local_dir=self.cpu_model_path
                     )
+
+                    self.logger.info(f"Modello scaricato in {self.cpu_model_path}")
+
                 except Exception as e:
                     raise RuntimeError(f"Errore durante il download del modello GGUF: {e}")
             else:
@@ -128,7 +133,7 @@ class FSEManager:
         self.logger.info("Download completato.")
 
 
-    def model_configuration(self): #OK 
+    def model_configuration(self):
         self.logger.debug(f"Inizializzazione modello da: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -151,9 +156,11 @@ class FSEManager:
         else:
             self.logger.debug("CUDA non disponibile. Caricamento modello quantizzato per CPU con `ctransformers`.")
 
+            model_file = os.path.join(self.cpu_model_path, "mistral_ita-7b-Q4_K_M.gguf")
+
             model = cAutoModelForCausalLM.from_pretrained(
-                model_path_or_repo_id=self.CPU_model_name,
-                model_file=self.cpu_model_path, #"mistral_ita-7b-Q4_K_M.gguf",
+                model_path_or_repo_id=model_file, #self.CPU_model_name,
+                #model_file=model_file, #"mistral_ita-7b-Q4_K_M.gguf",
                 model_type="mistral",
                 gpu_layers=0,
                 context_length=4096,
@@ -178,7 +185,7 @@ class FSEManager:
                 #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
                 self.logger.debug(f"Modalità di funzionamento: Emergency...")
                 self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.retrieve_context(embedding, doc_type_filter=self.function_mode) #COME FUNZIONA ESATTAMENTE?
+                context = self.retrieve_context(embedding) #COME FUNZIONA ESATTAMENTE?
                 #report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
 
                 #genero la scheda di ammissione al PS
@@ -217,7 +224,9 @@ class FSEManager:
             #self.llm.check_json_format(full_output)
 
             #Salvataggio in formato JSON dell'output 
-            out_file = os.path.join(self.JSON_path, timestamp)
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
+            out_file = os.path.join(self.JSON_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
+
             self.llm.save_to_json(full_output, out_file)
             self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
 
@@ -228,12 +237,14 @@ class FSEManager:
            
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
     #DeepMount00/Mistral-RAG
-   
-    def retrieve_context(self, embedding, top_k=1, doc_type_filter=None):
+
+    def retrieve_context(self, embedding, top_k=1): #DA CONTROLLARE - FUNZIONA BENE SUGLI EMBEDDING SUDDIVISI IN CHUNK?
         """
-        Recupera i clinical_report più simili, in base all'embedding e (opzionalmente) al tipo.
+        Recupera i referti clinici più simili da ChromaDB in base all'embedding fornito.
+        Applica eventualmente un filtro per tipo di documento.
         """
-        filter_metadata = {"type": doc_type_filter} if doc_type_filter else {}
+
+        filter_metadata = {"type": self.function_mode}
 
         try:
             results = self.collection.query(
@@ -243,27 +254,36 @@ class FSEManager:
             )
         except Exception as e:
             self.logger.error(f"Errore nella query per il contesto: {e}")
-            return "Errore nel recupero del contesto."
+            self.logger.info(f"Errore nel recupero del contesto.") 
 
         documents = results.get("documents", [[]])[0]
         similar_ids = results.get("ids", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0]
 
         if not documents or not similar_ids:
-            return "Nessun contesto rilevante trovato."
+            self.logger.info(f"Nessun contesto rilevante trovato.")
+            return
 
         context_snippets = []
-        for doc_id in similar_ids:
+        for i, doc_id in enumerate(similar_ids):
             try:
-                document = self.reports_collection.find_one({"_id": ObjectId(doc_id)})
-                if document and ("clinical_report" or "scheda_ps") in document:
-                    context_snippets.append(document["clinical_report"])
+                metadata = metadatas[i]
+                referto_testo = metadata.get("clinical_report") or metadata.get("scheda_ps") or documents[i]
+
+                if referto_testo:
+                    cleaned = self.clean_text(referto_testo)
+                    context_snippets.append(cleaned)
+
             except Exception as e:
                 self.logger.warning(f"Impossibile recuperare referto per ID {doc_id}: {e}")
+                return
 
         if not context_snippets:
-            return "Nessun referto rilevante trovato."
+            self.logger.info(f"Nessun referto rilevante trovato.")
+            return
 
         return "\n\n".join(context_snippets)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Gestione referti vocali e generazione FSE")
