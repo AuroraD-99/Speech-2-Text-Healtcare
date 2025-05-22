@@ -6,6 +6,7 @@ import time
 import uuid
 import numpy as np
 from typing import List
+import bcrypt
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -24,7 +25,7 @@ class DB:
             # Definizione delle collezioni separate
             self.transcriptions = self.db["transcriptions"]
             self.reports_collection = self.db["clinical_reports"] #deve contenere anche l'id dell'embedding
-            self.operators_collection = self.db["operators"]
+            self.operators_collection = self.db["medical_operators"]
             self.RAG_embedding_cache = self.db["RAG_embeddings_cache"]
             # Logger per il monitoraggio
             self.logger = Logger(self.__class__.__name__).get_logger()
@@ -238,7 +239,60 @@ class DB:
     def get_embeddings_by_doc_cf(self, cf: str) -> List[dict]: 
         return list(self.RAG_embedding_cache.find({"metadata.medico_cf": cf}))
      
-    #------------------------------------------------------------------------------------------------------------------------
+    #--------------------------------------------------- PERSONALE MEDICO ------------------------------------------------------
+    def insert_operator(self, username, password, anagrafica, ruolo):
+        """
+        Inserisce un operatore medico nella collezione 'medical_operators' con la seguente struttura:
+        {
+            "username": username,
+            "password": password,
+            "anagrafica": {
+                "name": name,
+                "surname": surname,
+                "birthdate": birthdate,
+                "CF": cf,
+                "address": address,
+            },
+            "ruolo": ruolo
+        }
+        
+        La password viene cryptata prima di essere memorizzata nel database.
+        """
+        # Controlla se l'operatore esiste già
+        existing_operator = self.operators_collection.find_one({"username": username})
+        if existing_operator:
+            raise ValueError("Operatore già esistente")
+
+        # Crittografia della password
+        hashed_password = self.hash_password(password)
+
+        # Inserimento dell'operatore
+        operator_data = {
+            "username": username,
+            "password": hashed_password,
+            "anagrafica": anagrafica,
+            "ruolo": ruolo
+        }
+        result = self.operators_collection.insert_one(operator_data)
+        return result.inserted_id
+    
+    def hash_password(self, password):
+        """
+        Crittografa la password utilizzando bcrypt.
+        """
+        if isinstance(password, str):
+            password = password.encode('utf-8')  # codifica solo se è una stringa
+
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password, salt)
+        return hashed.decode('utf-8')
+
+    
+    def get_operator(self, username):
+        """
+        Recupera un operatore medico dato il nome utente.
+        """
+        return self.operators_collection.find_one({"username": username})
 
     # Chiude la connessione al database
     def close(self):

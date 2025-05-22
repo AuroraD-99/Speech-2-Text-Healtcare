@@ -1,63 +1,88 @@
 import streamlit as st
+import bcrypt
 
-class Dashboard:
-    def __init__(self):
-        self.scope_options = ["Pronto Soccorso", "Visite Ordinarie"]
-        self.users = {
-            "medico1": "password1",
-            "medico2": "password2"
-        }
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Database.mongodb import DB
+# Inizializza il DB
+db = DB()
 
-        # Inizializzazione stato
-        st.session_state.setdefault('logged_in', False)
-        st.session_state.setdefault('username', "")
-        st.session_state.setdefault('scope', "")
-        st.session_state.setdefault('patients', ["Mario Rossi", "Pepp Scuppett"])
-        st.session_state.setdefault('_just_logged_in', False)
+# Funzione per il login
+def login():
+    st.title("Login Operatore Sanitario")
 
-    def login_screen(self):
-        st.title("Selettore per PS o VO")
-        st.session_state.scope = st.selectbox("Seleziona lo scopo di utilizzo", self.scope_options)
+    st.text_input("Username", key="login_username")
+    st.text_input("Password", type="password", key="login_password")
 
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login"):
-            if username in self.users and self.users[username] == password:
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.session_state._just_logged_in = True  # Trucchetto per mostrare subito la home
-                st.rerun()
-            else:
-                st.error("Credenziali errate")
-
-    def main_screen(self):
-        st.sidebar.title(f"Lista pazienti del Dott. {st.session_state.username.capitalize()}")
-
-        if st.sidebar.button("Nuovo paziente"):
-            st.info("Nuovo paziente selezionato (placeholder)")
-        if st.sidebar.button("Elimina tutti i pazienti"):
-            st.session_state.patients = []
-            st.success("Tutti i pazienti eliminati")
-
-        for p in st.session_state.patients:
-            st.sidebar.write(p)
-
-        st.title("Nuovo paziente")
-        if st.button("Clicca qui per iniziare la registrazione"):
-            st.info("Registrazione in corso...")
-
-        st.markdown("### PDF da compilare")
-        st.write("📄 Documento FSE/PS verrà mostrato qui")
-
-    def run(self):
-        if st.session_state.logged_in:
-            self.main_screen()
+    if st.button("Login"):
+        user = db.get_operator(st.session_state.login_username)
+        if user and bcrypt.checkpw(st.session_state.login_password.encode('utf-8'), user["password"]):
+            st.session_state.logged_in = True
+            st.session_state.user = user
+            st.success(f"Benvenuto, {user['nome']}!")
         else:
-            self.login_screen()
+            st.error("Credenziali non valide")
 
+    st.markdown("---")
+    if st.button("Register"):
+        st.session_state.page = "register"
 
-# Esecuzione
-if __name__ == "__main__":
-    dashboard = Dashboard()
-    dashboard.run()
+# Funzione per la registrazione
+def register():
+    st.title("Registrazione Nuovo Operatore")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    nome = st.text_input("Nome")
+    cognome = st.text_input("Cognome")
+    cf = st.text_input("Codice Fiscale")
+
+    if st.button("Registrati"):
+        if db.get_operator(username):
+            st.error("Username già esistente.")
+        elif db.db.operatori.find_one({"cf": cf}):
+            st.error("Codice fiscale già registrato.")
+        else:
+            password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+            new_user = {
+                "username": username,
+                "password": password_hash,
+                "anagrafica": {
+                    "name": nome,
+                    "surname": cognome,
+                    "CF": cf,
+                },
+                "ruolo": "operatore",
+            }
+            db.insert_operator(new_user["username"], new_user["password"], new_user["anagrafica"], new_user["ruolo"])
+            st.success("Registrazione completata con successo! Ora puoi effettuare il login.")
+            st.session_state.page = "login"
+
+    if st.button("Torna al login"):
+        st.session_state.page = "login"
+
+# Pagina principale dopo il login
+def main_page():
+    st.title("Dashboard Principale")
+    user = st.session_state.get("user", {})
+    st.write(f"Benvenuto, **{user.get('nome', '')} {user.get('cognome', '')}**")
+    st.write("Qui aggiungeremo le funzionalità per trascrizioni, referti, RAG, ecc.")
+    if st.button("Logout"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
+
+# Routing semplice
+if "page" not in st.session_state:
+    st.session_state.page = "login"
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if st.session_state.logged_in:
+    main_page()
+else:
+    if st.session_state.page == "login":
+        login()
+    elif st.session_state.page == "register":
+        register()
