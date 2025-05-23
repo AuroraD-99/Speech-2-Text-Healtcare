@@ -7,6 +7,7 @@ import uuid
 import numpy as np
 from typing import List
 import bcrypt
+from bson import Binary
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -240,11 +241,11 @@ class DB:
         return list(self.RAG_embedding_cache.find({"metadata.medico_cf": cf}))
      
     #--------------------------------------------------- PERSONALE MEDICO ------------------------------------------------------
-    def insert_operator(self, username, password, anagrafica, ruolo):
+    def insert_operator(self, new_user):
         """
         Inserisce un operatore medico nella collezione 'medical_operators' con la seguente struttura:
         {
-            "username": username,
+            "email": email,
             "password": password,
             "anagrafica": {
                 "name": name,
@@ -259,21 +260,16 @@ class DB:
         La password viene cryptata prima di essere memorizzata nel database.
         """
         # Controlla se l'operatore esiste già
-        existing_operator = self.operators_collection.find_one({"username": username})
+        existing_operator = self.operators_collection.find_one({"email": new_user["email"]})
         if existing_operator:
             raise ValueError("Operatore già esistente")
 
         # Crittografia della password
-        hashed_password = self.hash_password(password)
+        hashed_password = self.hash_password(new_user["password"])
 
         # Inserimento dell'operatore
-        operator_data = {
-            "username": username,
-            "password": hashed_password,
-            "anagrafica": anagrafica,
-            "ruolo": ruolo
-        }
-        result = self.operators_collection.insert_one(operator_data)
+        new_user["password"] = hashed_password
+        result = self.operators_collection.insert_one(new_user)
         return result.inserted_id
     
     def hash_password(self, password):
@@ -285,14 +281,14 @@ class DB:
 
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password, salt)
-        return hashed.decode('utf-8')
+        return hashed
 
     
-    def get_operator(self, username):
+    def get_operator(self, email):
         """
         Recupera un operatore medico dato il nome utente.
         """
-        return self.operators_collection.find_one({"username": username})
+        return self.operators_collection.find_one({"email": email})
 
     # Chiude la connessione al database
     def close(self):
