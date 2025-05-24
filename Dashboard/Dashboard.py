@@ -10,21 +10,27 @@ from Database.mongodb import DB
 
 class Dashboard:
     def __init__(self):
-        self.db = DB()
+        if "db" not in st.session_state:
+            st.session_state.db = DB()  # salva l'istanza nella sessione
+        self.db = st.session_state.db
         if "page" not in st.session_state:
             st.session_state.page = "login"
         if "logged_in" not in st.session_state:
             st.session_state.logged_in = False
 
     def login(self):
-        st.title("Login Operatore Sanitario")
-        st.text_input("Email", key="login_email")
-        st.text_input("Password", type="password", key="login_password")
+        st.markdown("## 🔐 Login Operatore Sanitario")
+        with st.container():
+            col1, col2 = st.columns(2)
+            with col1:
+                st.text_input("📧 Email", key="login_email", placeholder="es: mario.rossi@gmail.com")
+            with col2:
+                st.text_input("🔑 Password", type="password", key="login_password", placeholder="Almeno 8 caratteri")
 
-        if st.button("Login", key="login_button"):
+        st.markdown("")
+
+        if st.button("🚪 Accedi", use_container_width=True):
             user = self.db.get_operator(st.session_state.login_email)
-            
-            # Assicurati che l'hash della password venga convertito in bytes
             if user:
                 hashed_password = user["password"]
                 if isinstance(hashed_password, str):
@@ -33,64 +39,79 @@ class Dashboard:
                 if bcrypt.checkpw(st.session_state.login_password.encode('utf-8'), hashed_password):
                     st.session_state.logged_in = True
                     st.session_state.user = user
-                    st.success(f"Benvenuto, {user['anagrafica']['name']} {user['anagrafica']['surname']}!")
+                    st.success(f"✅ Benvenuto, {user['anagrafica']['name']} {user['anagrafica']['surname']}!")
                     time.sleep(2)
                     st.rerun()
                 else:
-                    st.error("Credenziali non valide")
+                    st.error("❌ Credenziali non valide")
             else:
-                st.error("Credenziali non valide")
+                st.error("❌ Credenziali non valide")
 
         st.markdown("---")
-        if st.button("Register"):
+        if st.button("📝 Non hai un account? Registrati", use_container_width=True):
             st.session_state.page = "register"
             st.rerun()
 
-
     def register(self):
-        st.title("Registrazione Nuovo Operatore")
+        st.markdown("## 📝 Registrazione Nuovo Operatore")
 
-        # --- Campi dati personali ---
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        nome = st.text_input("Nome")
-        cognome = st.text_input("Cognome")
-        cellulare = st.text_input("Cellulare")
-        cf = st.text_input("Codice Fiscale")
-        ruolo = st.selectbox("Ruolo", ["Medico", "Infermiere", "Tecnico di laboratorio", "Operatore sanitario"])
+        with st.form("register_form"):
+            st.markdown("### 👤 Dati Anagrafici")
+            col1, col2 = st.columns(2)
+            with col1:
+                email = st.text_input("📧 Email")
+                password = st.text_input("🔑 Password", type="password")
+                nome = st.text_input("🧍 Nome")
+                cognome = st.text_input("🧍‍♂️ Cognome")
+            with col2:
+                cellulare = st.text_input("📱 Cellulare")
+                cf = st.text_input("🧾 Codice Fiscale")
+                ruolo = st.selectbox("💼 Ruolo", ["Medico", "Infermiere", "Tecnico di laboratorio", "Operatore sanitario"])
 
-        # --- Campi struttura ospedaliera ---
-        st.markdown("### Informazioni Struttura Ospedaliera")
-        nome_struttura = st.text_input("Nome della Struttura")
-        reparto = st.text_input("Reparto")
-        città = st.text_input("Città")
-        provincia = st.text_input("Provincia")
-        cap = st.text_input("CAP")
+            st.markdown("### 🏥 Informazioni Struttura Ospedaliera")
+            col3, col4 = st.columns(2)
+            with col3:
+                nome_struttura = st.text_input("🏢 Nome della Struttura")
+                reparto = st.text_input("🏨 Reparto")
+            with col4:
+                città = st.text_input("📍 Città")
+                provincia = st.text_input("🌍 Provincia")
+                cap = st.text_input("📬 CAP")
 
-        if st.button("Registrati"):
-            # --- Validazioni ---
+            col_reg, col_back = st.columns(2)
+            with col_reg:
+                submitted = st.form_submit_button("📌 Registrati")
+            with col_back:
+                go_back = st.form_submit_button("⬅️ Indietro")
+
+        if go_back:
+            st.session_state.page = "login"
+            st.rerun()
+
+        if submitted:
+            # Validazione
             email_pattern = r"^[\w\.-]+@(?:gmail\.com|yahoo\.com|libero\.it|outlook\.com|hotmail\.com|icloud\.com)$"
             password_pattern = r"^(?=.*[.,!&#]).{8,16}$"
             cf_pattern = r"^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$"
 
             if not re.match(email_pattern, email):
-                st.error("Inserisci un'email valida (es. @gmail.com, @libero.it, ecc.)")
+                st.error("📧 Inserisci un'email valida (es. @gmail.com, @libero.it, ecc.)")
             elif not re.match(password_pattern, password):
-                st.error("La password deve essere lunga 8-16 caratteri e contenere almeno uno tra: . , ! & #")
+                st.error("🔑 La password deve essere lunga 8-16 caratteri e contenere almeno uno tra: . , ! & #")
             elif not nome.strip() or not cognome.strip():
-                st.error("Nome e Cognome non possono essere vuoti.")
+                st.error("❗ Nome e Cognome non possono essere vuoti.")
             elif not cellulare.isdigit() or not (10 <= len(cellulare) <= 11):
-                st.error("Il numero di cellulare deve contenere solo cifre e avere 10 o 11 cifre.")
+                st.error("📱 Il cellulare deve contenere 10 o 11 cifre.")
             elif not re.match(cf_pattern, cf.upper()):
-                st.error("Codice Fiscale non valido. Deve seguire il formato italiano (16 caratteri).")
+                st.error("🧾 Codice Fiscale non valido. Deve seguire il formato italiano (16 caratteri).")
             elif not nome_struttura.strip() or not reparto.strip() or not città.strip() or not provincia.strip() or not cap.strip():
-                st.error("Tutti i campi relativi alla struttura ospedaliera devono essere compilati.")
+                st.error("🏥 Tutti i campi relativi alla struttura devono essere compilati.")
             elif not cap.isdigit() or len(cap) != 5:
-                st.error("Il CAP deve essere un numero di 5 cifre.")
+                st.error("📬 Il CAP deve essere un numero di 5 cifre.")
             elif self.db.get_operator(email):
-                st.error("Email già registrata.")
+                st.error("📧 Email già registrata.")
             elif self.db.db.operatori.find_one({"cf": cf.upper()}):
-                st.error("Codice fiscale già registrato.")
+                st.error("🧾 Codice fiscale già registrato.")
             else:
                 new_user = {
                     "email": email,
@@ -112,26 +133,97 @@ class Dashboard:
                     }
                 }
                 self.db.insert_operator(new_user)
-                
-                st.success("Registrazione completata con successo! Ora puoi effettuare il login.")
+                st.success("✅ Registrazione completata! Ora puoi effettuare il login.")
+                time.sleep(2)
                 st.session_state.page = "login"
                 st.rerun()
-                if st.button("Torna al login"):
-                    st.session_state.page = "login"
-                    st.rerun()
+
 
     def main_page(self):
-        st.title("Dashboard Principale")
+        st.markdown("## 🏠 Dashboard Principale")
+
+        # Recupero dati operatore
         user = st.session_state.get("user", {})
-        st.write(f"Benvenuto, **{user.get('nome', '')} {user.get('cognome', '')}**")
-        st.write("Qui aggiungeremo le funzionalità per trascrizioni, referti, RAG, ecc.")
-        if st.button("Logout"):
+        anagrafica = user.get("anagrafica", {})
+        nome = anagrafica.get("name", "")
+        cognome = anagrafica.get("surname", "")
+        medico_cf = anagrafica.get("CF", "")
+
+        st.success(f"👋 Benvenuto **{nome} {cognome}**")
+        st.info("🔧 Le funzionalità di trascrizione e gestione referti saranno aggiunte qui.")
+
+        st.markdown("---")
+        st.markdown("### 🗂️ Riepilogo referti dei tuoi pazienti")
+
+        try:
+            # Recupero tutti i referti del medico attualmente loggato
+            reports = self.db.get_all_clinical_reports_by_doctor_cf(medico_cf)
+
+            if not reports:
+                st.warning("🔍 Non ci sono referti associati al tuo profilo medico.")
+            else:
+                # Raggruppa per nome paziente
+                grouped = {}
+                for report in reports:
+                    paziente = report.get("name", "Sconosciuto")
+                    grouped.setdefault(paziente, []).append(report)
+
+                for paziente, referti in grouped.items():
+                    with st.expander(f"🧑‍⚕️ Paziente: **{paziente}** ({len(referti)} referti)"):
+                        for referto in referti:
+                            st.markdown(f"""
+                            - 📄 **ID Referto**: `{referto.get('report_id', 'N/A')}`
+                            - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
+                            - 🩺 **Patologia**: {referto.get('Patologia', 'N/D')}
+                            - ✅ **Validato**: {"Sì" if referto.get("validated") else "No"}
+                            """)
+        except Exception as e:
+            st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
+
+        st.markdown("---")
+        if st.button("🚪 Logout", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
+            
+    def sidebar(self):
+        st.sidebar.markdown("## 📋 Filtri Referti")
+
+        # Pulsante per inserimento nuovo referto
+        if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
+            st.session_state["action"] = "insert_new_report"  # segna l'azione per la pagina principale
+
+        st.sidebar.markdown("---")
+
+        # Filtri per i pazienti
+        st.sidebar.markdown("### Filtra Pazienti")
+
+        # Filtro testuale per nome
+        nome_filtro = st.sidebar.text_input("Nome paziente")
+
+        # Filtro testuale per cognome
+        cognome_filtro = st.sidebar.text_input("Cognome paziente")
+
+        # Filtro per data referto - solo input per ora
+        data_inizio = st.sidebar.date_input("Data inizio", value=None)
+        data_fine = st.sidebar.date_input("Data fine", value=None)
+
+        # Filtro stato referto (esempio con opzioni fittizie)
+        stato_referto = st.sidebar.selectbox("Stato Referto", options=["Tutti", "Validato", "Non Validato"])
+
+        # Per ora salviamo i filtri in session_state (utile per future query)
+        st.session_state["filters"] = {
+            "nome": nome_filtro,
+            "cognome": cognome_filtro,
+            "data_inizio": data_inizio,
+            "data_fine": data_fine,
+            "stato_referto": stato_referto
+        }
+
 
     def run(self):
         if st.session_state.logged_in:
+            self.sidebar()
             self.main_page()
         else:
             if st.session_state.page == "login":
@@ -140,7 +232,6 @@ class Dashboard:
                 self.register()
 
 
-# Esecuzione della dashboard
 if __name__ == "__main__":
     dashboard = Dashboard()
     dashboard.run()
