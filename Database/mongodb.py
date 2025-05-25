@@ -162,11 +162,11 @@ class DB:
         result = self.reports_collection.delete_one({"report_id": report_id})
         return result.deleted_count
     
-    def delete_all_clinical_reports_of_a_patient(self, patient_name):
+    def delete_all_reports_by_patient(self, patient_name, doctor_cf=None):
         """
         Delete all clinical reports of a patient.
         """
-        result = self.reports_collection.delete_many({"name": patient_name})
+        result = self.reports_collection.delete_many({"name": patient_name}, {"doctor_cf": doctor_cf})
         return result.deleted_count
     
     def group_clinical_reports_by_patient_name(self, patient_name):
@@ -328,56 +328,8 @@ if __name__ == "__main__":
     # Esempio di utilizzo
     db = DB()
     
-    db.insert_clinical_report("report123",{
-        "report_id": "report123",
-        "patient_id": "patient123",
-        "doctor_cf": "RSSGNN90A01H501Z",
-        "name": "Mario Rossi",
-        "surname": "Rossi",
-        "birthdate": "1985-05-15",
-        "diagnosis": "Influenza",
-        "treatment": "Riposo e idratazione",
-        "validated": False
-    })
     
     
+    db.delete_all_reports_by_patient("Mario Rossi", "RSSGNN90A01H501Z")
+    db.delete_all_transcriptions()
     
-    db.insert_clinical_report("report123",{
-        "report_id": "report123",
-        "patient_id": "patient123",
-        "doctor_cf": "RSSGNN90A01H501Z",
-        "name": "Mario Rossi",
-        "surname": "Rossi",
-        "birthdate": "1985-05-15",
-        "diagnosis": "Influenza",
-        "treatment": "Riposo e idratazione",
-        "validated": False
-    })
-    
-    
-    
-    db.insert_clinical_report("report123",{
-        "report_id": "report123",
-        "patient_id": "patient123",
-        "doctor_cf": "RSSGNN90A01H501Z",
-        "name": "Mario Rossi",
-        "surname": "Rossi",
-        "birthdate": "1985-05-15",
-        "diagnosis": "Influenza",
-        "treatment": "Riposo e idratazione",
-        "validated": False
-    })
-    
-    
-    
-    db.insert_clinical_report("report123",{
-        "report_id": "report123",
-        "patient_id": "patient123",
-        "doctor_cf": "RSSGNN90A01H501Z",
-        "name": "Mario Rossi",
-        "surname": "Rossi",
-        "birthdate": "1985-05-15",
-        "diagnosis": "Influenza",
-        "treatment": "Riposo e idratazione",
-        "validated": False
-    })

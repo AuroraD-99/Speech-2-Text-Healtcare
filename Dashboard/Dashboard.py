@@ -4,12 +4,14 @@ import os
 import sys
 import time
 import re
+import dotenv
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Database.mongodb import DB
 
 class Dashboard:
-    def __init__(self):
+    def __init__(self, env_file="key.env"):
         if "db" not in st.session_state:
             st.session_state.db = DB()  # salva l'istanza nella sessione
         self.db = st.session_state.db
@@ -17,6 +19,9 @@ class Dashboard:
             st.session_state.page = "login"
         if "logged_in" not in st.session_state:
             st.session_state.logged_in = False
+        
+        # Imposta l'environment variable per FastAPI
+        dotenv.load_dotenv(env_file, override=True)
 
     def login(self):
         st.markdown("## 🔐 Login Operatore Sanitario")
@@ -51,6 +56,28 @@ class Dashboard:
         if st.button("📝 Non hai un account? Registrati", use_container_width=True):
             st.session_state.page = "register"
             st.rerun()
+    
+    def delete_all_reports_of_a_patient(self, patient_cf):
+        """
+        Cancella tutti i referti associati a un paziente specifico.
+        """
+        try:
+            self.db.delete_all_reports_by_patient(patient_cf, doctor_cf=st.session_state.user["anagrafica"]["CF"])
+            st.success(f"✅ Tutti i referti del paziente con CF {patient_cf} sono stati cancellati.")
+            time.sleep(2)
+        except Exception as e:
+            st.error(f"❌ Errore durante la cancellazione dei referti: {str(e)}")
+    
+    def delete_report(self, report_id):
+        """
+        Cancella un referto specifico.
+        """
+        try:
+            self.db.delete_clinical_report(report_id)
+            st.success(f"✅ Referto con ID {report_id} cancellato.")
+            time.sleep(2)
+        except Exception as e:
+            st.error(f"❌ Errore durante la cancellazione del referto: {str(e)}")
 
     def register(self):
         st.markdown("## 📝 Registrazione Nuovo Operatore")
@@ -150,7 +177,7 @@ class Dashboard:
         medico_cf = anagrafica.get("CF", "")
 
         
-
+ 
         st.markdown("---")
         st.markdown("### 🗂️ Riepilogo referti dei tuoi pazienti")
 
@@ -175,6 +202,11 @@ class Dashboard:
                             - 📄 **ID Referto**: `{referto.get('report_id', 'N/A')}`
                             - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
                             """)
+                            st.button(
+                                "❌ Cancella Referto",
+                                key=f"delete_{referto.get('report_id')}",
+                                on_click=self.delete_report,
+                                args=(referto.get('report_id'),),)
                             #TODO: INSERIRE CAMPO TYPE PER I REFERTI
         except Exception as e:
             st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
@@ -186,12 +218,36 @@ class Dashboard:
             st.rerun()
             
     def sidebar(self):
-        st.sidebar.markdown("## 📋 Filtri Referti")
+        st.sidebar.markdown("## 👤 Anagrafica Operatore")
 
+        if st.session_state.logged_in:
+            user = st.session_state.get("user", {})
+            anagrafica = user.get("anagrafica", {})
+            nome = anagrafica.get("name", "")
+            cognome = anagrafica.get("surname", "")
+            cf = anagrafica.get("CF", "")
+            ruolo = user.get("ruolo", "Sconosciuto")
+            struttura = user.get("struttura", {}).get("nome", "Sconosciuta")
+
+            with st.sidebar.container(border=True):
+                st.markdown(f"**👤 Nome:** `{nome} {cognome}`")
+                st.markdown(f"**🆔 Codice Fiscale:** `{cf}`")
+                st.markdown(f"**🎓 Ruolo:** `{ruolo}`")
+                st.markdown(f"**🏥 Struttura:** `{struttura}`")
+        else:
+            with st.sidebar.container(border=True):
+                st.markdown("🔒 <span style='color:gray'>Non sei loggato.</span>", unsafe_allow_html=True)
+
+
+        
+
+        st.sidebar.markdown("---")
+        
         # Pulsante per inserimento nuovo referto
         if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
-            st.session_state["action"] = "insert_new_report"  # segna l'azione per la pagina principale
-
+            #TODO: Implementare la logica per l'inserimento di un nuovo referto
+            st.sidebar.success("Funzionalità in arrivo! 🚀")
+            
         st.sidebar.markdown("---")
 
         # Filtri per i pazienti
@@ -218,6 +274,9 @@ class Dashboard:
             "data_fine": data_fine,
             "stato_referto": stato_referto
         }
+        
+        
+
 
 
     def run(self):
