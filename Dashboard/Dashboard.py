@@ -140,7 +140,7 @@ class Dashboard:
 
 
     def main_page(self):
-        st.markdown("## 🏠 Dashboard Principale")
+        st.markdown("## 🏠 Inserire nome APP")
 
         # Recupero dati operatore
         user = st.session_state.get("user", {})
@@ -149,8 +149,7 @@ class Dashboard:
         cognome = anagrafica.get("surname", "")
         medico_cf = anagrafica.get("CF", "")
 
-        st.success(f"👋 Benvenuto **{nome} {cognome}**")
-        st.info("🔧 Le funzionalità di trascrizione e gestione referti saranno aggiunte qui.")
+        
 
         st.markdown("---")
         st.markdown("### 🗂️ Riepilogo referti dei tuoi pazienti")
@@ -172,11 +171,11 @@ class Dashboard:
                     with st.expander(f"🧑‍⚕️ Paziente: **{paziente}** ({len(referti)} referti)"):
                         for referto in referti:
                             st.markdown(f"""
+                            - 🩺 {referto.get('type', 'N/A')}
                             - 📄 **ID Referto**: `{referto.get('report_id', 'N/A')}`
                             - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
-                            - 🩺 **Patologia**: {referto.get('Patologia', 'N/D')}
-                            - ✅ **Validato**: {"Sì" if referto.get("validated") else "No"}
                             """)
+                            #TODO: INSERIRE CAMPO TYPE PER I REFERTI
         except Exception as e:
             st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
 

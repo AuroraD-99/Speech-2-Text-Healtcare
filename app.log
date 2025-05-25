@@ -365,3 +365,8 @@
 2025-05-24 11:35:40,300 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-24 11:38:09,214 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-24 11:39:43,743 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 10:08:17,980 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 10:08:37,534 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 10:08:42,387 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 11:24:31,542 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 11:24:39,194 [DB] - INFO - Connected to MongoDB successfully.
