@@ -289,6 +289,34 @@ class DB:
         Recupera un operatore medico dato il nome utente.
         """
         return self.operators_collection.find_one({"email": email})
+    
+    def get_operator_by_name_and_surname(self, name, surname):
+        """
+        Recupera un operatore medico dato il nome e il cognome.
+        """
+        return self.operators_collection.find_one({"anagrafica.name": name, "anagrafica.surname": surname})
+    
+    def get_operator_by_cf(self, cf):
+        """
+        Recupera un operatore medico dato il codice fiscale.
+        """
+        return self.operators_collection.find_one({"anagrafica.CF": cf})
+    
+    def update_operator(self, email, updated_data):
+        """
+        Aggiorna i dati di un operatore medico dato il nome utente.
+        """
+        # Crittografia della nuova password se presente
+        if "password" in updated_data:
+            updated_data["password"] = self.hash_password(updated_data["password"])
+
+        result = self.operators_collection.update_one(
+            {"email": email},
+            {"$set": updated_data}
+        )
+        return result.modified_count
+        
+    
 
     # Chiude la connessione al database
     def close(self):
@@ -299,27 +327,57 @@ class DB:
 if __name__ == "__main__":
     # Esempio di utilizzo
     db = DB()
-    db.insert_clinical_report({
-        "report_id": "12345",
-        "cf_paziente": "ABC123",
-        "cf_medico": "XYZ789",
-        
+    
+    db.insert_clinical_report("report123",{
+        "report_id": "report123",
+        "patient_id": "patient123",
+        "doctor_cf": "RSSGNN90A01H501Z",
         "name": "Mario Rossi",
-        "Patologia":"Morto"
+        "surname": "Rossi",
+        "birthdate": "1985-05-15",
+        "diagnosis": "Influenza",
+        "treatment": "Riposo e idratazione",
+        "validated": False
     })
     
     
-    db.insert_clinical_report({
-        "report_id": "12345",
-        "cf_paziente": "ABC123",
-        "cf_medico": "XYZ789",
-        
+    
+    db.insert_clinical_report("report123",{
+        "report_id": "report123",
+        "patient_id": "patient123",
+        "doctor_cf": "RSSGNN90A01H501Z",
         "name": "Mario Rossi",
-        "Patologia":"Ho sbagliato è ancora vivo"
+        "surname": "Rossi",
+        "birthdate": "1985-05-15",
+        "diagnosis": "Influenza",
+        "treatment": "Riposo e idratazione",
+        "validated": False
     })
     
-    print(db.group_clinical_reports_by_patient_name("Mario Rossi"))
-    db.delete_all_clinical_reports_of_a_patient("Mario Rossi")
-    print(db.get_all_clinical_reports())
     
-    db.close()
+    
+    db.insert_clinical_report("report123",{
+        "report_id": "report123",
+        "patient_id": "patient123",
+        "doctor_cf": "RSSGNN90A01H501Z",
+        "name": "Mario Rossi",
+        "surname": "Rossi",
+        "birthdate": "1985-05-15",
+        "diagnosis": "Influenza",
+        "treatment": "Riposo e idratazione",
+        "validated": False
+    })
+    
+    
+    
+    db.insert_clinical_report("report123",{
+        "report_id": "report123",
+        "patient_id": "patient123",
+        "doctor_cf": "RSSGNN90A01H501Z",
+        "name": "Mario Rossi",
+        "surname": "Rossi",
+        "birthdate": "1985-05-15",
+        "diagnosis": "Influenza",
+        "treatment": "Riposo e idratazione",
+        "validated": False
+    })
