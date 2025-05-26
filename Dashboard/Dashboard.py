@@ -5,6 +5,8 @@ import sys
 import time
 import re
 import dotenv
+from audio_recorder import AudioRecorder
+import requests
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -19,9 +21,25 @@ class Dashboard:
             st.session_state.page = "login"
         if "logged_in" not in st.session_state:
             st.session_state.logged_in = False
+        if "audio_recorder" not in st.session_state:
+            st.session_state.audio_recorder = AudioRecorder()
         
         # Imposta l'environment variable per FastAPI
         dotenv.load_dotenv(env_file, override=True)
+    
+    def start_audio_recording(self):
+        if not st.session_state.get("is_recording", False):
+            st.session_state.audio_recorder.start_recording()
+            st.session_state.is_recording = True
+            st.success("🎤 Registrazione avviata!")
+    
+    def stop_audio_recording(self):
+        if st.session_state.get("is_recording", False):
+            filename = st.session_state.audio_recorder.stop_recording()
+            st.session_state.is_recording = False
+            st.session_state.last_audio_file = filename
+            return filename
+        return None
 
     def login(self):
         st.markdown("## 🔐 Login Operatore Sanitario")
@@ -56,28 +74,6 @@ class Dashboard:
         if st.button("📝 Non hai un account? Registrati", use_container_width=True):
             st.session_state.page = "register"
             st.rerun()
-    
-    def delete_all_reports_of_a_patient(self, patient_cf):
-        """
-        Cancella tutti i referti associati a un paziente specifico.
-        """
-        try:
-            self.db.delete_all_reports_by_patient(patient_cf, doctor_cf=st.session_state.user["anagrafica"]["CF"])
-            st.success(f"✅ Tutti i referti del paziente con CF {patient_cf} sono stati cancellati.")
-            time.sleep(2)
-        except Exception as e:
-            st.error(f"❌ Errore durante la cancellazione dei referti: {str(e)}")
-    
-    def delete_report(self, report_id):
-        """
-        Cancella un referto specifico.
-        """
-        try:
-            self.db.delete_clinical_report(report_id)
-            st.success(f"✅ Referto con ID {report_id} cancellato.")
-            time.sleep(2)
-        except Exception as e:
-            st.error(f"❌ Errore durante la cancellazione del referto: {str(e)}")
 
     def register(self):
         st.markdown("## 📝 Registrazione Nuovo Operatore")
@@ -243,10 +239,31 @@ class Dashboard:
 
         st.sidebar.markdown("---")
         
-        # Pulsante per inserimento nuovo referto
-        if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
-            #TODO: Implementare la logica per l'inserimento di un nuovo referto
-            st.sidebar.success("Funzionalità in arrivo! 🚀")
+        is_recording = st.session_state.get("is_recording", False)
+
+        if not is_recording:
+            # Mostra il bottone "Nuovo Referto"
+            if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
+                self.start_audio_recording()
+                st.session_state.is_recording = True
+                st.rerun()  # ricarica la pagina per aggiornare UI
+        else:
+            # Mostra bottone "Termina registrazione" e spinner di registrazione in corso
+            st.sidebar.markdown("### 🎙️ Registrazione in corso...")
+            with st.spinner("Registrazione attiva, parla ora..."):
+                if st.sidebar.button("⏹️ Termina registrazione", use_container_width=True):
+                    filename = self.stop_audio_recording()
+                    st.session_state.is_recording = False
+                    if filename:
+                        st.sidebar.success(f"✅ Registrazione salvata: {filename}")
+                        response = requests.post(
+                            url="http://localhost:8000/new_report",
+                            json={"text": filename}
+                        )
+                        
+                    else:
+                        st.sidebar.error("❌ Errore durante il salvataggio.")
+                    st.rerun()  # ricarica pagina per aggiornare UI
             
         st.sidebar.markdown("---")
 

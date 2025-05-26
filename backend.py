@@ -16,12 +16,13 @@ class InputText(BaseModel):
     
 
 @backend_app.post("/new_report")
-def new_report():
+def new_report(request: InputText):
     """
     Endpoint to create a new clinical report.
     """
+    filepath = request.text
     pipeline_manager = PipelineManager()
-    pipeline_manager.Pipeline_manager()
+    pipeline_manager.Pipeline_manager(filepath)
     return {"message": "New clinical report created successfully"}
 
 @backend_app.post("/delete_report")
@@ -41,9 +42,3 @@ def delete_all_reports_by_patient(patient_id: str):
     return {"message": f"All reports for patient with ID {patient_id} deleted successfully"}
 
 
-@backend_app.post("/dici_ciao")
-def dici_ciao(input_text: InputText):
-    """
-    Endpoint to say hello with the provided input text.
-    """
-    return {"message": f"Ciao, {input_text.text}!"}

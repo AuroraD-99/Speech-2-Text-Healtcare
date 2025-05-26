@@ -80,7 +80,7 @@ class PipelineManager:
 
     #---------------------------------------------- FUNZIONI PER LA GESTIONE DELLA PIPELINE ----------------------------------------------
 
-    def Pipeline_manager(self):
+    def Pipeline_manager(self, audio_filepath):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
 
         """Serve una logica di reset o re-inizializzazione del RAGManager e PipelineManager. Al login di un medico dovresti:
@@ -89,7 +89,7 @@ class PipelineManager:
         
         #acquisizione del testo trascritto
         self.logger.info(f"Procedo all'acquisizione della nuova trascrizione...")
-        report_text = self.transcriptor.run()
+        report_text = self.transcriptor.run(audio_filepath)
 
         #estrazione e check sulla validità dell'anagrafica del paziente nel DB
         self.logger.info(f"Procedo all'estrazione dell'anagrafica del paziente ed alla verifica sulla presenza del suo FSE...")

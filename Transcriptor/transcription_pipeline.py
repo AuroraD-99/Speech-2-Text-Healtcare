@@ -16,12 +16,8 @@ class TranscriptionPipeline:
         self.audio_path = os.getenv("AUDIO_PATH")
         os.makedirs(self.audio_path, exist_ok=True)
 
-    def run(self):
+    def run(self, audio_filename):
         """Run the transcription pipeline."""
-        self.logger.info("Starting transcription pipeline...")
-        audio_filename = time.strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
-        self.transcriptor.record_audio(output_filename=audio_filename, sample_rate=16000, channels=1)
-        self.logger.info(f"Audio recorded and saved as {audio_filename}.")
         
         self.audio_enhancer.run(audio_filename)
         self.logger.info(f"Audio enhanced and saved as {audio_filename}.")
