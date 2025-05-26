@@ -381,3 +381,141 @@
 2025-05-25 17:46:31,749 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-25 18:27:37,518 [DashboardDriver] - INFO - Running command: streamlit run
 2025-05-25 18:27:45,785 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 16:40:40,111 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-26 16:40:52,083 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:14:18,650 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:20,694 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:22,736 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:24,789 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:26,830 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:28,888 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:30,940 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:32,974 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:35,002 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:37,017 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:39,059 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:41,077 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:43,112 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:45,151 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:47,195 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:49,237 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:51,281 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:53,328 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:55,371 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:57,421 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:59,476 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:01,529 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:03,580 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:05,628 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:07,674 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:09,711 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:11,751 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:13,805 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:15,852 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:17,899 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:19,951 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:22,008 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:24,062 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:26,113 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:28,165 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:30,224 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:32,263 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:34,318 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:36,375 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:38,429 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:16:30,428 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,434 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,440 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,448 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,456 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,461 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,467 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,473 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,479 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,485 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,491 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,497 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,503 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,508 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,514 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,519 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,525 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,530 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,536 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,542 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,547 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,553 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,559 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,566 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,572 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,577 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,582 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,587 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,593 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,598 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,604 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,609 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,615 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,620 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,630 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,654 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,691 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,696 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,702 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,707 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:18:36,700 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:38,739 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:40,773 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:42,806 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:44,844 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:46,897 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:48,944 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:50,958 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:52,987 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:55,024 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:57,061 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:59,114 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:01,144 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:03,172 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:05,217 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:07,261 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:09,312 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:11,354 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:13,383 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:15,407 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:17,461 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:19,485 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:21,524 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:23,556 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:25,591 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:34,579 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,585 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,591 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,597 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,602 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,609 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,615 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,621 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,626 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,632 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,638 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,644 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,649 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,654 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,660 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,666 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,671 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,677 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,682 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,688 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,693 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,707 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,713 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,718 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:37:38,693 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:38:15,921 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:41:01,376 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:43:42,573 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:43:56,001 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:44:00,097 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:44:37,985 [DB] - INFO - Connected to MongoDB successfully.

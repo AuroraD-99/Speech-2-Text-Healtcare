@@ -23,7 +23,14 @@ from Database.mongodb import DB
 from Pipeline_Manager.Anagrafica import Anagrafica
 
 class PipelineManager:
-    def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
+    def __init__(self, anagrafica_medico=
+                 {
+                     "name": "Anna",
+                     "surname": "Quercia",
+                     "CF": "QRCNNA225H",
+                     "specializzazione": "Pneumologa"
+                 }
+                 , function_mode="Emergency", env_file="key.env"):
         #e se il medico fa il log-out e un altro fa il login?
 
         logging.basicConfig(level=logging.INFO)
