@@ -7,6 +7,7 @@ import re
 import dotenv
 from audio_recorder import AudioRecorder
 import requests
+import threading
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -23,10 +24,35 @@ class Dashboard:
             st.session_state.logged_in = False
         if "audio_recorder" not in st.session_state:
             st.session_state.audio_recorder = AudioRecorder()
+        if "last_report" not in st.session_state:
+            st.session_state.last_report = None
         
         # Imposta l'environment variable per FastAPI
         dotenv.load_dotenv(env_file, override=True)
     
+    def new_report_async(self, filename):
+        def task():
+            try:
+                response = requests.post(
+                    url="http://localhost:8000/new_report",
+                    json={"text": filename}
+                )
+                
+                if response.status_code == 200:
+                    report = response.json()
+                    st.session_state.last_report = report
+                    st.session_state.report_ready = True
+                    st.session_state.page = "report_modify"
+                else:
+                    st.session_state.last_report = {"Error": "Failed to create report"}
+                    st.session_state.report_ready = True
+            except Exception as e:
+                st.session_state.last_report = {"Error": str(e)}
+                st.session_state.report_ready = True
+                
+        st.session_state.report_ready = False
+        threading.Thread(target=task).start()
+        
     def start_audio_recording(self):
         if not st.session_state.get("is_recording", False):
             st.session_state.audio_recorder.start_recording()
@@ -64,6 +90,7 @@ class Dashboard:
                     st.session_state.user = user
                     st.success(f"✅ Benvenuto, {user['anagrafica']['name']} {user['anagrafica']['surname']}!")
                     time.sleep(2)
+                    st.session_state.page = "main"
                     st.rerun()
                 else:
                     st.error("❌ Credenziali non valide")
@@ -256,10 +283,15 @@ class Dashboard:
                     st.session_state.is_recording = False
                     if filename:
                         st.sidebar.success(f"✅ Registrazione salvata: {filename}")
-                        response = requests.post(
-                            url="http://localhost:8000/new_report",
-                            json={"text": filename}
-                        )
+                        self.new_report_async(filename)  # Avvia il task asincrono per inviare il referto
+                        if st.session_state.report_ready:
+                            report = st.session_state.last_report
+                            if "Error" in report:
+                                st.sidebar.error(f"❌ Errore: {report['Error']}")
+                            else:
+                                st.sidebar.success(f"✅ Referto creato con ID: {report.get('report_id', 'N/A')}")
+                                time.sleep(2)  # Attendi un attimo per mostrare il messaggio
+                                
                         
                     else:
                         st.sidebar.error("❌ Errore durante il salvataggio.")
@@ -292,14 +324,55 @@ class Dashboard:
             "stato_referto": stato_referto
         }
         
-        
+    def report_modify_page(self, report_id="12345"):
+        # Questa funzione apre una pagina per modificare un referto specifico
+        st.markdown(f"## 📝 Modifica Referto ID: `{report_id}`")
+
+        # Ottieni il referto dal database
+        report = self.db.get_report_by_id(report_id)
+        if not report:
+            st.error("❌ Referto non trovato.")
+            return
+
+        # Mostra i campi in base al tipo di valore
+        for key, value in report.items():
+            if isinstance(value, str):
+                new_value = st.text_input(f"✏️ {key.capitalize()}", value=value)
+                report[key] = new_value
+            elif isinstance(value, list):
+                new_value = st.text_area(f"🗒️ {key.capitalize()}", value="\n".join(value))
+                report[key] = new_value.split("\n")
+            else:
+                # Usa markdown con HTML per testo più grande e grassetto
+                st.markdown(
+                    f"""<div style='margin-top: 10px; font-size: 18px; font-weight: bold; color: #333;'>
+                        🔒 <span style='text-transform: capitalize;'>ID Referto:</span> {value}
+                    </div>""",
+                    unsafe_allow_html=True
+                )
+
+        # Bottone per salvare
+        if st.button("💾 Salva Modifiche"):
+            self.db.update_clinical_report(report_id, report)
+            st.success("✅ Referto aggiornato con successo!")
+            time.sleep(2)
+            # ritorna alla pagina principale
+            st.session_state.page = "main"
+            st.rerun()
+
+            
 
 
 
     def run(self):
         if st.session_state.logged_in:
-            self.sidebar()
-            self.main_page()
+            if st.session_state.page == "main":
+                self.sidebar()
+                self.main_page()
+            elif st.session_state.page == "report_modify":
+                self.report_modify_page()
+                
+            
         else:
             if st.session_state.page == "login":
                 self.login()

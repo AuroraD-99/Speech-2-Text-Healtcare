@@ -167,6 +167,8 @@ class PipelineManager:
             self.RAGManager.sync_chroma_from_mongo() #fa la sincronizzazione periodica tra il RAG e MongoDB
             self.update_time = datetime.now() + timedelta(hours=2)
             self.logger.info(f"Sincronizzazione RAG - MongoDB terminata ...")
+        
+        return document_id
    
 
 #------------------------------------- MAIN DI PROVA ----------------------------------------

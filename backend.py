@@ -22,8 +22,11 @@ def new_report(request: InputText):
     """
     filepath = request.text
     pipeline_manager = PipelineManager()
-    pipeline_manager.Pipeline_manager(filepath)
-    return {"message": "New clinical report created successfully"}
+    report_id = pipeline_manager.Pipeline_manager(filepath)
+    return {
+        "message": "New clinical report created successfully",
+        "report_id": report_id
+        }
 
 @backend_app.post("/delete_report")
 def delete_report(report_id: str):

@@ -131,7 +131,12 @@ class DB:
         
         return report
 
-       
+    def get_report_by_id(self, report_id):
+        """
+        Returns a clinical report by report_id.
+        """
+        return self.reports_collection.find_one({"report_id": report_id})
+    
     def get_all_clinical_reports(self):
         """
         Returns all clinical reports.
@@ -150,7 +155,6 @@ class DB:
         """
         result = self.reports_collection.update_one(
             {"report_id": report_id},
-            {"validater": True},
             {"$set": new_report}
         )
         return result.modified_count
@@ -330,6 +334,14 @@ if __name__ == "__main__":
     
     
     
-    db.delete_all_reports_by_patient("Mario Rossi", "RSSGNN90A01H501Z")
-    db.delete_all_transcriptions()
+    db.insert_clinical_report(
+        report_id="12345",
+        report={
+            "name": "Mario Rossi",
+            "patient_id": "P123",
+            "doctor_cf": "D456",
+            "report_text": "Questo è un esempio di referto clinico.",
+            "validated": False
+        }
+    )
     
