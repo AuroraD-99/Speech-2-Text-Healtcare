@@ -8,6 +8,7 @@ import numpy as np
 from typing import List
 import bcrypt
 from bson import Binary
+from bson import ObjectId
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -135,7 +136,7 @@ class DB:
         """
         Returns a clinical report by report_id.
         """
-        return self.reports_collection.find_one({"report_id": report_id})
+        return self.reports_collection.find_one({"_id": ObjectId(report_id)})
     
     def get_all_clinical_reports(self):
         """
@@ -154,7 +155,7 @@ class DB:
         Update a clinical report by report_id.
         """
         result = self.reports_collection.update_one(
-            {"report_id": report_id},
+            {"_id": report_id},
             {"$set": new_report}
         )
         return result.modified_count
@@ -163,7 +164,7 @@ class DB:
         """
         Delete a clinical report by report_id.
         """
-        result = self.reports_collection.delete_one({"report_id": report_id})
+        result = self.reports_collection.delete_one({"_id": report_id})
         return result.deleted_count
     
     def delete_all_reports_by_patient(self, patient_name, doctor_cf=None):
@@ -249,30 +250,38 @@ class DB:
         """
         Inserisce un operatore medico nella collezione 'medical_operators' con la seguente struttura:
         {
-            "email": email,
-            "password": password,
-            "anagrafica": {
-                "name": name,
-                "surname": surname,
-                "birthdate": birthdate,
-                "CF": cf,
-                "address": address,
-            },
-            "ruolo": ruolo
+            "Anagrafica": {
+                "Email":,
+                "Password":,
+                "Nome":,
+                "Cognome":,
+                "Cellulare":,
+                "Codice Fiscale":,
+                "Ruolo":,  # ad esempio "Medico", "Infermiere", etc.
+                
+            }
+            "Ospedale": {
+                "Nome Ospedale":,
+                "Città":,
+                "Provincia":,
+                "CAP":,
+                "Reparto":,
+                
+            }
         }
         
         La password viene cryptata prima di essere memorizzata nel database.
         """
         # Controlla se l'operatore esiste già
-        existing_operator = self.operators_collection.find_one({"email": new_user["email"]})
+        existing_operator = self.operators_collection.find_one({"Email": new_user["Anagrafica"]["Email"]})
         if existing_operator:
             raise ValueError("Operatore già esistente")
 
         # Crittografia della password
-        hashed_password = self.hash_password(new_user["password"])
+        hashed_password = self.hash_password(new_user["Anagrafica"]["Password"])
 
         # Inserimento dell'operatore
-        new_user["password"] = hashed_password
+        new_user["Anagrafica"]["Password"] = hashed_password
         result = self.operators_collection.insert_one(new_user)
         return result.inserted_id
     
@@ -292,7 +301,9 @@ class DB:
         """
         Recupera un operatore medico dato il nome utente.
         """
-        return self.operators_collection.find_one({"email": email})
+        # L'email si trova sotto il campo "EMail" all'interno della struttura "Anagrafica"
+        
+        return self.operators_collection.find_one({"Anagrafica.Email": email})
     
     def get_operator_by_name_and_surname(self, name, surname):
         """
@@ -311,8 +322,8 @@ class DB:
         Aggiorna i dati di un operatore medico dato il nome utente.
         """
         # Crittografia della nuova password se presente
-        if "password" in updated_data:
-            updated_data["password"] = self.hash_password(updated_data["password"])
+        if "Password" in updated_data:
+            updated_data["Anagrafica"]["Password"] = self.hash_password(updated_data["Anagrafica"]["Password"])
 
         result = self.operators_collection.update_one(
             {"email": email},

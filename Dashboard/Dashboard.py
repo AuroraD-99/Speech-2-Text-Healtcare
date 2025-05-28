@@ -81,14 +81,14 @@ class Dashboard:
         if st.button("🚪 Accedi", use_container_width=True):
             user = self.db.get_operator(st.session_state.login_email)
             if user:
-                hashed_password = user["password"]
+                hashed_password = user["Anagrafica"]["Password"]
                 if isinstance(hashed_password, str):
                     hashed_password = hashed_password.encode('utf-8')
 
                 if bcrypt.checkpw(st.session_state.login_password.encode('utf-8'), hashed_password):
                     st.session_state.logged_in = True
                     st.session_state.user = user
-                    st.success(f"✅ Benvenuto, {user['anagrafica']['name']} {user['anagrafica']['surname']}!")
+                    st.success(f"✅ Benvenuto, {user['Anagrafica']['Nome']} {user['Anagrafica']['Cognome']}!")
                     time.sleep(2)
                     st.session_state.page = "main"
                     st.rerun()
@@ -160,28 +160,28 @@ class Dashboard:
                 st.error("📬 Il CAP deve essere un numero di 5 cifre.")
             elif self.db.get_operator(email):
                 st.error("📧 Email già registrata.")
-            elif self.db.db.operatori.find_one({"cf": cf.upper()}):
+            elif self.db.db.operatori.find_one({"Codice Fiscale": cf.upper()}):
                 st.error("🧾 Codice fiscale già registrato.")
             else:
                 new_user = {
-                    "email": email,
-                    "password": password,
-                    "anagrafica": {
-                        "name": nome.strip(),
-                        "surname": cognome.strip(),
-                        "CF": cf.upper(),
-                        "cellulare": cellulare,
-                        "email": email,
+                    "Anagrafica": {
+                        "Email":email,
+                        "Password":password,
+                        "Nome":nome,
+                        "Cognome":cognome,
+                        "Cellulare":cellulare,
+                        "Codice Fiscale":cf,
+                        "Ruolo":ruolo,  # ad esempio "Medico", "Infermiere", etc.
+                    
                     },
-                    "ruolo": ruolo,
-                    "struttura": {
-                        "nome": nome_struttura.strip(),
-                        "reparto": reparto.strip(),
-                        "città": città.strip(),
-                        "provincia": provincia.strip(),
-                        "CAP": cap,
-                    }
-                }
+                    "Ospedale": {
+                        "Nome Ospedale":nome_struttura,
+                        "Città":città,
+                        "Provincia":provincia,
+                        "CAP":cap,
+                        "Reparto":reparto,
+                    }    
+                } 
                 self.db.insert_operator(new_user)
                 st.success("✅ Registrazione completata! Ora puoi effettuare il login.")
                 time.sleep(2)
@@ -244,19 +244,7 @@ class Dashboard:
         st.sidebar.markdown("## 👤 Anagrafica Operatore")
 
         if st.session_state.logged_in:
-            user = st.session_state.get("user", {})
-            anagrafica = user.get("anagrafica", {})
-            nome = anagrafica.get("name", "")
-            cognome = anagrafica.get("surname", "")
-            cf = anagrafica.get("CF", "")
-            ruolo = user.get("ruolo", "Sconosciuto")
-            struttura = user.get("struttura", {}).get("nome", "Sconosciuta")
-
-            with st.sidebar.container(border=True):
-                st.markdown(f"**👤 Nome:** `{nome} {cognome}`")
-                st.markdown(f"**🆔 Codice Fiscale:** `{cf}`")
-                st.markdown(f"**🎓 Ruolo:** `{ruolo}`")
-                st.markdown(f"**🏥 Struttura:** `{struttura}`")
+            #TODO : mostrare i dati anagrafici dell'operatore e il nome dell'ospedale
         else:
             with st.sidebar.container(border=True):
                 st.markdown("🔒 <span style='color:gray'>Non sei loggato.</span>", unsafe_allow_html=True)
@@ -324,7 +312,7 @@ class Dashboard:
             "stato_referto": stato_referto
         }
         
-    def report_modify_page(self, report_id="12345"):
+    def report_modify_page(self, report_id="6835d760cdc5c3eb8dec00f7"): 
         # Questa funzione apre una pagina per modificare un referto specifico
         st.markdown(f"## 📝 Modifica Referto ID: `{report_id}`")
 
@@ -342,17 +330,15 @@ class Dashboard:
             elif isinstance(value, list):
                 new_value = st.text_area(f"🗒️ {key.capitalize()}", value="\n".join(value))
                 report[key] = new_value.split("\n")
-            else:
-                # Usa markdown con HTML per testo più grande e grassetto
-                st.markdown(
-                    f"""<div style='margin-top: 10px; font-size: 18px; font-weight: bold; color: #333;'>
-                        🔒 <span style='text-transform: capitalize;'>ID Referto:</span> {value}
-                    </div>""",
-                    unsafe_allow_html=True
-                )
+            
 
         # Bottone per salvare
         if st.button("💾 Salva Modifiche"):
+            # aggiungi anagrafica medico al referto
+            if "anagrafica_medico" not in report:
+                report["anagrafica_medico"] = st.session_state.user["Anagrafica"]
+            if "ospedale" not in report:
+                report["ospedale"] = st.session_state.user["Ospedale"]
             self.db.update_clinical_report(report_id, report)
             st.success("✅ Referto aggiornato con successo!")
             time.sleep(2)
