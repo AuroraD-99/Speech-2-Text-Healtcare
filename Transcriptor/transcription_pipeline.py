@@ -29,8 +29,7 @@ class TranscriptionPipeline:
         
         # Move the audio file to a different directory
         #audio_filepath = f"assets/audios/{audio_filename}"
-        audio_filepath = os.path.join(self.audio_path, audio_filename)
-        os.rename(audio_filename, audio_filepath)
+        audio_filepath = audio_filename
         
         
         # Save transcription to a JSON file

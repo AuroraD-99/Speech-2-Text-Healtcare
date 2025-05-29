@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from Database.mongodb import DB
-from Dashboard.Dashboard import Dashboard
 from Pipeline_Manager.Pipeline_manager import PipelineManager
 
 backend_app = FastAPI()
@@ -22,7 +21,7 @@ def new_report(request: InputText):
     """
     filepath = request.text
     pipeline_manager = PipelineManager()
-    report_id = pipeline_manager.Pipeline_manager(filepath)
+    report_id = str(pipeline_manager.Pipeline_manager(filepath))
     return {
         "message": "New clinical report created successfully",
         "report_id": report_id

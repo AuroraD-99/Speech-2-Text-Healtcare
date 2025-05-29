@@ -5,13 +5,14 @@ import sys
 import time
 import re
 import dotenv
-from audio_recorder import AudioRecorder
+
 import requests
 import threading
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Database.mongodb import DB
+from audio_recorder import AudioRecorder
 
 class Dashboard:
     def __init__(self, env_file="key.env"):
@@ -29,6 +30,25 @@ class Dashboard:
         
         # Imposta l'environment variable per FastAPI
         dotenv.load_dotenv(env_file, override=True)
+        
+    def new_report(self, filename):
+        response = requests.post(
+            url="http://localhost:8000/new_report",
+            json={"text": filename}
+        )
+        
+        st.session_state.report_ready = False
+        
+        if response.status_code == 200:
+            report = response.json()
+            st.session_state.last_report = report
+            st.session_state.report_ready = True
+            st.session_state.page = "report_modify"
+        else:
+            st.session_state.last_report = {"Error": "Failed to create report"}
+            st.session_state.report_ready = True
+        
+        st.rerun()  # Ricarica la pagina per aggiornare l'interfaccia
     
     def new_report_async(self, filename):
         def task():
@@ -43,6 +63,7 @@ class Dashboard:
                     st.session_state.last_report = report
                     st.session_state.report_ready = True
                     st.session_state.page = "report_modify"
+                    st.rerun()
                 else:
                     st.session_state.last_report = {"Error": "Failed to create report"}
                     st.session_state.report_ready = True
@@ -206,10 +227,10 @@ class Dashboard:
 
         try:
             # Recupero tutti i referti del medico attualmente loggato
-            reports = self.db.get_all_clinical_reports_by_doctor_cf(medico_cf)
+            reports = self.db.get_all_clinical_reports_by_doctor_cf(st.session_state.user["Anagrafica"]["Codice Fiscale"])
 
             if not reports:
-                st.warning("🔍 Non ci sono referti associati al tuo profilo medico.")
+                st.warning("🔍 Non ci sono referti associati al codice fiscale: " + st.session_state.user["Anagrafica"]["Codice Fiscale"])
             else:
                 # Raggruppa per nome paziente
                 grouped = {}
@@ -245,6 +266,18 @@ class Dashboard:
 
         if st.session_state.logged_in:
             #TODO : mostrare i dati anagrafici dell'operatore e il nome dell'ospedale
+            operator = st.session_state.user["Anagrafica"]["Nome"] + " " + st.session_state.user["Anagrafica"]["Cognome"]
+            operator_cf = st.session_state.user["Anagrafica"]["Codice Fiscale"]
+            operator_email = st.session_state.user["Anagrafica"]["Email"]
+            role = st.session_state.user["Anagrafica"]["Ruolo"]
+            ospedale = st.session_state.user["Ospedale"]["Nome Ospedale"]
+            with st.sidebar.container(border=True):
+                st.markdown(f"👤 **Operatore:** {operator}")
+                st.markdown(f"🧾 **CF:** {operator_cf}")
+                st.markdown(f"📧 **Email:** {operator_email}")
+                st.markdown(f"💼 **Ruolo:** {role}")
+                st.markdown(f"🏥 **Ospedale:** {ospedale}")
+                
         else:
             with st.sidebar.container(border=True):
                 st.markdown("🔒 <span style='color:gray'>Non sei loggato.</span>", unsafe_allow_html=True)
@@ -265,25 +298,26 @@ class Dashboard:
         else:
             # Mostra bottone "Termina registrazione" e spinner di registrazione in corso
             st.sidebar.markdown("### 🎙️ Registrazione in corso...")
-            with st.spinner("Registrazione attiva, parla ora..."):
-                if st.sidebar.button("⏹️ Termina registrazione", use_container_width=True):
-                    filename = self.stop_audio_recording()
-                    st.session_state.is_recording = False
-                    if filename:
-                        st.sidebar.success(f"✅ Registrazione salvata: {filename}")
-                        self.new_report_async(filename)  # Avvia il task asincrono per inviare il referto
-                        if st.session_state.report_ready:
-                            report = st.session_state.last_report
-                            if "Error" in report:
-                                st.sidebar.error(f"❌ Errore: {report['Error']}")
-                            else:
-                                st.sidebar.success(f"✅ Referto creato con ID: {report.get('report_id', 'N/A')}")
-                                time.sleep(2)  # Attendi un attimo per mostrare il messaggio
+            if st.sidebar.button("⏹️ Termina registrazione", use_container_width=True):
+                filename = self.stop_audio_recording()
+                st.session_state.is_recording = False
+                if filename:
+                    st.sidebar.success(f"✅ Registrazione salvata: {filename}")
+                    with st.spinner("Creazione referto in corso..."):
+                        self.new_report(filename)
+                    if st.session_state.report_ready:
+                        report = st.session_state.last_report
+                        if "Error" in report:
+                            st.sidebar.error(f"❌ Errore: {report['Error']}")
+                        else:
+                            st.sidebar.success(f"✅ Referto creato con ID: {report.get('report_id', 'N/A')}")
+                            time.sleep(2)  # Attendi un attimo per mostrare il messaggio
                                 
                         
                     else:
                         st.sidebar.error("❌ Errore durante il salvataggio.")
                     st.rerun()  # ricarica pagina per aggiornare UI
+                
             
         st.sidebar.markdown("---")
 
@@ -356,9 +390,7 @@ class Dashboard:
                 self.sidebar()
                 self.main_page()
             elif st.session_state.page == "report_modify":
-                self.report_modify_page()
-                
-            
+                self.report_modify_page(st.session_state.last_report["report_id"])         
         else:
             if st.session_state.page == "login":
                 self.login()
