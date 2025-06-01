@@ -74,19 +74,44 @@ class Dashboard:
             st.warning("Premi di nuovo per confermare la cancellazione")
         else:
             # Secondo click: cancella e resetta flag
-            self.db.delete_clinical_report(report_id)
-            st.session_state.deleted = True
-            st.session_state[confirm_key] = False
-            st.rerun()
+            response = requests.post(
+                url = f"{self.controller_url}/delete_report",
+                json = {
+                    "text": report_id
+                }
+            )
+            if response.status_code == 200:
+                st.session_state.deleted = True
+                st.session_state[confirm_key] = False
+                st.rerun()
 
         
     def modify_report(self, report_id):
-        st.session_state.page = "report_modify"
-        st.session_state.last_report = self.db.get_report_by_id(report_id)
+        
+        response = requests.post(
+            url = f"{self.controller_url}/get_report_by_id",
+            json = {
+                "text": str(report_id)
+            }
+        )
+        if response.status_code == 200:
+            report =  response.json()
+            st.session_state.last_report = report["report"]
+            st.session_state.page = "report_modify"
         
     def show_report(self, report_id):
-        st.session_state.page = "show_report"
-        st.session_state.last_report = self.db.get_report_by_id(report_id)
+        
+        response = requests.post(
+            url = f"{self.controller_url}/get_report_by_id",
+            json = {
+                "text": str(report_id)
+            }
+        )
+        if response.status_code == 200:
+            report =  response.json()
+            print(report)
+            st.session_state.last_report = report["report"]
+            st.session_state.page = "show_report"
         
     def new_report(self, filename):
         response = requests.post(
@@ -569,9 +594,9 @@ class Dashboard:
                 self.sidebar()
                 self.main_page()
             elif st.session_state.page == "report_modify":
-                self.report_modify_page(st.session_state.last_report["report_id"])
+                self.report_modify_page(st.session_state.last_report["_id"])
             elif st.session_state.page == "show_report":
-                self.show_report_page(st.session_state.last_report["_id"])         
+                self.show_report_page(st.session_state.last_report["_id"])
         else:
             if st.session_state.page == "login":
                 self.login()
