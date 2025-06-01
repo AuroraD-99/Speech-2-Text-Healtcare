@@ -54,7 +54,8 @@ class PipelineManager:
 
         self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["CF"])
 
-        self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
+        self.collection = self.chroma_client.get_or_create_collection("fse_rag_index") 
+        #devi controllare se con questo tutti gli altri file si collegano allo stesso RAG
 
         #inizializzazione del trascrittore
         self.transcriptor = TranscriptionPipeline()
@@ -105,8 +106,7 @@ class PipelineManager:
         #Controllo sul referto anonimizzato
         self.logger.info(f"Report anonimizzato: {report_text_RAG}")
         
-        #embedding = self.RAGManager.compute_embedding(report_text_RAG, self.collection, embedding = self.embedder)
-        #salvataggio embedding nel DB
+        #calcolo dell'embedding del testo
         embedding_id, embedding = self.RAGManager.compute_embedding(report_text_RAG, self.function_mode) 
 
         try:
@@ -138,21 +138,13 @@ class PipelineManager:
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
         document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
 
+        #salvataggio dell'embedding (strutturato) nel DB
+        embedding_doc = self.RAGManager.prepare_embedding_doc(embedding_id, embedding, self.function_mode)
+        embedding_doc_id = self.DB_manager.insert_embedding(embedding_doc)
+
         self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
         if os.path.exists(clinical_report[1]): #il check non dovrebbe essere necessario ma è meglio metterlo
             os.remove(clinical_report[1])
-
-        #modifica/validazione del referto - DA RIVEDERE --------------------------------------------------------------------------
-        self.logger.info(f"Procedo alla validazione del referto prodotto...")
-        #validated_report_text = self.FSE_manager.check_json_structure(clinical_report[0])
-
-        
-        #NON SERVE PIù PERCHè ORA C'è IL REFRESH PERIODICO DEL RAG
-        """#recupero del referto validato -> VEDERE SE CI SONO MODIFICHE DA FARE
-        validated_report = self.DB_manager.get_validated_clinical_report(embedding_id)
-        #salvataggio dell'embedding nel DB
-        embedding_doc = self.RAGManager.prepare_embedding_doc(embedding_id, embedding, self.function_mode, validated_report)
-        self.DB_manager.insert_embedding(embedding_doc) #salvo l'embedding del testo e ottengo il suo id"""
 
         #REFRESH PERIODICO DEL RAG OGNI 2 ORE
         if datetime.now() == self.update_time:
