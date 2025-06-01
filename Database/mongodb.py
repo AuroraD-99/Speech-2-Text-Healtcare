@@ -119,7 +119,7 @@ class DB:
         """
         Returns all clinical reports for a specific doctor.
         """
-        return list(self.reports_collection.find({"doctor_cf": doctor_cf}))
+        return list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf}))
     
     def get_validated_clinical_report(self, report_id: str) -> dict:
         #Recupera un referto validato. Se non è validato, restituisce None e mostra un warning.

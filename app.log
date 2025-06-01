@@ -606,3 +606,162 @@
 2025-05-29 16:29:30,882 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-29 16:29:33,514 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-29 16:29:43,409 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:09:47,739 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:10:04,828 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:11:09,209 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:12:55,486 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:22:06,463 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:28:48,931 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:28:52,735 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:33:16,048 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:34:21,293 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:23,330 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:25,350 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:27,378 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:29,402 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:31,424 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:33,462 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:35,497 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:37,523 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:39,546 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:41,563 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:43,585 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:45,613 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:47,639 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:49,664 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:51,689 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:53,714 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:55,736 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:57,757 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:59,781 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:01,803 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:03,845 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:05,878 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:07,899 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:09,924 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:11,947 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:13,970 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:15,993 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:18,010 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:20,034 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:22,059 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:24,104 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:26,153 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:28,195 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:30,246 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:32,299 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:34,343 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:36,395 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:38,437 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:40,481 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:45:02,068 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:49:30,954 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:49:34,024 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:49:57,658 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:50:01,718 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62EED3790>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 10:53:05,266 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:53:09,328 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B0D10>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 10:58:40,811 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:58:44,891 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B8E90>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 11:00:05,258 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:00:09,316 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B3450>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 11:01:18,870 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:01:19,650 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:01:22,115 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:01:58,698 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:01:58,703 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:08:09,643 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:08:15,496 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:08:18,675 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:11:13,680 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:16:22,392 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:16:25,594 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:20:34,025 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:26:15,916 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:26:33,894 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:26:37,729 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:38:47,914 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:38:47,945 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:39:59,956 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:40:28,989 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:40:56,697 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:40:56,704 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:43:40,186 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:43:40,189 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:44:31,597 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:44:31,602 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:45:17,185 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:46:07,385 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:46:14,302 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:39,538 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:50,802 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:48:56,696 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:58,423 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:50:55,334 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:50:57,136 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:50:57,161 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:03:02,264 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:03:04,792 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:03:04,818 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:05:40,473 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:05:44,290 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:06:13,860 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:06:16,735 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:06:16,879 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:06:44,792 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:00,144 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:07:02,276 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:04,571 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:14,971 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:17:25,419 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 12:17:31,861 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:17:49,576 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:07,553 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:18:12,019 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:15,737 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:24,178 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:20,388 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:25:24,955 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:27,706 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:39,043 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:31:49,513 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:32:47,471 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:32:51,970 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:32:55,051 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:33:03,663 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:40:26,739 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:40:58,171 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:42:17,011 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:42:20,321 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:50:27,613 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:51:00,467 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:51:05,500 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:54:02,767 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:07:40,238 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:08:01,225 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:08:04,660 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:08:47,513 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:08:50,606 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:11:49,361 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:16:13,662 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:16:17,084 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:16:35,136 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:16:38,366 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:22:17,843 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:22:21,082 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:57:34,084 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:41:55,644 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:02,371 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:49,847 [Controller] - INFO - Creating a new clinical report
+2025-05-31 11:43:54,568 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:57,997 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:44:08,234 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:49:45,228 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:28,639 [Controller] - INFO - Creating a new clinical report
+2025-05-31 11:51:34,096 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:36,769 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:46,851 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:38,628 [Controller] - INFO - Creating a new clinical report
+2025-05-31 12:02:43,518 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:46,313 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:56,540 [DB] - INFO - Connected to MongoDB successfully.

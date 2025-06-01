@@ -12,19 +12,25 @@ class InputText(BaseModel):
     Data model for input text.
     """
     text: str
-    
+
+class InputReport(BaseModel):
+    """
+    Data model for a new report request
+    """
+    text:str
+    anagrafica_medico:dict
 
 @backend_app.post("/new_report")
-def new_report(request: InputText):
+def new_report(request: InputReport):
     """
     Endpoint to create a new clinical report.
     """
     filepath = request.text
-    pipeline_manager = PipelineManager()
+    pipeline_manager = PipelineManager(request.anagrafica_medico)
     report_id = str(pipeline_manager.Pipeline_manager(filepath))
     return {
         "message": "New clinical report created successfully",
-        "report_id": report_id
+        "report_id": str(report_id)
         }
 
 @backend_app.post("/delete_report")

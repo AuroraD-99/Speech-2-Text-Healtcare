@@ -23,14 +23,7 @@ from Database.mongodb import DB
 from Pipeline_Manager.Anagrafica import Anagrafica
 
 class PipelineManager:
-    def __init__(self, anagrafica_medico=
-                 {
-                     "name": "Anna",
-                     "surname": "Quercia",
-                     "CF": "QRCNNA225H",
-                     "specializzazione": "Pneumologa"
-                 }
-                 , function_mode="Emergency", env_file="key.env"):
+    def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
         #e se il medico fa il log-out e un altro fa il login?
 
         logging.basicConfig(level=logging.INFO)
@@ -59,7 +52,7 @@ class PipelineManager:
         self.chroma_path = os.getenv("CHROMA_DB_PATH")
         self.chroma_client = Client() 
 
-        self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["CF"])
+        self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["Anagrafica"]["Codice Fiscale"])
 
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
 

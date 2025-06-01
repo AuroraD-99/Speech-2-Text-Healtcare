@@ -16,6 +16,8 @@ from audio_recorder import AudioRecorder
 
 class Dashboard:
     def __init__(self, env_file="key.env"):
+        if "deleted" not in st.session_state:
+            st.session_state.deleted = False
         if "db" not in st.session_state:
             st.session_state.db = DB()  # salva l'istanza nella sessione
         self.db = st.session_state.db
@@ -28,14 +30,71 @@ class Dashboard:
         if "last_report" not in st.session_state:
             st.session_state.last_report = None
         
+        
         # Imposta l'environment variable per FastAPI
         dotenv.load_dotenv(env_file, override=True)
         
+        self.controller_url = os.getenv('CONTROLLER_URL', 'http://127.0.0.1:8003')
+        
+    def genera_anagrafica(self, dizionario:dict):
+        """
+        Il dizionario user ha la seguente struttura
+        
+        {
+            "Id":
+            "Anagrafica": 
+                "Email":
+                "Password":
+                "Nome":
+                "Cognome":
+                "Cellulare":
+                "Codice Fiscale":
+                "Ruolo":
+            "Ospedale":
+                "Nome Ospedale":
+                "Città":
+                "Provincia":
+                "CAP":
+                "Reparto":
+        }
+        """
+        anagrafica = {
+            "Anagrafica": {
+                k: v for k, v in dizionario.get("Anagrafica", {}).items() if k != "Password"
+            },
+            "Ospedale": dizionario.get("Ospedale",{}).copy()
+        }
+        return anagrafica
+    
+    def del_and_rerun(self, report_id):
+        confirm_key = f"confirm_delete_{report_id}"
+        if not st.session_state.get(confirm_key, False):
+            # Primo click: settiamo il flag e mostriamo messaggio
+            st.session_state[confirm_key] = True
+            st.warning("Premi di nuovo per confermare la cancellazione")
+        else:
+            # Secondo click: cancella e resetta flag
+            self.db.delete_clinical_report(report_id)
+            st.session_state.deleted = True
+            st.session_state[confirm_key] = False
+            st.rerun()
+
+        
+    def modify_report(self, report_id):
+        st.session_state.page = "report_modify"
+        st.session_state.last_report = self.db.get_report_by_id(report_id)
+        
+    def show_report(self, report_id):
+        st.session_state.page = "show_report"
+        st.session_state.last_report = self.db.get_report_by_id(report_id)
+        
     def new_report(self, filename):
         response = requests.post(
-            url="http://localhost:8000/new_report",
-            json={"text": filename}
-        )
+            url=f"{self.controller_url}/new_report",
+            json = {
+                "text": filename,
+                "anagrafica_medico": self.genera_anagrafica(st.session_state.user)
+            })
         
         st.session_state.report_ready = False
         
@@ -49,36 +108,12 @@ class Dashboard:
             st.session_state.report_ready = True
         
         st.rerun()  # Ricarica la pagina per aggiornare l'interfaccia
-    
-    def new_report_async(self, filename):
-        def task():
-            try:
-                response = requests.post(
-                    url="http://localhost:8000/new_report",
-                    json={"text": filename}
-                )
-                
-                if response.status_code == 200:
-                    report = response.json()
-                    st.session_state.last_report = report
-                    st.session_state.report_ready = True
-                    st.session_state.page = "report_modify"
-                    st.rerun()
-                else:
-                    st.session_state.last_report = {"Error": "Failed to create report"}
-                    st.session_state.report_ready = True
-            except Exception as e:
-                st.session_state.last_report = {"Error": str(e)}
-                st.session_state.report_ready = True
-                
-        st.session_state.report_ready = False
-        threading.Thread(target=task).start()
         
     def start_audio_recording(self):
         if not st.session_state.get("is_recording", False):
             st.session_state.audio_recorder.start_recording()
             st.session_state.is_recording = True
-            st.success("🎤 Registrazione avviata!")
+            st.success("🎤 Registrazione avviata!"),
     
     def stop_audio_recording(self):
         if st.session_state.get("is_recording", False):
@@ -235,7 +270,7 @@ class Dashboard:
                 # Raggruppa per nome paziente
                 grouped = {}
                 for report in reports:
-                    paziente = report.get("name", "Sconosciuto")
+                    paziente = report["dati paziente"]["nominativo"]["nome"] + report["dati paziente"]["nominativo"]["cognome"]
                     grouped.setdefault(paziente, []).append(report)
 
                 for paziente, referti in grouped.items():
@@ -243,18 +278,55 @@ class Dashboard:
                         for referto in referti:
                             st.markdown(f"""
                             - 🩺 {referto.get('type', 'N/A')}
-                            - 📄 **ID Referto**: `{referto.get('report_id', 'N/A')}`
+                            - 📄 **ID Referto**: `{referto.get('_id', 'N/A')}`
                             - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
                             """)
-                            st.button(
-                                "❌ Cancella Referto",
-                                key=f"delete_{referto.get('report_id')}",
-                                on_click=self.delete_report,
-                                args=(referto.get('report_id'),),)
-                            #TODO: INSERIRE CAMPO TYPE PER I REFERTI
+                            with st.container():
+                                col1, col2, col3 = st.columns(3)
+                                with col3: 
+                                    delete_key = f"delete_{referto.get('_id')}"
+                                    confirm_key = f"confirm_delete_{referto.get('_id')}"
+
+                                    if st.button("❌ Cancella Referto", key=delete_key):
+                                        st.session_state[confirm_key] = True
+
+                                    if st.session_state.get(confirm_key, False):
+                                        st.warning("⚠️ Sei sicuro di voler cancellare questo referto?")
+                                        col_confirm, col_cancel = st.columns(2)
+                                        with col_confirm:
+                                            if st.button("✅ Conferma", key=f"confirm_{referto.get('_id')}"):
+                                                self.db.delete_clinical_report(referto.get('_id'))
+                                                del st.session_state[confirm_key]
+                                                st.session_state.deleted = True
+                                                st.rerun()
+                                        with col_cancel:
+                                            if st.button("❎ Annulla", key=f"cancel_{referto.get('_id')}"):
+                                                del st.session_state[confirm_key]
+                                                st.rerun()
+
+                                
+                                with col2: 
+                                    st.button(
+                                    "✏️ Modifica Referto",
+                                    key = f"modify_{referto.get('_id')}",
+                                    on_click= self.modify_report,
+                                    args = (referto.get('_id'),),
+                                    )
+                                
+                                with col1:
+                                    st.button(
+                                    "👁️ Visualizza Referto",
+                                    key = f"show_{referto.get('_id')}",
+                                    on_click=self.show_report,
+                                    args = (report.get('_id'),),
+                                    )
         except Exception as e:
             st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
 
+        if st.session_state.deleted:
+            st.session_state.deleted = False
+            st.rerun()
+        
         st.markdown("---")
         if st.button("🚪 Logout", use_container_width=True):
             for key in list(st.session_state.keys()):
@@ -310,7 +382,7 @@ class Dashboard:
                         if "Error" in report:
                             st.sidebar.error(f"❌ Errore: {report['Error']}")
                         else:
-                            st.sidebar.success(f"✅ Referto creato con ID: {report.get('report_id', 'N/A')}")
+                            st.sidebar.success(f"✅ Referto creato con ID: {report.get('_id', 'N/A')}")
                             time.sleep(2)  # Attendi un attimo per mostrare il messaggio
                                 
                         
@@ -380,7 +452,114 @@ class Dashboard:
             st.session_state.page = "main"
             st.rerun()
 
-            
+
+    def show_report_page(self, report_id="6835d760cdc5c3eb8dec00f7"):
+        st.markdown(f"# 👁️ Visualizza Referto")
+        st.markdown(f"### ID: `{report_id}`")
+        
+        with st.container():
+            if st.button("Torna indietro"):
+                st.session_state.page = "main"
+                st.rerun()
+        st.write("---")
+
+        report = self.db.get_report_by_id(report_id)
+        if not report:
+            st.error("❌ Referto non trovato.")
+            return
+
+        # CSS aggiornato con palette TOML e stile più "medical dark"
+        st.markdown(
+            """
+            <style>
+            /* Container principale referto */
+            .report-box {
+                background-color: #1E1E1E;              /* secondaryBackgroundColor */
+                border: 1.5px solid #4DD0E1;            /* primaryColor */
+                border-radius: 12px;
+                padding: 18px 22px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 6px rgba(77, 208, 225, 0.35);
+                color: #E0E0E0;                         /* textColor */
+                font-family: "sans-serif", Arial, Helvetica, sans-serif;
+                max-height: 140px;
+                overflow-y: auto;
+                transition: box-shadow 0.3s ease;
+            }
+            .report-box:hover {
+                box-shadow: 0 4px 12px rgba(77, 208, 225, 0.6);
+            }
+            /* Scrollbar stile */
+            .report-box::-webkit-scrollbar {
+                width: 7px;
+            }
+            .report-box::-webkit-scrollbar-thumb {
+                background-color: #4DD0E1;
+                border-radius: 10px;
+            }
+            /* Chiave (titolo campo) */
+            .report-key {
+                font-weight: 700;
+                font-size: 1.2em;
+                color: #4DD0E1;                        /* primaryColor */
+                margin-bottom: 8px;
+                border-bottom: 2px solid #4DD0E1;
+                padding-bottom: 6px;
+                user-select: text;
+            }
+            /* Valore */
+            .report-value {
+                font-size: 1em;
+                color: #E0E0E0;                        /* textColor */
+                white-space: pre-wrap;
+                user-select: text;
+                line-height: 1.4em;
+            }
+            /* Layout colonne */
+            .report-columns > div {
+                padding: 0 12px;
+            }
+            /* Titoli e linee di separazione */
+            hr {
+                border: none;
+                border-top: 1px solid #333;
+                margin: 20px 0;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        items = list(report.items())
+        mid_index = (len(items) + 1) // 2
+        left_items = items[:mid_index]
+        right_items = items[mid_index:]
+
+        col1, col2 = st.columns(2)
+
+        def render_boxes(container, items_to_render):
+            with container:
+                for key, value in items_to_render:
+                    display_key = key.replace('_', ' ').capitalize()
+                    if isinstance(value, list):
+                        value_str = "\n".join(f"• {item}" for item in value)
+                    else:
+                        value_str = str(value)
+
+                    box_html = f"""
+                    <div class="report-box">
+                        <div class="report-key">{display_key}</div>
+                        <div class="report-value">{value_str}</div>
+                    </div>
+                    """
+                    st.markdown(box_html, unsafe_allow_html=True)
+
+        render_boxes(col1, left_items)
+        render_boxes(col2, right_items)
+
+        st.write("---")
+
+
 
 
 
@@ -390,7 +569,9 @@ class Dashboard:
                 self.sidebar()
                 self.main_page()
             elif st.session_state.page == "report_modify":
-                self.report_modify_page(st.session_state.last_report["report_id"])         
+                self.report_modify_page(st.session_state.last_report["report_id"])
+            elif st.session_state.page == "show_report":
+                self.show_report_page(st.session_state.last_report["_id"])         
         else:
             if st.session_state.page == "login":
                 self.login()

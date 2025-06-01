@@ -6,16 +6,24 @@ from log import Logger
 from pydantic import BaseModel
 
 
+
+
 class InputText(BaseModel):
     """
     Data model for input text.
     """
     text: str
-    
+
+class InputReport(BaseModel):
+    text: str
+    anagrafica_medico: dict
     
 class Controller:
-    def __init__(self):
+    def __init__(self, env_file='key.env'):
         self.logger = Logger(self.__class__.__name__).get_logger()
+        
+        load_dotenv(env_file, override=True)
+        self.backend_url = os.getenv('BACKEND_URL', 'http://127.0.0.1:8001')
         
         self.app = FastAPI()
         
@@ -24,7 +32,7 @@ class Controller:
             path = "/new_report",
             endpoint = self.new_report,
             methods = ["POST"],
-            response_model = str,
+            response_model = dict,
             summary = "Create a new clinical report",
             description = "Generates a new clinical report running the pipeline in Pipeline_Manager.py",
         )
@@ -46,24 +54,18 @@ class Controller:
             summary = "Delete all reports for a patient",
             description = "Deletes all clinical reports for a specific patient by their ID",
         )
-        
-        self.app.add_api_route(
-            path = "/dici_ciao",
-            endpoint = self.dici_ciao,
-            methods = ["POST"],
-            response_model = str,
-            summary = "Say hello",
-            description = "Returns a greeting message with the provided input text",
-        )
-    def new_report(self):
+    def new_report(self, input_var:InputReport):
         """
         Endpoint to create a new clinical report.
         """
         self.logger.info("Creating a new clinical report")
         try:
             response = requests.post(
-                url = "http://localhost:8000/new_report",
-                json = {"text": "New clinical report"}
+                url = f"{self.backend_url}/new_report",
+                json = {
+                    "text": input_var.text,
+                    "anagrafica_medico": input_var.anagrafica_medico
+                }
             )
             response.raise_for_status()
             return response.json()
@@ -78,7 +80,7 @@ class Controller:
         self.logger.info(f"Deleting report with ID: {report_id}")
         try:
             response = requests.post(
-                url = "http://localhost:8000/delete_report",
+                url = f"{self.backend_url}/delete_report",
                 json = {"report_id": report_id}
             )
             response.raise_for_status()
@@ -94,7 +96,7 @@ class Controller:
         self.logger.info(f"Deleting all reports for patient with ID: {patient_id}")
         try:
             response = requests.post(
-                url = "http://localhost:8000/delete_all_reports_by_patient",
+                url = f"{self.backend_url}/delete_all_reports_by_patient",
                 json = {"patient_id": patient_id}
             )
             response.raise_for_status()
@@ -102,19 +104,6 @@ class Controller:
         except requests.RequestException as e:
             self.logger.error(f"Error deleting reports for patient: {e}")
             raise HTTPException(status_code=500, detail=str(e))
-        
-    def dici_ciao(self):
-        """
-        Endpoint to say hello.
-        """
-        response = requests.post(
-            url = "http://localhost:8000/dici_ciao",
-            json = {"text": "Ciao!"}
-        )
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
 
 
 # Create an instance of the Controller class and expose the FastAPI app
