@@ -232,3 +232,536 @@
 2025-05-12 16:47:22,457 [DashboardDriver] - INFO - Running command: streamlit run
 2025-05-13 16:37:13,335 [DashboardDriver] - INFO - Running command: streamlit run
 2025-05-15 10:46:25,752 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:42:11,698 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:43:57,449 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:06,734 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:08,784 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:11,454 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:12,067 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:52,435 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:53,151 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:44:57,990 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:45:06,567 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:45:15,225 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:45:16,705 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:45:24,594 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:45:24,660 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:13,913 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:16,041 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:25,760 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:27,483 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:50,726 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:46:53,549 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:56,541 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:57,055 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:46:59,367 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:00,123 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:02,244 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:03,271 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:06,091 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:06,684 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:46,572 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:47,894 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:47:59,247 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:48:00,605 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:48:16,636 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:12,963 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:15,484 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:17,612 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:41,465 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:50:44,009 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:46,368 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:47,347 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:48,869 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:49,925 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:50,826 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:51,682 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:52,570 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:50:52,644 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:51:38,284 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:51:40,028 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:16,671 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:52:19,174 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:22,016 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:22,069 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:24,355 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:26,154 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:26,975 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:27,834 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:28,816 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:31,751 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:31,829 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:53,131 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:52:54,271 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:03,617 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:53:06,148 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:07,364 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:09,042 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:10,911 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:11,835 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:12,840 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:14,002 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:15,270 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:15,335 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:53:17,689 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:54:56,857 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:54:59,382 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:00,609 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:01,351 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:02,708 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:03,465 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:04,358 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:05,917 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:06,893 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:06,959 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:14,990 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:19,462 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:20,729 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:22,995 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:24,133 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:27,982 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:29,008 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:31,582 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:31,668 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:34,457 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:37,274 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:39,508 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:55:39,571 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:57:58,185 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-22 23:58:00,665 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:58:14,612 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-22 23:58:15,394 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:47:19,876 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-23 15:47:31,787 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:49:47,919 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:49:48,630 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:56:18,962 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:57:46,016 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:57:56,262 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:57:56,995 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:17,248 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:19,900 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:19,922 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:21,148 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:21,170 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:22,665 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:22,688 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:23,594 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 15:59:23,615 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 16:00:25,650 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 16:00:27,007 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-23 16:00:27,080 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 10:19:12,980 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-24 10:19:23,675 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 10:28:26,325 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 10:34:46,958 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-24 10:34:49,294 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 10:36:25,074 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:24:26,143 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:29:28,131 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:30:05,980 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:30:40,100 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:35:36,524 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:35:40,300 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:38:09,214 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-24 11:39:43,743 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 10:08:17,980 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 10:08:37,534 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 10:08:42,387 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 11:24:31,542 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 11:24:39,194 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 16:17:09,916 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 16:17:21,197 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 16:20:20,262 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 16:20:27,484 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 16:39:26,759 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 16:39:33,350 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 17:43:48,323 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 17:44:58,087 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 17:46:31,749 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-25 18:27:37,518 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-25 18:27:45,785 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 16:40:40,111 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-26 16:40:52,083 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:14:18,650 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:20,694 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:22,736 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:24,789 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:26,830 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:28,888 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:30,940 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:32,974 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:35,002 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:37,017 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:39,059 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:41,077 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:43,112 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:45,151 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:47,195 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:49,237 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:51,281 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:53,328 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:55,371 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:57,421 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:14:59,476 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:01,529 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:03,580 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:05,628 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:07,674 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:09,711 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:11,751 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:13,805 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:15,852 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:17,899 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:19,951 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:22,008 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:24,062 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:26,113 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:28,165 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:30,224 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:32,263 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:34,318 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:36,375 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:15:38,429 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:16:30,428 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,434 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,440 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,448 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,456 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,461 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,467 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,473 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,479 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,485 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,491 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,497 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,503 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,508 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,514 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,519 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,525 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,530 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,536 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,542 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,547 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,553 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,559 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,566 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,572 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,577 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,582 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,587 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,593 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,598 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,604 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,609 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,615 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,620 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,630 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,654 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,691 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,696 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,702 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:16:30,707 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:18:36,700 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:38,739 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:40,773 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:42,806 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:44,844 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:46,897 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:48,944 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:50,958 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:52,987 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:55,024 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:57,061 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:18:59,114 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:01,144 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:03,172 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:05,217 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:07,261 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:09,312 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:11,354 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:13,383 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:15,407 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:17,461 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:19,485 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:21,524 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:23,556 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:25,591 [Controller] - INFO - Creating a new clinical report
+2025-05-26 17:19:34,579 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,585 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,591 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,597 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,602 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,609 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,615 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,621 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,626 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,632 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,638 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,644 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,649 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,654 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,660 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,666 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,671 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,677 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,682 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,688 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,693 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,707 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,713 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:19:34,718 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://localhost:8000/new_report
+2025-05-26 17:37:38,693 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:38:15,921 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:41:01,376 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:43:42,573 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:43:56,001 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:44:00,097 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 17:44:37,985 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 21:47:42,662 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-26 21:47:53,723 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 22:31:35,459 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-26 22:49:29,085 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-26 22:49:31,616 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-27 17:16:48,089 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-27 17:17:19,681 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-27 17:17:28,323 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-27 17:18:37,107 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-27 17:18:59,671 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-27 17:19:26,477 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-27 17:19:29,344 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 11:56:23,920 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 11:57:00,790 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 11:58:29,312 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:00:52,433 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 12:00:55,610 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:01:14,964 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:02:15,097 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:02:43,764 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 12:02:46,557 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:06:34,946 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 12:06:39,755 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:42:54,765 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 12:43:01,547 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:45:39,988 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 12:45:42,858 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 12:50:19,273 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 13:46:22,176 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 16:19:02,258 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 16:19:14,153 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 16:58:57,255 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 16:59:01,935 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:08:44,564 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:22:48,497 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 17:22:51,420 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:24:09,257 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 17:24:12,116 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:32:56,980 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 17:32:59,749 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:36:55,200 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 17:36:58,016 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-28 17:38:04,129 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-28 17:38:06,869 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 09:52:51,825 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-29 09:53:16,659 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 10:09:47,853 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-29 10:09:52,724 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 10:45:34,997 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 10:46:24,220 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 10:46:27,744 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 10:46:36,479 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 13:43:44,467 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-29 13:43:51,693 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 13:44:50,390 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 13:45:13,534 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 13:45:16,902 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 13:45:30,049 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:41:15,979 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:43:25,530 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:43:28,799 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:43:37,490 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:46:58,297 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:48:36,086 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:48:38,370 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:48:47,314 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:20,854 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:22,992 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:31,718 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:37,862 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:39,879 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 14:59:48,266 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:01:59,816 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:05:46,524 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:06:48,516 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:07:27,178 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:07:30,372 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:07:38,868 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:29:26,662 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:29:29,408 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 15:29:39,087 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:03:26,125 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:03:28,885 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:03:38,723 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:29:30,882 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:29:33,514 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-29 16:29:43,409 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:09:47,739 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:10:04,828 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:11:09,209 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:12:55,486 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:22:06,463 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:28:48,931 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:28:52,735 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:33:16,048 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:34:21,293 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:23,330 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:25,350 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:27,378 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:29,402 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:31,424 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:33,462 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:35,497 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:37,523 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:39,546 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:41,563 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:43,585 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:45,613 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:47,639 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:49,664 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:51,689 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:53,714 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:55,736 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:57,757 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:34:59,781 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:01,803 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:03,845 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:05,878 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:07,899 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:09,924 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:11,947 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:13,970 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:15,993 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:18,010 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:20,034 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:22,059 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:24,104 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:26,153 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:28,195 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:30,246 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:32,299 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:34,343 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:36,395 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:38,437 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:35:40,481 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:45:02,068 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:49:30,954 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 10:49:34,024 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 10:49:57,658 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:50:01,718 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62EED3790>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 10:53:05,266 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:53:09,328 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B0D10>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 10:58:40,811 [Controller] - INFO - Creating a new clinical report
+2025-05-30 10:58:44,891 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B8E90>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 11:00:05,258 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:00:09,316 [Controller] - ERROR - Error creating new report: HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /new_report (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B62F0B3450>: Failed to establish a new connection: [WinError 10061] Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione'))
+2025-05-30 11:01:18,870 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:01:19,650 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:01:22,115 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:01:58,698 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:01:58,703 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:08:09,643 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:08:15,496 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:08:18,675 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:11:13,680 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:16:22,392 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:16:25,594 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:20:34,025 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:26:15,916 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:26:33,894 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:26:37,729 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:38:47,914 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:38:47,945 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:39:59,956 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:40:28,989 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:40:56,697 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:40:56,704 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:43:40,186 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:43:40,189 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:44:31,597 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:44:31,602 [Controller] - ERROR - Error creating new report: 422 Client Error: Unprocessable Entity for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:45:17,185 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 11:46:07,385 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:46:14,302 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:39,538 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:50,802 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:48:56,696 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:48:58,423 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 11:50:55,334 [Controller] - INFO - Creating a new clinical report
+2025-05-30 11:50:57,136 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 11:50:57,161 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:03:02,264 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:03:04,792 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:03:04,818 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:05:40,473 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:05:44,290 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:06:13,860 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:06:16,735 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:06:16,879 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-05-30 12:06:44,792 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:00,144 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:07:02,276 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:04,571 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:07:14,971 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:17:25,419 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-30 12:17:31,861 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:17:49,576 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:07,553 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:18:12,019 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:15,737 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:18:24,178 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:20,388 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:25:24,955 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:27,706 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:25:39,043 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:31:49,513 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:32:47,471 [Controller] - INFO - Creating a new clinical report
+2025-05-30 12:32:51,970 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:32:55,051 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-30 12:33:03,663 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:40:26,739 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:40:58,171 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:42:17,011 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:42:20,321 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:50:27,613 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:51:00,467 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 09:51:05,500 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 09:54:02,767 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:07:40,238 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:08:01,225 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:08:04,660 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:08:47,513 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:08:50,606 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:11:49,361 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:16:13,662 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:16:17,084 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:16:35,136 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:16:38,366 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:22:17,843 [DashboardDriver] - INFO - Running command: streamlit run
+2025-05-31 10:22:21,082 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 10:57:34,084 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:41:55,644 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:02,371 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:49,847 [Controller] - INFO - Creating a new clinical report
+2025-05-31 11:43:54,568 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:43:57,997 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:44:08,234 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:49:45,228 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:28,639 [Controller] - INFO - Creating a new clinical report
+2025-05-31 11:51:34,096 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:36,769 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 11:51:46,851 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:38,628 [Controller] - INFO - Creating a new clinical report
+2025-05-31 12:02:43,518 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:46,313 [DB] - INFO - Connected to MongoDB successfully.
+2025-05-31 12:02:56,540 [DB] - INFO - Connected to MongoDB successfully.

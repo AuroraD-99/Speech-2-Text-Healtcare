@@ -52,7 +52,7 @@ class PipelineManager:
         self.chroma_path = os.getenv("CHROMA_DB_PATH")
         self.chroma_client = Client() 
 
-        self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["CF"])
+        self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["Anagrafica"]["Codice Fiscale"])
 
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index") 
         #devi controllare se con questo tutti gli altri file si collegano allo stesso RAG
@@ -74,7 +74,7 @@ class PipelineManager:
 
     #---------------------------------------------- FUNZIONI PER LA GESTIONE DELLA PIPELINE ----------------------------------------------
 
-    def Pipeline_manager(self):
+    def Pipeline_manager(self, audio_filepath):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
 
         """Serve una logica di reset o re-inizializzazione del RAGManager e PipelineManager. Al login di un medico dovresti:
@@ -83,7 +83,7 @@ class PipelineManager:
         
         #acquisizione del testo trascritto
         self.logger.info(f"Procedo all'acquisizione della nuova trascrizione...")
-        report_text = self.transcriptor.run()
+        report_text = self.transcriptor.run(audio_filepath)
 
         #estrazione e check sulla validità dell'anagrafica del paziente nel DB
         self.logger.info(f"Procedo all'estrazione dell'anagrafica del paziente ed alla verifica sulla presenza del suo FSE...")
@@ -152,6 +152,8 @@ class PipelineManager:
             self.RAGManager.sync_chroma_from_mongo() #fa la sincronizzazione periodica tra il RAG e MongoDB
             self.update_time = datetime.now() + timedelta(hours=2)
             self.logger.info(f"Sincronizzazione RAG - MongoDB terminata ...")
+        
+        return document_id
    
 
 #------------------------------------- MAIN DI PROVA ----------------------------------------

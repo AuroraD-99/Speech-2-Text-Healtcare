@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#F5EEDD"  
-backgroundColor = "#7AE2CF" 
-secondaryBackgroundColor = "#077A7D" 
-textColor = "#262730"  
+primaryColor = "#4DD0E1"                 # Azzurro medico per accenti
+backgroundColor = "#121212"              # Nero quasi assoluto per lo sfondo
+secondaryBackgroundColor = "#1E1E1E"     # Grigio molto scuro per container e sidebar
+textColor = "#E0E0E0"                    # Grigio chiaro per alta leggibilità
 font = "sans serif"

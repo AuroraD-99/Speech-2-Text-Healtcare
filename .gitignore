@@ -6,3 +6,10 @@ key.env
 *.jsonl
 *.wav
 *.conda
+/mistral_ita-7b-Q4_K_M.gguf
+app.log
+app.log
+*.pyc
+*.log
+*.log
+*.log

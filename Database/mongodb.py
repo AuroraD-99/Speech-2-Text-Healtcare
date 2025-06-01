@@ -6,6 +6,9 @@ import time
 import uuid
 import numpy as np
 from typing import List
+import bcrypt
+from bson import Binary
+from bson import ObjectId
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -24,7 +27,7 @@ class DB:
             # Definizione delle collezioni separate
             self.transcriptions = self.db["transcriptions"]
             self.reports_collection = self.db["clinical_reports"] #deve contenere anche l'id dell'embedding
-            self.operators_collection = self.db["operators"]
+            self.operators_collection = self.db["medical_operators"]
             self.RAG_embedding_cache = self.db["RAG_embeddings_cache"]
             # Logger per il monitoraggio
             self.logger = Logger(self.__class__.__name__).get_logger()
@@ -116,7 +119,7 @@ class DB:
         """
         Returns all clinical reports for a specific doctor.
         """
-        return list(self.reports_collection.find({"doctor_cf": doctor_cf}))
+        return list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf}))
     
     def get_validated_clinical_report(self, report_id: str) -> dict:
         #Recupera un referto validato. Se non è validato, restituisce None e mostra un warning.
@@ -129,7 +132,12 @@ class DB:
         
         return report
 
-       
+    def get_report_by_id(self, report_id):
+        """
+        Returns a clinical report by report_id.
+        """
+        return self.reports_collection.find_one({"_id": ObjectId(report_id)})
+    
     def get_all_clinical_reports(self):
         """
         Returns all clinical reports.
@@ -147,8 +155,7 @@ class DB:
         Update a clinical report by report_id.
         """
         result = self.reports_collection.update_one(
-            {"report_id": report_id},
-            {"validater": True},
+            {"_id": report_id},
             {"$set": new_report}
         )
         return result.modified_count
@@ -157,14 +164,14 @@ class DB:
         """
         Delete a clinical report by report_id.
         """
-        result = self.reports_collection.delete_one({"report_id": report_id})
+        result = self.reports_collection.delete_one({"_id": report_id})
         return result.deleted_count
     
-    def delete_all_clinical_reports_of_a_patient(self, patient_name):
+    def delete_all_reports_by_patient(self, patient_name, doctor_cf=None):
         """
         Delete all clinical reports of a patient.
         """
-        result = self.reports_collection.delete_many({"name": patient_name})
+        result = self.reports_collection.delete_many({"name": patient_name}, {"doctor_cf": doctor_cf})
         return result.deleted_count
     
     def group_clinical_reports_by_patient_name(self, patient_name):
@@ -238,7 +245,93 @@ class DB:
     def get_embeddings_by_doc_cf(self, cf: str) -> List[dict]: 
         return list(self.RAG_embedding_cache.find({"metadata.medico_cf": cf}))
      
-    #------------------------------------------------------------------------------------------------------------------------
+    #--------------------------------------------------- PERSONALE MEDICO ------------------------------------------------------
+    def insert_operator(self, new_user):
+        """
+        Inserisce un operatore medico nella collezione 'medical_operators' con la seguente struttura:
+        {
+            "Anagrafica": {
+                "Email":,
+                "Password":,
+                "Nome":,
+                "Cognome":,
+                "Cellulare":,
+                "Codice Fiscale":,
+                "Ruolo":,  # ad esempio "Medico", "Infermiere", etc.
+                
+            }
+            "Ospedale": {
+                "Nome Ospedale":,
+                "Città":,
+                "Provincia":,
+                "CAP":,
+                "Reparto":,
+                
+            }
+        }
+        
+        La password viene cryptata prima di essere memorizzata nel database.
+        """
+        # Controlla se l'operatore esiste già
+        existing_operator = self.operators_collection.find_one({"Email": new_user["Anagrafica"]["Email"]})
+        if existing_operator:
+            raise ValueError("Operatore già esistente")
+
+        # Crittografia della password
+        hashed_password = self.hash_password(new_user["Anagrafica"]["Password"])
+
+        # Inserimento dell'operatore
+        new_user["Anagrafica"]["Password"] = hashed_password
+        result = self.operators_collection.insert_one(new_user)
+        return result.inserted_id
+    
+    def hash_password(self, password):
+        """
+        Crittografa la password utilizzando bcrypt.
+        """
+        if isinstance(password, str):
+            password = password.encode('utf-8')  # codifica solo se è una stringa
+
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password, salt)
+        return hashed
+
+    
+    def get_operator(self, email):
+        """
+        Recupera un operatore medico dato il nome utente.
+        """
+        # L'email si trova sotto il campo "EMail" all'interno della struttura "Anagrafica"
+        
+        return self.operators_collection.find_one({"Anagrafica.Email": email})
+    
+    def get_operator_by_name_and_surname(self, name, surname):
+        """
+        Recupera un operatore medico dato il nome e il cognome.
+        """
+        return self.operators_collection.find_one({"anagrafica.name": name, "anagrafica.surname": surname})
+    
+    def get_operator_by_cf(self, cf):
+        """
+        Recupera un operatore medico dato il codice fiscale.
+        """
+        return self.operators_collection.find_one({"anagrafica.CF": cf})
+    
+    def update_operator(self, email, updated_data):
+        """
+        Aggiorna i dati di un operatore medico dato il nome utente.
+        """
+        # Crittografia della nuova password se presente
+        if "Password" in updated_data:
+            updated_data["Anagrafica"]["Password"] = self.hash_password(updated_data["Anagrafica"]["Password"])
+
+        result = self.operators_collection.update_one(
+            {"email": email},
+            {"$set": updated_data}
+        )
+        return result.modified_count
+        
+    
 
     # Chiude la connessione al database
     def close(self):
@@ -249,27 +342,17 @@ class DB:
 if __name__ == "__main__":
     # Esempio di utilizzo
     db = DB()
-    db.insert_clinical_report({
-        "report_id": "12345",
-        "cf_paziente": "ABC123",
-        "cf_medico": "XYZ789",
-        
-        "name": "Mario Rossi",
-        "Patologia":"Morto"
-    })
     
     
-    db.insert_clinical_report({
-        "report_id": "12345",
-        "cf_paziente": "ABC123",
-        "cf_medico": "XYZ789",
-        
-        "name": "Mario Rossi",
-        "Patologia":"Ho sbagliato è ancora vivo"
-    })
     
-    print(db.group_clinical_reports_by_patient_name("Mario Rossi"))
-    db.delete_all_clinical_reports_of_a_patient("Mario Rossi")
-    print(db.get_all_clinical_reports())
+    db.insert_clinical_report(
+        report_id="12345",
+        report={
+            "name": "Mario Rossi",
+            "patient_id": "P123",
+            "doctor_cf": "D456",
+            "report_text": "Questo è un esempio di referto clinico.",
+            "validated": False
+        }
+    )
     
-    db.close()
