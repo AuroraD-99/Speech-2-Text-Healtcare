@@ -36,8 +36,7 @@ class LLMWrapper:
                 "H in PS": "09:45",
                 "H libero e operativo": "10:00",
                 "luogo intervento": "Via Roma 12, Milano",
-                "condizione riferita": "Dolore toracico",
-                "recapito telefonico": "3331234567"
+                "condizione riferita": "Dolore toracico"
             },
             "Ambulanza": {
                 "CRI": "MI102",

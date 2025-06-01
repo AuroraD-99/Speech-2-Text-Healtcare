@@ -238,49 +238,57 @@ class FSEManager:
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
     #DeepMount00/Mistral-RAG
 
-    def retrieve_context(self, embedding, top_k=1): #DA CONTROLLARE - FUNZIONA BENE SUGLI EMBEDDING SUDDIVISI IN CHUNK?
+    def retrieve_context(self, embedding, top_k=4): #TODO: CONTROLLARE FUNZIONAMENTO
         """
-        Recupera i referti clinici più simili da ChromaDB in base all'embedding fornito.
-        Applica eventualmente un filtro per tipo di documento.
+        Esegue retrieval semantico sui chunk delle trascrizioni e restituisce i referti clinici
+        dei documenti a cui appartengono i chunk più simili.
         """
-
         filter_metadata = {"type": self.function_mode}
 
         try:
             results = self.collection.query(
                 query_embeddings=[embedding],
                 n_results=top_k,
-                where=filter_metadata
+                where=filter_metadata,
+                include=["metadatas", "documents", "ids"]
             )
         except Exception as e:
             self.logger.error(f"Errore nella query per il contesto: {e}")
-            self.logger.info(f"Errore nel recupero del contesto.") 
+            return None
 
-        documents = results.get("documents", [[]])[0]
-        similar_ids = results.get("ids", [[]])[0]
         metadatas = results.get("metadatas", [[]])[0]
+        similar_ids = results.get("ids", [[]])[0]
 
-        if not documents or not similar_ids:
-            self.logger.info(f"Nessun contesto rilevante trovato.")
-            return
+        if not metadatas or not similar_ids:
+            self.logger.info("Nessun contesto rilevante trovato.")
+            return None
 
+        # Per evitare duplicati se più chunk appartengono allo stesso documento
+        seen_docs = set()
         context_snippets = []
-        for i, doc_id in enumerate(similar_ids):
-            try:
-                metadata = metadatas[i]
-                referto_testo = metadata.get("clinical_report") or metadata.get("scheda_ps") or documents[i]
 
-                if referto_testo:
-                    cleaned = self.clean_text(referto_testo)
-                    context_snippets.append(cleaned)
+        for metadata in metadatas:
+            parent_id = metadata.get("parent_doc_id")
+            if not parent_id or parent_id in seen_docs:
+                continue
 
-            except Exception as e:
-                self.logger.warning(f"Impossibile recuperare referto per ID {doc_id}: {e}")
-                return
+            # Prova a recuperare il referto
+            referto = (
+                metadata.get("clinical_report") or
+                metadata.get("scheda_ps") or
+                None
+            )
+
+            if referto:
+                context_snippets.append(referto)
+                seen_docs.add(parent_id)
+
+            if len(context_snippets) >= top_k:
+                break
 
         if not context_snippets:
-            self.logger.info(f"Nessun referto rilevante trovato.")
-            return
+            self.logger.info("Nessun referto rilevante trovato.")
+            return None
 
         return "\n\n".join(context_snippets)
 
