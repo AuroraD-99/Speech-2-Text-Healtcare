@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import time
+import numpy as np
 from datetime import datetime
 import logging 
 import tempfile   
@@ -185,8 +186,7 @@ class FSEManager:
                 #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
                 self.logger.debug(f"Modalità di funzionamento: Emergency...")
                 self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.retrieve_context(embedding) #COME FUNZIONA ESATTAMENTE?
-                #report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
+                context = self.retrieve_context(embedding) 
 
                 #genero la scheda di ammissione al PS
                 self.logger.debug(f"Procedo alla generazione della scheda di ammissione al PS...")
@@ -206,7 +206,6 @@ class FSEManager:
                 self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
                 self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
                 context = self.retrieve_context(embedding, doc_type_filter=self.function_mode)
-                #report_with_context = f"Contesto simile:\n{context}\n\nReferto:\n{report_text}"
 
                 self.logger.debug(f"Procedo alla generazione del referto clinico...")
                 clinical_report = self.llm.generate_clinical_report(report_text, context) #
@@ -221,7 +220,7 @@ class FSEManager:
                         "clinical_report": clinical_report
                 }
 
-            #self.llm.check_json_format(full_output)
+            self.llm.check_json_format(full_output) #TODO: CONTROLLARE LA FUNZIONE
 
             #Salvataggio in formato JSON dell'output 
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
@@ -238,86 +237,192 @@ class FSEManager:
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
     #DeepMount00/Mistral-RAG
 
+    def cosine_similarity(a, b): #TODO: VEDERE SE CI SONO ANCHE ALTRE ALTERNATIVE E SCEGLIERE LA MIGLIORE
+        a = np.array(a)
+        b = np.array(b)
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
+
+
     def retrieve_context(self, embedding, top_k=4): #TODO: CONTROLLARE FUNZIONAMENTO
-        """
-        Esegue retrieval semantico sui chunk delle trascrizioni e restituisce i referti clinici
-        dei documenti a cui appartengono i chunk più simili.
-        """
+
         filter_metadata = {"type": self.function_mode}
 
-        try:
-            results = self.collection.query(
-                query_embeddings=[embedding],
-                n_results=top_k,
-                where=filter_metadata,
-                include=["metadatas", "documents", "ids"]
+        #l'embedding viene calcolato in Pipeline_manager con la funzione del RAGManager compute_embedding
+        #e ha come formato:
+        """chunk_data.append({
+                "id": chunk_id,
+                "text": chunk,  # Conservo il testo perchè lo uso per il retrieval semantico
+                "embedding": embedding.tolist()
+            })"""
+
+        try: #fa il confronto per tutti i chunk: trova i chunk più simili -> prende l'id dell'elemento a cui appartiene -> carica il referto corrispondente
+            results = self.collection.query( 
+                query_embeddings=[embedding], #embedding del testo che voglio utilizzare per il retrieval
+                n_results=top_k * 2, #numero di risultati che voglio trovare
+                where=filter_metadata, #regola che restringe i risultati - voglio che ci sia un filtraggio in base al tipo di documento
+                include=["metadatas", "documents"]
             )
         except Exception as e:
             self.logger.error(f"Errore nella query per il contesto: {e}")
             return None
+        
+        try:
+            chunk_metadatas = results.get("metadatas", [[]])[0] #TODO: COSA PRENDE ESATTAMENTE?
+            self.logger.info(f"Chunk metadata: {chunk_metadatas[0]}") #stampo un esempio di chunk metatada per capire cosa contiene
+        except Exception as e:
+            self.logger.error(f"Errore nel recupero metadati per i chunk: {e}")
 
-        metadatas = results.get("metadatas", [[]])[0]
-        similar_ids = results.get("ids", [[]])[0]
+        # Retrieval su documenti interi (ibrido)
+        try:
+            # Recupero tutti i metadati dei documenti memorizzati
+            metadatas = self.collection.get(include=["metadatas"]).get("metadatas", [])
+            self.logger.info(f"metadata: {metadatas[0]}") #stampo un esempio di metatada per capire cosa contiene
+
+        except Exception as e:
+            self.logger.error(f"Errore nel recupero metadati per embedding completi: {e}")
+            metadatas = [] #perchè altrimenti fa cosi?
+
+        complete_scores = [] #lista che conterrà i punteggi di similarità calcolati per le query
+ 
+        """similar_ids = results.get("ids", [[]])[0]
 
         if not metadatas or not similar_ids:
             self.logger.info("Nessun contesto rilevante trovato.")
             return None
-
-        # Per evitare duplicati se più chunk appartengono allo stesso documento
-        seen_docs = set()
-        context_snippets = []
+        """
 
         for metadata in metadatas:
-            parent_id = metadata.get("parent_doc_id")
-            if not parent_id or parent_id in seen_docs:
+            #verifico che i documenti siano del tipo che mi serve - DOVREBBE ESSERE INUTILE MA LO USO PER IL CHECK
+            if not metadata or metadata.get("type") != self.function_mode: 
+                self.logger.info(f"Metadati assenti o tipologia di documento errato")
                 continue
 
-            # Prova a recuperare il referto
+            #Prendo le info (id ed embedding) della trascrizione completa
+            complete_emb = metadata.get("complete_embedding")
+            parent_id = metadata.get("parent_doc_id")
+            #Verifico che siano presenti - è INUTILE MA LO INSERISCO PER DEBUG
+            if not complete_emb or not parent_id:
+                self.logger.info(f"Embedding della trascrizione completa o id della trascrizione mancanti")
+                continue
+
+            #Calcolo lo score di similarità tra l'embedding fornito in input alla funzione e quelli nel RAG
+            score = self.cosine_similarity(embedding, complete_emb)
+            complete_scores.append((score, metadata))
+
+        # Ordino per similarità: per prendere gli embedding più simili a quello in input
+        complete_scores.sort(key=lambda x: x[0], reverse=True)
+
+        # Unione: deduplica e ordina
+        # Per evitare duplicati se più chunk appartengono allo stesso documento
+        combined_context = []
+        seen_docs = set()
+
+        # Prima i documenti interi più rilevanti
+        for score, metadata in complete_scores:
+            parent_id = metadata.get("parent_doc_id")
+            if parent_id in seen_docs: #verifico che il documento intero non sia già stato preso
+                continue
+
+            referto = ( #prelievo del referto
+                metadata.get("clinical_report") or
+                metadata.get("scheda_ps") or
+                None
+            )
+            if referto:
+                combined_context.append((score, referto))
+                seen_docs.add(parent_id)
+
+            if len(combined_context) >= top_k:
+                break
+
+        # Se non bastano i documenti interi, aggiungi i più simili da chunk
+        for metadata in chunk_metadatas:
+            parent_id = metadata.get("parent_doc_id")
+            if parent_id in seen_docs:
+                continue
+
             referto = (
                 metadata.get("clinical_report") or
                 metadata.get("scheda_ps") or
                 None
             )
-
             if referto:
-                context_snippets.append(referto)
+                combined_context.append((None, referto))
                 seen_docs.add(parent_id)
 
-            if len(context_snippets) >= top_k:
+            if len(combined_context) >= top_k:
                 break
 
-        if not context_snippets:
-            self.logger.info("Nessun referto rilevante trovato.")
+        if not combined_context:
+            self.logger.info("Nessun contesto rilevante trovato.")
             return None
 
-        return "\n\n".join(context_snippets)
+        # Restituisco solo i testi
+        return "\n\n".join([referto for _, referto in combined_context])
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gestione referti vocali e generazione FSE")
+def main():
+    # Impostazioni iniziali
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("FSEManagerMain")
 
-    args = parser.parse_args()
+    # Caricamento variabili ambiente
+    env_file = "key.env"
+    load_dotenv(env_file)
 
-    report_text="Scheda di Ammissione al Pronto Soccorso Paziente Sig.ra Francesca Nanni, 62 anni, residente a Roma. Motivo dellintervento e sintomi riferiti La paziente ha accusato un intenso dolore al petto, irradiato al braccio sinistro e accompagnato da nausea, mentre era a casa. Ha riferito anche di aver avuto episodi simili nei giorni precedenti, ma di entità minore. Contesto clinico La paziente è una donna con una storia familiare di malattie cardiovascolari; la madre è deceduta per un infarto del miocardio alletà di 70 anni. La paziente è ipertesa e in trattamento con farmaci antipertensivi. Dinamica dellaccesso al PS La chiamata è stata effettuata alle ore 1115 da un familiare. Lintervento è avvenuto in Via della Libertà, 25, a Roma. Il trasporto è stato effettuato in ambulanza in codice giallo, con monitoraggio continuo dellECG e della saturazione di ossigeno. Trattamenti e interventi effettuati Allarrivo sul posto, la paziente era vigile, collaborante, con parametri vitali nella norma, ma con evidente distress respiratorio. È stata sottoposta a ossigenoterapia con maschera facciale a 6 litriminuto e somministrazione di acido acetilsalicilico da mg per via endovenosa. La paziente ha ricevuto anche un bolo di morfina da 2 mg per il controllo del dolore. Parametri vitali rilevati Pressione arteriosa 80 mmHg Frequenza cardiaca 92 bpm Frequenza respiratoria 22 attimin Temperatura 36,8C Saturazione di ossigeno 88 con aria ambiente, migliorata al 94 con ossigenoterapia Eventuale presenza di autorità Non presente. Annotazioni aggiuntive da parte del personale La paziente ha riferito di aver assunto gli ultimi pasti regolarmente e di non avere particolari allergie note. La famiglia ha fornito una cartella clinica incompleta con precedenti episodi di angina. Esami diagnostici Allelettrocardiogramma eseguito in ambulanza è emerso un sopraslivellamento del tratto ST in derivazioni inferiori, suggestivo per infarto miocardico inferiore. Trasporto al PS La paziente è stata trasportata al Pronto Soccorso dellOspedale Umberto I di Roma, dove è stata accolta nel percorso Code Rosse. Notazioni È stata avviata la procedura per il trattamento trombolitico e la paziente è stata sottoposta a ulteriori indagini diagnostice, tra cui ecocardiogramma e esami del sangue per marker cardiaci. Dettagli clinici aggiuntivi La paziente è stata mantenuta sotto stretto monitoraggio per tutta la durata del trasporto e in Pronto Soccorso, con controlli continui dei parametri vitali e dellECG. Stato alla fine del trasporto La paziente è arrivata al Pronto Soccorso in buone condizioni generali, ma con persistente dolore toracico. Elementi JSON strutturati json nome Francesca, cognome Nanni, eta 62, residenza Roma, motivo_intervento Dolore toracico acuto, sintomi_riferiti Dolore al petto irradiato al braccio sinistro, Nausea, storia_familiare Malattie cardiovascolari, farmaci_assunti Farmaci anti"
-    embedding_model = os.getenv("EMBEDDING_MODEL")
+    # Modalità di funzionamento (Emergency, Follow-up, ecc.)
+    function_mode = "Emergency"
+
+    # Report di test
+    report_text = (
+        "Scheda di Ammissione al Pronto Soccorso Paziente Sig.ra Francesca Nanni, 62 anni, residente a Roma. "
+        "Motivo dell’intervento e sintomi riferiti: La paziente ha accusato un intenso dolore al petto, irradiato al braccio sinistro "
+        "e accompagnato da nausea, mentre era a casa. [...] ECG e della saturazione di ossigeno."
+    )
+
+    # Inizializzazione embedder
+    logger.info("Inizializzo modello di embedding...")
     embedder = SentenceTransformer("distiluse-base-multilingual-cased-v2")
-
     embedding = embedder.encode(report_text)
 
-    anagrafica_medico={"name": "Anna", "surname": "Quercia", "CF": "QRCNNA225H", "specializzazione": "Pneumologa" }
-    anagrafica_paziente={"name": "Giovanni", "surname": "Foglia", "CF": "GVNNFOR347S"}
+    # Anagrafiche fittizie
+    anagrafica_medico = {
+        "name": "Anna",
+        "surname": "Quercia",
+        "CF": "QRCNNA225H",
+        "specializzazione": "Pneumologa"
+    }
 
-    chroma_client = Client() 
-    function_mode="Emergency"
-    env_file="key.env"
+    anagrafica_paziente = {
+        "name": "Francesca",
+        "surname": "Nanni",
+        "CF": "FRNNNI62R"
+    }
 
-    FSE_manager = FSEManager(chroma_client, function_mode, env_file)
+    # Inizializzazione ChromaDB client
+    logger.info("Creo client ChromaDB...")
+    chroma_client = Client()
 
-    clinical_report = FSE_manager.FSE_manager(time.strftime("%Y-%m-%d %H:%M:%S"), 
-                                              report_text, 
-                                              embedding, 
-                                              anagrafica_medico, 
-                                              anagrafica_paziente) 
+    # Inizializzazione del manager
+    logger.info("Inizializzo FSEManager...")
+    fse_manager = FSEManager(chroma_client, function_mode, env_file)
 
-        
+    # Generazione report clinico
+    logger.info("Avvio generazione del documento FSE...")
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    output, file_path = fse_manager.FSE_manager(
+        timestamp,
+        report_text,
+        embedding,
+        anagrafica_medico,
+        anagrafica_paziente
+    )
 
+    # Output finale
+    logger.info("Output JSON generato:")
+    print(output)
+
+    logger.info(f"Salvato temporaneamente in: {file_path}")
+
+if __name__ == "__main__":
+    main()

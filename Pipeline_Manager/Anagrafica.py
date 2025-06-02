@@ -14,7 +14,7 @@ from Database.mongodb import DB
 class Anagrafica:
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
-        #self.logger = logging.getLogger("Anagrafica")
+        self.logger = logging.getLogger("Anagrafica")
 
         #inizializzazione del database
         self.DB_manager = DB()
@@ -45,10 +45,10 @@ class Anagrafica:
             "nominativo": {
                 "nome": r"\b[Nn]ome\s*[:\-]?\s*([A-Z][a-z]+)",
                 "cognome": r"\b[Cc]ognome\s*[:\-]?\s*([A-Z][a-z]+)",
-                "completo": r"\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b",  # fallback
             },
             "sesso": r"\b[Ss]esso\s*[:\-]?\s*(Maschio|Femmina|M|F)\b",
             "data_nascita": r"\b[Nn]at[oa]?\s*(?:il)?\s*(\d{2}[/-]\d{2}[/-]\d{4})\b",
+            "età": r"\b[ÉE]tà\s*[:\-]?\s*(\d{1,3})\b",
             "luogo_nascita": {
                 "città": r"[Nn]at[oa]?\s*(?:a|in)?\s*([A-Z][a-z\s']+)",
                 "provincia": r"\(([A-Z]{2})\)"
@@ -108,18 +108,6 @@ class Anagrafica:
         nominativo["nome"] == "N/A" or nominativo["cognome"] == "N/A":
             missing_fields.append("nominativo (nome/cognome)")
 
-        #Determinazione del sesso se mancante
-        if not anagrafica.get("sesso") or anagrafica["sesso"] in ["", "N/A"]:
-            nome = nominativo.get("nome")
-            if nome and nome != "N/A":
-                if nome[-1].lower() == "a":
-                    anagrafica["sesso"] = "F"
-                elif nome[-1].lower() in ["o", "e"]:
-                    anagrafica["sesso"] = "M"
-                else:
-                    anagrafica["sesso"] = "N/A"
-
-
         # Calcolo età se mancante e ho la data di nascita
         if not anagrafica.get("età") or anagrafica["età"] in ["", "N/A"]:
             data_nascita = anagrafica.get("data_nascita")
@@ -173,8 +161,9 @@ class Anagrafica:
                     self.logger.warning(f"Errore calcolo età da {data_nascita}: {e}")
                     anagrafica["età"] = "N/A"
 
-        # CERCA RECORD SIMILI IN MONGODB
-        all_reports = list(self.reports_collection.find({"dati paziente": {"$exists": True}}))
+        # CERCA RECORD SIMILI IN MONGODB -> si potrebbe anche filtrare in base al medico (se la visita è di routine e non emergency)
+        #vanno aggiunte al database le funzioni find_anagrafica_best_match_by_medico CF e finf_anagrafica_best_match
+        all_reports = list(self.DB_manager.reports_collection.find({"dati paziente": {"$exists": True}}))
         max_match_score = 0
         best_match_anagrafica = None
 

@@ -55,7 +55,12 @@ class DB:
     # Ottiene tutte le trascrizioni dalla collezione 'transcriptions'
     def get_all_transcriptions(self):
         return list(self.transcriptions.find())
+    
+    #Recupera tutte le trascrizioni associate a una lista di embedding_id
+    def get_all_transcription_by_embedding_id(self, embedding_ids: List[str]):
+        return list(self.transcriptions.find({"embedding_id": {"$in": embedding_ids}}))
 
+    
     # Trova una trascrizione per 'filename'
     def find_transcription_by_filename(self, filename):
         return self.transcriptions.find_one({"filename": filename})
@@ -115,11 +120,11 @@ class DB:
         """
         return list(self.reports_collection.find({"patient_id": patient_id}))
     
-    def get_all_clinical_reports_by_doctor_cf(self, doctor_cf):
+    def get_all_clinical_reports_by_doctor_cf(self, doctor_cf): #prendo tutti i referti di un medico che sono stati validati
         """
         Returns all clinical reports for a specific doctor.
         """
-        return list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf}))
+        return list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf, "validated": True}))
     
     def get_validated_clinical_report(self, report_id: str) -> dict:
         #Recupera un referto validato. Se non è validato, restituisce None e mostra un warning.

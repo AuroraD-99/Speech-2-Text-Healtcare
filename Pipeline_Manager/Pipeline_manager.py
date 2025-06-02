@@ -107,7 +107,8 @@ class PipelineManager:
         self.logger.info(f"Report anonimizzato: {report_text_RAG}")
         
         #calcolo dell'embedding del testo
-        embedding_id, embedding = self.RAGManager.compute_embedding(report_text_RAG, self.function_mode) 
+        embedding_id = self.RAGManager.compute_id(report_text_RAG, self.function_mode) #calcolo l'id univoco su tutto il testo
+        embedding = self.RAGManager.compute_chunk_embeddings(report_text_RAG, self.function_mode) #calcolo gli embedding sui chunk
 
         try:
             #salvataggio della coppia audio + testo nel database 

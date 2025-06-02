@@ -28,76 +28,80 @@ class LLMWrapper:
     def __generate_prompt_scheda(self):
         esempio_scheda = {
             "Chiamata": {
-                "data": ["06.05.2025"],
-                "H chiamata": "08:30",
-                "H partenza": "08:35",
-                "H sul posto": "08:45",
-                "H partenza posto": "09:15",
-                "H in PS": "09:45",
-                "H libero e operativo": "10:00",
-                "luogo intervento": "Via Roma 12, Milano",
-                "condizione riferita": "Dolore toracico"
+                "data": ["N/A"],
+                "H chiamata": "N/A",
+                "H partenza": "N/A",
+                "H sul posto": "N/A",
+                "H partenza posto": "N/A",
+                "H in PS": "N/A",
+                "H libero e operativo": "N/A",
+                "luogo intervento": "N/A",
+                "condizione riferita": "N/A"
             },
             "Ambulanza": {
-                "CRI": "MI102",
-                "Sel": "SEL3"
+                "CRI": "N/A",
+                "Sel": "N/A"
             },
             "Equipaggio": {
-                "Aut.": "Mario Rossi",
-                "Socc1": "Luca Bianchi",
-                "Socc2": "Anna Verdi",
+                "Aut.": "N/A",
+                "Socc1": "N/A",
+                "Socc2": "N/A",
                 "IP": "N/A",
-                "Medico": "Dr. Paolo Neri"
+                "Medico": "N/A"
             },
-            "Causa trasporto non effettuato": ["Non necessaria"],
+            "Causa trasporto non effettuato": ["N/A"],
             "Attivazioni/Autorità presenti": {
-                "descrizione": "Polizia Locale",
-                "referto": "Intervento per incidente stradale"
+                "descrizione": "N/A",
+                "referto": "N/A"
             },
-            "Decesso": {"Ora decesso": "", "Firma": ""},
-            "Rifiuto (firma dell'interessato)": {"Firma": ""},
+            "Decesso": {"Ora decesso": "", "Firma": "N/A"},
+            "Rifiuto (firma dell'interessato)": {"Firma": "N/A"},
             "Rilevazioni": {
                 "Parametri": {
-                    "Coscienza": "vigile",
-                    "Cute": "normale",
-                    "Respiro": "regolare",
-                    "Sp02": "98%",
-                    "FC bpm": "72",
-                    "PA mmHg": "120/80",
-                    "Glic, Mg/dl": "95",
-                    "Temp. C°": "36.7"
+                    "Coscienza": "N/A",
+                    "Cute": "N/A",
+                    "Respiro": "N/A",
+                    "Sp02": "N/A",
+                    "FC bpm": "N/A",
+                    "PA mmHg": "N/A0",
+                    "Glic, Mg/dl": "N/A",
+                    "Temp. C°": "N/A"
                 },
                 "Glasgow Coma Scale": {
-                    "Apertura occhi": "Spontanea",
-                    "Risposta verbale": "Orientata",
-                    "Risposta motoria": "Obbedisce ai comandi"
+                    "Apertura occhi": "N/A",
+                    "Risposta verbale": "N/A",
+                    "Risposta motoria": "N/A"
                 },
-                "Pupille": "isocoriche",
-                "Lesioni riscontrate": "nessuna"
+                "Pupille": "N/A",
+                "Lesioni riscontrate": "N/A"
             },
             "Provvedimenti": {
-                "Respiro": "Ossigenoterapia",
-                "Circolo": "Monitoraggio",
+                "Respiro": "N/A",
+                "Circolo": "N/A",
                 "Immobilizzazione": "N/A",
-                "Altro": "ECG in loco",
-                "Infusioni/Farmaci": "Fiale di Paracetamolo"
+                "Altro": "N/A",
+                "Infusioni/Farmaci": "N/A"
             },
-            "Annotazioni": ["Paziente collaborante, nessuna difficoltà durante il trasporto"]
+            "Annotazioni": ["N/A"]
         }
 
         return (
-            "Sei un medico d’emergenza. Ricevi un testo discorsivo da una trascrizione. "
-            "Compila in formato JSON una scheda di Pronto Soccorso (PS), riempiendo i seguenti campi obbligatori. "
-            "Non inventare nulla: se un’informazione è assente, inserisci 'N/A'. L'anagrafica del paziente è già stata inserita."
-            "Rispondi in italiano e con JSON ben formattato, senza testo introduttivo.\n\n"
-            "Esempio di struttura attesa:\n"
+            "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
+            "chiara e ben strutturata, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
+            "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente."
+            "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
         )
 
 
     def generate_scheda_from_report(self, referto_ps, report_with_context = None): #DA CONTROLLARE
         prompt = self.__generate_prompt_scheda()
-        full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto_ps}"
+        if report_with_context:
+            self.logger.info(f"Generazione della scheda PS con contesto")
+            full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto_ps}"
+        else:
+            self.logger.info(f"Generazione della scheda PS senza contesto")
+            full_prompt = f"{prompt}\n\nReferto da analizzare: {referto_ps}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
             return result #[0]["generated_text"].replace(full_prompt, "").strip()
