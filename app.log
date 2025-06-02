@@ -765,3 +765,50 @@
 2025-05-31 12:02:43,518 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-31 12:02:46,313 [DB] - INFO - Connected to MongoDB successfully.
 2025-05-31 12:02:56,540 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:34:11,464 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-01 10:34:24,557 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:35:57,583 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:37:03,285 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:38:09,754 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:38:29,065 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:39:39,366 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:40:09,377 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:41:15,298 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:41:25,596 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:41:30,236 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:44:23,725 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:44:34,082 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:44:37,450 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:46:35,333 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:46:45,778 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:48:46,222 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:48:52,357 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:48:57,023 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:49:10,812 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:49:23,192 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:49:27,467 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:52:13,299 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-01 10:52:13,811 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:52:16,570 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:52:27,134 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:52:27,180 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:01,864 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-01 10:54:05,278 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:54:07,582 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:54:19,409 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:19,432 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:24,853 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:24,863 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:25,861 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:25,871 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:28,221 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:28,230 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:33,281 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:33,292 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:54:33,757 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:54:33,765 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:55:54,587 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-01 10:57:27,554 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:57:27,585 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
+2025-06-01 10:57:39,085 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
+2025-06-01 10:57:39,094 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id

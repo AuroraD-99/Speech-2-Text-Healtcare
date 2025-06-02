@@ -34,19 +34,20 @@ def new_report(request: InputReport):
         }
 
 @backend_app.post("/delete_report")
-def delete_report(report_id: str):
+def delete_report(report_id: InputText):
     """
     Endpoint to delete a clinical report by its ID.
     """
-    db.delete_clinical_report(report_id)
-    return {"message": f"Report with ID {report_id} deleted successfully"}
+    db.delete_clinical_report(report_id.text)
+    return {"message": f"Report with ID {report_id.text} deleted successfully"}
 
-@backend_app.post("/delete_all_reports_by_patient")
-def delete_all_reports_by_patient(patient_id: str):
+
+
+
+@backend_app.post("/get_report_by_id")
+def get_report_by_id(report_id: InputText):
     """
-    Endpoint to delete all clinical reports for a specific patient by their ID.
+    Endpoint to get a clinical report by its ID
     """
-    db.delete_all_reports_by_patient(patient_id)
-    return {"message": f"All reports for patient with ID {patient_id} deleted successfully"}
-
-
+    report = db.get_report_by_id(report_id.text)
+    return {"message":f"Report with ID {report_id.text} retrieved successfully", "report": report}

@@ -47,13 +47,35 @@ class Controller:
         )
         
         self.app.add_api_route(
-            path = "/delete_all_reports_by_patient",
-            endpoint = self.delete_all_reports_by_patient,
-            methods = ["POST"],
-            response_model = str,
-            summary = "Delete all reports for a patient",
-            description = "Deletes all clinical reports for a specific patient by their ID",
+            path = "/get_report_by_id",
+            endpoint=self.get_report_by_id,
+            methods=["POST"],
+            response_model=dict,
+            summary="Retrieve a report from DB",
+            description="Get a report from DB by its ID"
         )
+        
+    def get_report_by_id(self, input_var:InputText):
+        """
+        Endpoint to retrieve a clinical report by its ID from db
+        """
+        self.logger.info(f"Retrieving clinical report with ID: {input_var.text}")
+        
+        try:
+            response = requests.post(
+                url = f"{self.backend_url}/get_report_by_id",
+                json = {
+                    "text": input_var.text
+                }
+            )
+            
+            
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.logger.error(f"Error retrieving report: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
     def new_report(self, input_var:InputReport):
         """
         Endpoint to create a new clinical report.
@@ -89,21 +111,6 @@ class Controller:
             self.logger.error(f"Error deleting report: {e}")
             raise HTTPException(status_code=500, detail=str(e))
         
-    def delete_all_reports_by_patient(self, patient_id: str):
-        """
-        Endpoint to delete all clinical reports for a specific patient by their ID.
-        """
-        self.logger.info(f"Deleting all reports for patient with ID: {patient_id}")
-        try:
-            response = requests.post(
-                url = f"{self.backend_url}/delete_all_reports_by_patient",
-                json = {"patient_id": patient_id}
-            )
-            response.raise_for_status()
-            return response.json()
-        except requests.RequestException as e:
-            self.logger.error(f"Error deleting reports for patient: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
 
 
 # Create an instance of the Controller class and expose the FastAPI app
