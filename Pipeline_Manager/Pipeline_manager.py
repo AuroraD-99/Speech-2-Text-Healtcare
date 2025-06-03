@@ -148,6 +148,8 @@ class PipelineManager:
         embedding_doc_id = self.DB_manager.insert_embedding(embedding_doc)
 
         self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
+        #TODO: MECCANISMO DI RECUPERO IN CASO DI INTERRUZIONE PRIMA DEL SALVATAGGIO IN DB
+        #Viene effettuato il selvataggio del JSON temporaneamente anche in locale per prevenire la possibile perdita di info fino al salvataggio nel DB
         if os.path.exists(clinical_report[1]): #il check non dovrebbe essere necessario ma è meglio metterlo
             os.remove(clinical_report[1])
 
