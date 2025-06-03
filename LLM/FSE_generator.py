@@ -85,14 +85,17 @@ class LLMWrapper:
             "Annotazioni": ["N/A"]
         }
 
+        #TODO: usare il NER per arricchire il prompt
+
         return (
             "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
             "chiara e ben strutturata, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente."
-            "Non aggiungere un testo introduttivo, produci solo la scheda richiesta."
+            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
             "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
         )
+
 
 
     def generate_scheda_from_report(self, referto_ps, report_with_context = None): #DA CONTROLLARE

@@ -254,10 +254,15 @@ class FSEManager:
                 "text": chunk,  # Conservo il testo perchè lo uso per il retrieval semantico
                 "embedding": embedding.tolist()
             })"""
+        
+        embedding_chunk = []
+        
+        for e in embedding: #TODO: VEDI SE FUNZIONA
+            embedding_chunk.append(e["embedding"])
 
         try: #fa il confronto per tutti i chunk: trova i chunk più simili -> prende l'id dell'elemento a cui appartiene -> carica il referto corrispondente
             results = self.collection.query( 
-                query_embeddings=[embedding], #embedding del testo che voglio utilizzare per il retrieval
+                query_embeddings=[embedding_chunk], #embedding del testo che voglio utilizzare per il retrieval
                 n_results=top_k * 2, #numero di risultati che voglio trovare
                 where=filter_metadata, #regola che restringe i risultati - voglio che ci sia un filtraggio in base al tipo di documento
                 include=["metadatas", "documents"]

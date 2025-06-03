@@ -144,7 +144,7 @@ class PipelineManager:
         document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
 
         #salvataggio dell'embedding (strutturato) nel DB
-        embedding_doc = self.RAGManager.prepare_embedding_doc(embedding_id, embedding, self.function_mode)
+        embedding_doc = self.RAGManager.prepare_embedding_doc(report_text_RAG, embedding_id, embedding, self.function_mode)
         embedding_doc_id = self.DB_manager.insert_embedding(embedding_doc)
 
         self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")

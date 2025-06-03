@@ -9,6 +9,7 @@ from typing import List, Optional
 import bcrypt
 from bson import Binary
 from bson import ObjectId
+import redis
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
