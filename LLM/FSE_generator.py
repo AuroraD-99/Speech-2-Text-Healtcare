@@ -89,6 +89,7 @@ class LLMWrapper:
             "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
             "chiara e ben strutturata, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente."
+            "Non aggiungere un testo introduttivo, produci solo la scheda richiesta."
             "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
         )
@@ -133,11 +134,11 @@ class LLMWrapper:
             }
         
         return (
-            "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico formale, "
-            "chiaro e strutturato, in formato JSON. Non inserire dati inventati. Se una sezione è assente, scrivi 'N/A'.\n\n"
+            "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico in italiano, formale, "
+            "chiaro e ben strutturato, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente. "
-            "Rispondi in italiano e con JSON ben formattato. L'anagrafica del paziente è già stata inserita."
-            "Esempio di struttura attesa:\n"
+            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
+            "Struttura attesa:\n"
             f"{json.dumps(esempio_referto, ensure_ascii=False, indent=2)}"
         )
 
@@ -152,21 +153,48 @@ class LLMWrapper:
             self.logger.error(f"Errore nella generazione referto: {e}")
             return "{}"
 
-    def check_json_format(self, document): #FUNZIONE PER IL CHECK SUL FORMATO DEL FILE JSON - potrebbe essere inutile o dover essere cambiata
-        try:
-            if isinstance(document, str):
-                json.loads(document)
-            elif isinstance(document, dict):
-                json.dumps(document)
-            else:
-                return False
-            return True
-        except  json.JSONDecodeError:
+    def check_json_format(self, document):
+        """
+        Controlla se l'input è un JSON valido.
+        Supporta:
+        - dizionari Python
+        - stringhe JSON
+        Ritorna True se il formato è valido, altrimenti False.
+        """
+        if isinstance(document, dict):
             try:
-                fixed = repair_json(document)
-                return json.loads(fixed)
-            except Exception as e:
+                json.dumps(document)  # verifica serializzabilità
+                return True
+            except (TypeError, ValueError):
+                self.logger.warning(f"")
+                return False
+
+        elif isinstance(document, str):
+            try:
+                json.loads(document)  # verifica deserializzabilità
+                return True
+            except json.JSONDecodeError:
+                self.logger.warning(f"")
+                return False
+
+        return False
+    
+    def parse_json_if_valid(self, document):
+        """
+        Tenta di convertire un input in dizionario JSON.
+        Ritorna:
+        - dict se valido
+        - {} se non valido
+        """
+        if isinstance(document, dict):
+            return document
+        elif isinstance(document, str):
+            try:
+                return json.loads(document)
+            except json.JSONDecodeError:
                 return {}
+        return {}
+
     
     def save_to_json(self, result, file_path="output.json"): #DA RICONTROLLARE
         self.logger.info(f"Salvataggio su {file_path}: IN CORSO")

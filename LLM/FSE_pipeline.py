@@ -226,6 +226,7 @@ class FSEManager:
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
             out_file = os.path.join(self.JSON_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
 
+            #Salvataggio anche in locale per sicurezza  
             self.llm.save_to_json(full_output, out_file)
             self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
 
@@ -241,7 +242,6 @@ class FSEManager:
         a = np.array(a)
         b = np.array(b)
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
-
 
     def retrieve_context(self, embedding, top_k=4): #TODO: CONTROLLARE FUNZIONAMENTO
 
