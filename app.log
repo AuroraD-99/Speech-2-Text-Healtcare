@@ -813,3 +813,10 @@
 2025-06-01 10:57:39,085 [Controller] - INFO - Retrieving clinical report with ID: 683ad4ddcb2015b85357f4b5
 2025-06-01 10:57:39,094 [Controller] - ERROR - Error retrieving report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/get_report_by_id
 2025-06-03 10:53:50,323 [NER] - INFO - Creating directory for NER model at assets/HUMADEX/italian_medical_ner
+2025-06-03 11:35:53,731 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-03 11:36:00,724 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-03 11:36:26,406 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-03 11:38:28,445 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-03 11:39:03,387 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-03 11:39:31,260 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-03 11:39:34,426 [DB] - INFO - Connected to MongoDB successfully.

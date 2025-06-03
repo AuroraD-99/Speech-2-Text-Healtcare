@@ -29,6 +29,8 @@ class Dashboard:
             st.session_state.audio_recorder = AudioRecorder()
         if "last_report" not in st.session_state:
             st.session_state.last_report = None
+        if "function_mode" not in st.session_state:
+            st.session_state.function_mode = "Emergency"
         
         
         # Imposta l'environment variable per FastAPI
@@ -281,7 +283,6 @@ class Dashboard:
         medico_cf = anagrafica.get("CF", "")
 
         
- 
         st.markdown("---")
         st.markdown("### 🗂️ Riepilogo referti dei tuoi pazienti")
 
@@ -359,6 +360,24 @@ class Dashboard:
             st.rerun()
             
     def sidebar(self):
+        st.sidebar.markdown("### 📋 Modalità di funzionamento")
+        col1, col2 = st.sidebar.columns(2)
+        
+        with col1:
+            st.sidebar.button(
+                "🚑 Emergenza",
+                key="emergency_mode",
+                on_click=lambda: st.session_state.update({"function_mode": "Emergency"})
+            )
+        
+        with col2:
+            st.sidebar.button(
+                "🏥 Ordinaria",
+                key="ordinary_mode",
+                on_click=lambda: st.session_state.update({"function_mode": "Ordinary"})
+            )
+        st.sidebar.markdown("---")
+        
         st.sidebar.markdown("## 👤 Anagrafica Operatore")
 
         if st.session_state.logged_in:
@@ -379,8 +398,6 @@ class Dashboard:
             with st.sidebar.container(border=True):
                 st.markdown("🔒 <span style='color:gray'>Non sei loggato.</span>", unsafe_allow_html=True)
 
-
-        
 
         st.sidebar.markdown("---")
         
