@@ -21,6 +21,7 @@ from LLM.FSE_pipeline import FSEManager
 from Transcriptor.transcription_pipeline import TranscriptionPipeline
 from Database.mongodb import DB
 from Pipeline_Manager.Anagrafica import Anagrafica
+from ner import NER
 
 class PipelineManager:
     def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
@@ -64,6 +65,7 @@ class PipelineManager:
         self.FSE_manager = FSEManager(self.chroma_client, self.function_mode, self.env_file)
 
         self.anagrafica = Anagrafica()
+        self.ner = NER()
         
         #--------------------------------------------------- Salvataggio in PDF ---------------------------------------------------------
         self.PDF_output = os.getenv("PDF_PATH")
@@ -135,6 +137,8 @@ class PipelineManager:
                                                        self.anagrafica_medico, 
                                                        anagrafica_paziente) 
         
+        ner_clinical_reports = self.ner.extract_medical_entities(clinical_report[0]) #estrazione delle entità mediche dal referto generato
+        self.logger.info(f"Entità mediche estratte dal referto: {ner_clinical_reports}")
         #salvataggio del documento nel DB
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
         document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
