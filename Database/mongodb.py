@@ -34,7 +34,7 @@ class DB:
             self.logger = Logger(self.__class__.__name__).get_logger()
             self.logger.info("Connected to MongoDB successfully.")
             #Per le code Redis
-            self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            #self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
         except ConnectionFailure as e:
             self.logger.error(f"Failed to connect to MongoDB: {e}")
             raise
@@ -341,24 +341,24 @@ class DB:
 
     #----------------------------------------- PER LE CODE REDIS --------------------------------------------------
     #TODO: FINIRE DI INTEGRARE NEL SISTEMA LE CODE REDIS
-    def enqueue_report_for_doctor(self, doctor_cf: str, report_id: str):
-        """
+    """def enqueue_report_for_doctor(self, doctor_cf: str, report_id: str):
+        
         Aggiunge un referto alla coda Redis per il medico identificato dal CF.
-        """
+        
         key = f"queue:referti:{doctor_cf}"
         self.redis.rpush(key, report_id)  # inserisce in coda (push a destra)
 
     def dequeue_report_for_doctor(self, doctor_cf: str) -> Optional[str]:
-        """
+        
         Estrae il prossimo report_id dalla coda Redis per il medico (FIFO).
-        """
+        
         key = f"queue:referti:{doctor_cf}"
         return self.redis.lpop(key)
 
     def get_queue_for_doctor(self, doctor_cf: str) -> List[str]:
-        """
+        
         Ritorna tutti i report_id attualmente nella coda del medico.
-        """
+        
         key = f"queue:referti:{doctor_cf}"
         return self.redis.lrange(key, 0, -1)
 
@@ -370,7 +370,7 @@ class DB:
     # Chiude la connessione al database
     def close(self):
         self.client.close()
-
+    """
 
 
 if __name__ == "__main__":
