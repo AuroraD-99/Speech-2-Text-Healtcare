@@ -25,7 +25,7 @@ class LLMWrapper:
 
     #--------------------------------- FUNZIONI PER LA GENERAZIONE DELLA SCHEDA PS ----------------------------------------
 
-    def __generate_prompt_scheda(self):
+    def __generate_prompt_scheda(self, entities):
         esempio_scheda = {
             "Chiamata": {
                 "data": ["N/A"],
@@ -85,7 +85,7 @@ class LLMWrapper:
             "Annotazioni": ["N/A"]
         }
 
-        #TODO: usare il NER per arricchire il prompt
+        self.logger.info(f"Entities: {entities}")
 
         return (
             "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
@@ -94,12 +94,12 @@ class LLMWrapper:
             "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
             "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
+            f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{entities}\n\n"
         )
 
 
-
-    def generate_scheda_from_report(self, referto_ps, report_with_context = None): #DA CONTROLLARE
-        prompt = self.__generate_prompt_scheda()
+    def generate_scheda_from_report(self, referto_ps, entities, report_with_context = None): #DA CONTROLLAREa
+        prompt = self.__generate_prompt_scheda(entities)
         if report_with_context:
             self.logger.info(f"Generazione della scheda PS con contesto")
             full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto_ps}"
@@ -113,7 +113,7 @@ class LLMWrapper:
             self.logger.error(f"Errore nella generazione scheda: {e}")
             return "{}"
         
-    def __generate_prompt_report(self):
+    def __generate_prompt_report(self, entities):
         esempio_referto = {
               "Intestazione": {
                 "Data visita": "N/A",
@@ -136,18 +136,23 @@ class LLMWrapper:
               "Data redazione": "N/A"
             }
         
+        unique_entities = sorted(set(entities), key=str.lower)
+        formatted_entities = ", ".join(unique_entities) if unique_entities else "nessuna"
+
+        
         return (
             "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico in italiano, formale, "
             "chiaro e ben strutturato, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente. "
-            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
+            "NON SCRIVERE INTRODUZIONI, COMMENTI O SPIEGAZIONI. RISPONDI SOLO CON UN OGGETTO JSON VALIDO.\n\n"
+            f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{formatted_entities}\n\n"
             "Struttura attesa:\n"
             f"{json.dumps(esempio_referto, ensure_ascii=False, indent=2)}"
         )
 
                 
-    def generate_clinical_report(self, referto, report_with_context = None): #DA CONTROLLARE
-        prompt = self.__generate_prompt_report() 
+    def generate_clinical_report(self, referto, entities, report_with_context = None): #DA CONTROLLARE
+        prompt = self.__generate_prompt_report(entities) 
         full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)

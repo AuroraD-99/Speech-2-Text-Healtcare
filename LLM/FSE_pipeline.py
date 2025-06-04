@@ -30,11 +30,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from LLM.FSE_generator import LLMWrapper 
 from LLM.RAG_manager import RAGManager
+from Pipeline_Manager.ner import NER
 
 
 class FSEManager:
-    def __init__(self, chroma_client, function_mode="Emergency", env_file="key.env"):
-        #nella definizione della funzione vanno inserite le variabili per il RAG 
+    def __init__(self, chroma_client, ner, RAGManager, function_mode="Emergency", env_file="key.env"):
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("FSEManager")
@@ -60,26 +60,30 @@ class FSEManager:
         #Configurazione del modello
         if not os.path.exists(self.model_path) or os.path.exists(self.model_path):
             #se il path del modello non esiste, il modello viene scaricato al path specificato
-            self.model_download()
+            self._model_download()
 
         #configurazione del modello in base alle risorse a disposizione
-        self.model = self.model_configuration() 
+        self.model = self._model_configuration() 
 
         self.llm = LLMWrapper(model=self.model)
 
         #---------------------------------------------- Configurazione RAG --------------------------------------------------------------
-        self.chroma_client = chroma_client 
+        self.RAGManager = RAGManager
+        self.chroma_client = self.RAGManager.chroma_client #chroma_client 
 
-        self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
+        self.collection = self.RAGManager.collection #self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
         #--------------------------------------------------------------------------------------------------------------------------------
 
         self.JSON_path = os.getenv("JSON_PATH")
         if not os.path.exists(self.JSON_path):
             os.makedirs(self.JSON_path, exist_ok=True)
 
+        #self.ner = NER() #TODO: COMMENTARE, INSERIRE IN PIPELINE MANAGER E PASSARE COME PARAMETRO
+        self.ner = ner
+
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
 
-    def model_download(self):
+    def _model_download(self):
         self.logger.info(f"Controllo modello in: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -134,7 +138,7 @@ class FSEManager:
         self.logger.info("Download completato.")
 
 
-    def model_configuration(self):
+    def _model_configuration(self):
         self.logger.debug(f"Inizializzazione modello da: {self.model_path}")
 
         if torch.cuda.is_available():
@@ -179,18 +183,25 @@ class FSEManager:
             #Prelevo il testo trascritto
             self.logger.debug(f"[{timestamp}] Estrazione del record...")
             report_text = record.get("referto") if isinstance(record, dict) else record
+            entities = self.ner.extract_medical_entities(record)
 
-            self.logger.debug(f"[{timestamp}] Elaborazione record...")
+            self.logger.info(f"Entities: {entities}")
+            unique_entities = sorted(set(entities), key=str.lower)
+            formatted_entities = ", ".join(unique_entities) if unique_entities else "nessuna"
+
+            self.logger.info(f"Formatted Entities: {formatted_entities}")
+
+            self.logger.info(f"[{timestamp}] Elaborazione record...")
 
             if self.function_mode == "Emergency":
                 #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
-                self.logger.debug(f"Modalità di funzionamento: Emergency...")
-                self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.retrieve_context(embedding) 
+                self.logger.info(f"Modalità di funzionamento: Emergency...")
+                self.logger.info(f"Procedo con il recupero dal rag dei documenti simili...")
+                context = self.RAGManager.retrieve_context(embedding, entities) 
 
                 #genero la scheda di ammissione al PS
-                self.logger.debug(f"Procedo alla generazione della scheda di ammissione al PS...")
-                scheda_ps = self.llm.generate_scheda_from_report(report_text, context) 
+                self.logger.info(f"Procedo alla generazione della scheda di ammissione al PS...")
+                scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities, context) 
                 self.llm.check_json_format(scheda_ps)
 
                 #Configurazione del formato del file JSON di output
@@ -205,10 +216,10 @@ class FSEManager:
             else:
                 self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
                 self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.retrieve_context(embedding, doc_type_filter=self.function_mode)
+                context = self.RAGManager.retrieve_context(embedding, entities, doc_type_filter=self.function_mode)
 
                 self.logger.debug(f"Procedo alla generazione del referto clinico...")
-                clinical_report = self.llm.generate_clinical_report(report_text, context) #
+                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities, context) #
                 self.llm.check_json_format(clinical_report)
 
                 #Configurazione del formato del file JSON di output
@@ -228,7 +239,7 @@ class FSEManager:
 
             #Salvataggio anche in locale per sicurezza  
             self.llm.save_to_json(full_output, out_file)
-            self.logger.debug(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
+            self.logger.info(f"[{timestamp}] Output temporaneamente salvato in: {out_file}")                
 
             return [full_output, out_file]
 
@@ -237,134 +248,6 @@ class FSEManager:
            
     #------------------------------------- PER LA GESTIONE DEL RETRIEVAL DAL RAG -------------------------------------------
     #DeepMount00/Mistral-RAG
-
-    def cosine_similarity(a, b): #TODO: VEDERE SE CI SONO ANCHE ALTRE ALTERNATIVE E SCEGLIERE LA MIGLIORE
-        a = np.array(a)
-        b = np.array(b)
-        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
-
-    def retrieve_context(self, embedding, top_k=4): #TODO: CONTROLLARE FUNZIONAMENTO
-
-        filter_metadata = {"type": self.function_mode}
-
-        #l'embedding viene calcolato in Pipeline_manager con la funzione del RAGManager compute_embedding
-        #e ha come formato:
-        """chunk_data.append({
-                "id": chunk_id,
-                "text": chunk,  # Conservo il testo perchè lo uso per il retrieval semantico
-                "embedding": embedding.tolist()
-            })"""
-        
-        embedding_chunk = []
-        
-        for e in embedding: #TODO: VEDI SE FUNZIONA
-            embedding_chunk.append(e["embedding"])
-
-        try: #fa il confronto per tutti i chunk: trova i chunk più simili -> prende l'id dell'elemento a cui appartiene -> carica il referto corrispondente
-            results = self.collection.query( 
-                query_embeddings=[embedding_chunk], #embedding del testo che voglio utilizzare per il retrieval
-                n_results=top_k * 2, #numero di risultati che voglio trovare
-                where=filter_metadata, #regola che restringe i risultati - voglio che ci sia un filtraggio in base al tipo di documento
-                include=["metadatas", "documents"]
-            )
-        except Exception as e:
-            self.logger.error(f"Errore nella query per il contesto: {e}")
-            return None
-        
-        try:
-            chunk_metadatas = results.get("metadatas", [[]])[0] #TODO: COSA PRENDE ESATTAMENTE?
-            self.logger.info(f"Chunk metadata: {chunk_metadatas[0]}") #stampo un esempio di chunk metatada per capire cosa contiene
-        except Exception as e:
-            self.logger.error(f"Errore nel recupero metadati per i chunk: {e}")
-
-        # Retrieval su documenti interi (ibrido)
-        try:
-            # Recupero tutti i metadati dei documenti memorizzati
-            metadatas = self.collection.get(include=["metadatas"]).get("metadatas", [])
-            self.logger.info(f"metadata: {metadatas[0]}") #stampo un esempio di metatada per capire cosa contiene
-
-        except Exception as e:
-            self.logger.error(f"Errore nel recupero metadati per embedding completi: {e}")
-            metadatas = [] #perchè altrimenti fa cosi?
-
-        complete_scores = [] #lista che conterrà i punteggi di similarità calcolati per le query
- 
-        """similar_ids = results.get("ids", [[]])[0]
-
-        if not metadatas or not similar_ids:
-            self.logger.info("Nessun contesto rilevante trovato.")
-            return None
-        """
-
-        for metadata in metadatas:
-            #verifico che i documenti siano del tipo che mi serve - DOVREBBE ESSERE INUTILE MA LO USO PER IL CHECK
-            if not metadata or metadata.get("type") != self.function_mode: 
-                self.logger.info(f"Metadati assenti o tipologia di documento errato")
-                continue
-
-            #Prendo le info (id ed embedding) della trascrizione completa
-            complete_emb = metadata.get("complete_embedding")
-            parent_id = metadata.get("parent_doc_id")
-            #Verifico che siano presenti - è INUTILE MA LO INSERISCO PER DEBUG
-            if not complete_emb or not parent_id:
-                self.logger.info(f"Embedding della trascrizione completa o id della trascrizione mancanti")
-                continue
-
-            #Calcolo lo score di similarità tra l'embedding fornito in input alla funzione e quelli nel RAG
-            score = self.cosine_similarity(embedding, complete_emb)
-            complete_scores.append((score, metadata))
-
-        # Ordino per similarità: per prendere gli embedding più simili a quello in input
-        complete_scores.sort(key=lambda x: x[0], reverse=True)
-
-        # Unione: deduplica e ordina
-        # Per evitare duplicati se più chunk appartengono allo stesso documento
-        combined_context = []
-        seen_docs = set()
-
-        # Prima i documenti interi più rilevanti
-        for score, metadata in complete_scores:
-            parent_id = metadata.get("parent_doc_id")
-            if parent_id in seen_docs: #verifico che il documento intero non sia già stato preso
-                continue
-
-            referto = ( #prelievo del referto
-                metadata.get("clinical_report") or
-                metadata.get("scheda_ps") or
-                None
-            )
-            if referto:
-                combined_context.append((score, referto))
-                seen_docs.add(parent_id)
-
-            if len(combined_context) >= top_k:
-                break
-
-        # Se non bastano i documenti interi, aggiungi i più simili da chunk
-        for metadata in chunk_metadatas:
-            parent_id = metadata.get("parent_doc_id")
-            if parent_id in seen_docs:
-                continue
-
-            referto = (
-                metadata.get("clinical_report") or
-                metadata.get("scheda_ps") or
-                None
-            )
-            if referto:
-                combined_context.append((None, referto))
-                seen_docs.add(parent_id)
-
-            if len(combined_context) >= top_k:
-                break
-
-        if not combined_context:
-            self.logger.info("Nessun contesto rilevante trovato.")
-            return None
-
-        # Restituisco solo i testi
-        return "\n\n".join([referto for _, referto in combined_context])
-
 
 def main():
     # Impostazioni iniziali
@@ -379,11 +262,7 @@ def main():
     function_mode = "Emergency"
 
     # Report di test
-    report_text = (
-        "Scheda di Ammissione al Pronto Soccorso Paziente Sig.ra Francesca Nanni, 62 anni, residente a Roma. "
-        "Motivo dell’intervento e sintomi riferiti: La paziente ha accusato un intenso dolore al petto, irradiato al braccio sinistro "
-        "e accompagnato da nausea, mentre era a casa. [...] ECG e della saturazione di ossigeno."
-    )
+    report_text = "Motivo dellintervento e sintomi riferiti La paziente ha accusato un intenso dolore al petto, irradiato al braccio sinistro e accompagnato da nausea, mentre era a casa. Ha riferito anche di aver avuto episodi simili nei giorni precedenti, ma di entità minore. Contesto clinico La paziente è una donna con una storia familiare di malattie cardiovascolari. La paziente è ipertesa e in trattamento con farmaci antipertensivi. Dinamica dellaccesso al PS La chiamata è stata effettuata alle ore 1115 da un familiare. Lintervento è avvenuto in Via della Libertà, 25, a Roma. Il trasporto è stato effettuato in ambulanza in codice giallo, con monitoraggio continuo dellECG e della saturazione di ossigeno. Trattamenti e interventi effettuati Allarrivo sul posto, la paziente era vigile, collaborante, con parametri vitali nella norma, ma con evidente distress respiratorio. È stata sottoposta a ossigenoterapia con maschera facciale a 6 litriminuto e somministrazione di acido acetilsalicilico da mg per via endovenosa. La paziente ha ricevuto anche un bolo di morfina da 2 mg per il controllo del dolore. Parametri vitali rilevati Pressione arteriosa 80 mmHg Frequenza cardiaca 92 bpm Frequenza respiratoria 22 attimin Temperatura 36,8C Saturazione di ossigeno 88 con aria ambiente, migliorata al 94 con ossigenoterapia Eventuale presenza di autorità Non presente. Annotazioni aggiuntive da parte del personale La paziente ha riferito di aver assunto gli ultimi pasti regolarmente e di non avere particolari allergie note. La famiglia ha fornito una cartella clinica incompleta con precedenti episodi di angina. Esami diagnostici Allelettrocardiogramma eseguito in ambulanza è emerso un sopraslivellamento del tratto ST in derivazioni inferiori, suggestivo per infarto miocardico inferiore. Trasporto al PS La paziente è stata trasportata al Pronto Soccorso dellOspedale Umberto I di Roma, dove è stata accolta nel percorso Code Rosse. Notazioni È stata avviata la procedura per il trattamento trombolitico e la paziente è stata sottoposta a ulteriori indagini diagnostice, tra cui ecocardiogramma e esami del sangue per marker cardiaci. Dettagli clinici aggiuntivi La paziente è stata mantenuta sotto stretto monitoraggio per tutta la durata del trasporto e in Pronto Soccorso, con controlli continui dei parametri vitali e dellECG. Stato alla fine del trasporto La paziente è arrivata al Pronto Soccorso in buone condizioni generali, ma con persistente dolore toracico. Elementi JSON strutturati json nome Francesca, cognome Nanni, eta 62, residenza Roma, motivo_intervento Dolore toracico acuto, sintomi_riferiti Dolore al petto irradiato al braccio sinistro, Nausea, storia_familiare Malattie cardiovascolari."
 
     # Inizializzazione embedder
     logger.info("Inizializzo modello di embedding...")

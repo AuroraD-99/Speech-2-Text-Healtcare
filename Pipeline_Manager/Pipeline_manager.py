@@ -46,6 +46,9 @@ class PipelineManager:
         self.embedding_model = os.getenv("EMBEDDING_MODEL")
         self.embedder = SentenceTransformer(self.embedding_model)
 
+        #NER per l'estrazione delle entities - usate sia per il retrieval che per migliorare la generazione
+        self.ner = NER()
+
         #inizializzazione del database
         self.DB_manager = DB()
 
@@ -53,7 +56,7 @@ class PipelineManager:
         self.chroma_path = os.getenv("CHROMA_DB_PATH")
         self.chroma_client = Client() 
 
-        self.RAGManager = RAGManager(self.chroma_path, self.anagrafica_medico["Anagrafica"]["Codice Fiscale"])
+        self.RAGManager = RAGManager(self.chroma_path, self.ner, self.DB_manager, self.function_mode, self.anagrafica_medico["Anagrafica"]["Codice Fiscale"])
 
         self.collection = self.chroma_client.get_or_create_collection("fse_rag_index") 
         #devi controllare se con questo tutti gli altri file si collegano allo stesso RAG
@@ -62,10 +65,10 @@ class PipelineManager:
         self.transcriptor = TranscriptionPipeline()
 
         #inizializzazione del modello
-        self.FSE_manager = FSEManager(self.chroma_client, self.function_mode, self.env_file)
+        self.FSE_manager = FSEManager(self.chroma_client, self.ner, self.function_mode, self.RAGManager, self.env_file)
 
-        self.anagrafica = Anagrafica()
-        self.ner = NER()
+        self.anagrafica = Anagrafica(self.ner)
+        
         
         #--------------------------------------------------- Salvataggio in PDF ---------------------------------------------------------
         self.PDF_output = os.getenv("PDF_PATH")

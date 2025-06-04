@@ -8,9 +8,8 @@ import json
 from typing import List, Dict, Literal, Tuple
 from log import Logger
 import logging
-
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
+import subprocess
 
 from sklearn.preprocessing import normalize
 
@@ -22,33 +21,56 @@ from chromadb import Client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Database.mongodb import DB
+from Pipeline_Manager.ner import NER
 from dotenv import load_dotenv
 
-#TODO: è IL CASO DI USARE UN NER?
 
 class RAGManager:
-    def __init__(self, chroma_path: str, cf = None):
+    def __init__(self, chroma_path: str, ner, db_manager, function_mode, cf = None):
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("RAG_Manager")
+
+        self.function_mode = function_mode
 
         self.chroma_path = os.getenv("CHROMA_DB_PATH") #./rag_data o /var/lib/rag_data
         self.chroma_client = Client() #con Client viene inizializzata una sessione temporanea in RAM quindi una volta terminata vengono persi tutti i dati
         #self.chroma_client = PersistentClient(path=self.chroma_path) 
 
-        self.collection = self.chroma_client.get_or_create_collection("fse_rag_index")
+        self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
         self.embedder = SentenceTransformer("distiluse-base-multilingual-cased-v2")
 
-        self.nlp = spacy.load("it_core_news_sm")
+        #TODO: vedere se si può integrare il NER insieme a spacy o utilizzare un approccio comune/ibrido
+            # - usare il ner per salvare nel parent metadata le info sulle entità nel documento
+        #Configurazione del modello
+        self.model_name = os.getenv("MODEL_PATH_SPACY") #"it_core_news_sm"
+
+        #utilizzo spacy in modo da realizzare embedding con contesto più coeso
+        try: #TODO: CONTROLLARE
+            self.nlp = spacy.load(self.model_name)
+        except OSError:
+            #se il path del modello non esiste, il modello viene scaricato al path specificato
+            self._model_download()
+            self.nlp = spacy.load(self.model_name)
 
         self.cf = cf
 
-        self.db_manager = DB()
+        self.db_manager = db_manager
+        self.ner = ner
 
-        self.inizialize_RAG_from_DB()
-  
+        self._inizialize_RAG_from_DB()
+
+    def _model_download(self, model_name: str):
+            """Scarica il modello spaCy indicato se non è già presente."""
+            try:
+                self.logger.info(f"Scaricamento modello spaCy '{model_name}'...")
+                subprocess.run(["python", "-m", "spacy", "download", model_name], check=True)
+                self.logger.info(f"Modello '{model_name}' scaricato con successo.")
+            except subprocess.CalledProcessError:
+                self.logger.error(f"Errore nel download del modello spaCy '{model_name}'.")
+    
     #per l'inizializzazione del RAG
-    def inizialize_RAG_from_DB(self): #funzione richiamata quando viene avviata una sessione del sistema (dopo il login da interfaccia)
+    def _inizialize_RAG_from_DB(self): #funzione richiamata quando viene avviata una sessione del sistema (dopo il login da interfaccia)
         try:
             self.logger.info("Inizializzazione del RAG a partire dal database")
 
@@ -103,8 +125,6 @@ class RAGManager:
     def add_to_RAG(self, documents: List[Dict[str, str]], reports: List[Dict[str, str]]): # nel RAG salvo ID, EMBEDDING e REFERTO 
         #La funzione prende in ingresso una lista di trascrizioni e una lista di referti corrispondenti da inserire nel RAG - provengono sempre dal DB
         # (può essere in fase di inizializzazione, oppure in fase di sincronizzazione - programmata ogni 2 ore) 
-        # dato che gli embedding vengono calcolati all'inizio di ogni nuovo report e inseriti nel DB dopo il calcolo del referto
-        # non dovrebbero esserci problemi legati alla loro mancanza
         
         reports_by_id = {r["embedding_id"]: r for r in reports}
 
@@ -116,7 +136,7 @@ class RAGManager:
 
             #prendo il report
             #TODO: DA CONTROLLARE
-            metadata = reports_by_id.get(doc_id) #self.db_manager.get_validated_clinical_report(doc_id)
+            metadata = reports_by_id.get(doc_id)
 
             if not metadata:
                 self.logger.warning(f"Nessun metadata trovato per il documento {doc_id}")
@@ -132,10 +152,13 @@ class RAGManager:
                 self.logger.warning(f"Nessun embedding trovato o incompleto per il documento {doc_id}") 
                 continue
 
+            entities = record["entities"]
+
             #preparo i dati relativi al documento completo - sono comuni a tutti i chunk dello stesso testo
             parent_metadata = {
                 **metadata,
                 "parent_doc_id": doc_id,
+                "entities": entities,
                 "complete_embedding": record["complete_embedding"], 
                 "type": doc_type
             }
@@ -147,10 +170,13 @@ class RAGManager:
                     continue
                 self.logger.info(f"Check sul chunk id: {chunk_id}")
 
+                chunk_entities = chunk.get("entities")
+
                 try:
                     if not self.collection.peek(ids=[chunk_id]):
                         self.collection.add(
                             documents=[chunk["text"]],
+                            entities_chunk=chunk_entities,
                             embeddings=[chunk["embedding"]],
                             ids=[chunk_id],
                             metadatas=[parent_metadata]
@@ -166,7 +192,6 @@ class RAGManager:
     
     #TODO: VA SCELTA BENE LA CHUNK_SIZE E CHUNK_OVERLAP
     #TODO: DEVE ESSERE OTTIMIZZATA LA SUDDIVISIONE IN CHUNK perchè influenza il matching
-    #       c'è il rischio che vengano scartati dei documenti se con la divisione in chunk contenuti simili vengono suddivisi diversamente anche con il retireval ibrido e la cosine similarity?
     def split_and_clean(self, text: str, chunk_size: int = 512, chunk_overlap: int = 50):
         doc = self.nlp(text)
 
@@ -192,10 +217,11 @@ class RAGManager:
     def compute_id(self, content: str, doc_type: str = "") -> str:
         return f"{doc_type}_{hashlib.md5(content.encode('utf-8')).hexdigest()}" 
     
-    def compute_embedding(self, text: str, doc_type: str) -> Tuple[str, np.ndarray]:
-        """
-        Calcola l'embedding del testo completo (usato per ID univoco e salvataggio nel DB).
-        """
+    def compute_embedding(self, text: str, doc_type: str) -> Tuple[str, np.ndarray]: 
+        #Calcola l'embedding del testo completo (usato per ID univoco e salvataggio nel DB).
+        #ho usato l'embedding dell'intero documento perchè dato che prendo tutti i referti dello stesso medico c'è un'alta probabilità che per pazienti con 
+        # "situazioni" cliniche molto simili organizzi il referto in modo simile e quindi gli embedding saranno simili
+        
         doc_id = self.compute_id(text, doc_type)
         embedding = self.embedder.encode(text)
         return doc_id, embedding
@@ -213,11 +239,13 @@ class RAGManager:
         for chunk in chunks:
             chunk_id = self.compute_id(chunk, doc_type)
             embedding = self.compute_embedding_for_chunk(chunk)
+            entities = self.ner.extract_medical_entities(chunk)
 
             chunk_data.append({
                 "id": chunk_id,
                 "text": chunk,  # Conservo il testo perchè lo uso per il retrieval semantico
-                "embedding": embedding.tolist()
+                "embedding": embedding.tolist(),
+                "entities": entities #memorizzo anche le entità che caratterizzano il chunk in modo da favorire il filtraggio
             })
 
         return chunk_data
@@ -225,27 +253,116 @@ class RAGManager:
     def prepare_embedding_doc(self, text: str, embedding_id, chunk_data, doc_type: str) -> Dict: 
         #PREPARO L'EMBEDDING PER IL SALVATAGGIO NEL DB -> nel DB salvo ID e EMBEDDING
         doc_id, embedding = self.compute_embedding(text, doc_type) #calcolo l'ID della entry (trascrizione, referto, embedding)
-        """chunks = self.split_and_clean(text)
 
-        chunk_data = []
-        for chunk in chunks:
-            chunk_id = self.compute_id(chunk, doc_type)
-            embedding = self.compute_embedding_for_chunk(chunk)
-
-            chunk_data.append({
-                "id": chunk_id,
-                "text": chunk,  # Conservo il testo perchè lo uso per il retrieval semantico
-                "embedding": embedding.tolist()
-            })"""
+        entities = self.ner.extract_medical_entities(text)
 
         embedding_data = {
             "_id": doc_id,
             "complete_embedding": embedding,
+            "entities": entities,
             "chunks": chunk_data,
             "timestamp": datetime.now()
         }
 
         return embedding_data   
+    
+    def cosine_similarity(a, b):
+        a = np.array(a)
+        b = np.array(b)
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
+
+    def retrieve_context(self, embedding, entities, top_k=2):
+        try:
+            embedding_chunk = [e["embedding"] for e in embedding]
+        except Exception as e:
+            self.logger.error(f"Errore nel preprocessing embedding: {e}")
+            return None
+
+        results = []
+
+        #recupero documenti interi con filtri stringenti
+        docs = self._query_full_documents(embedding, entities)
+        results.extend(docs)
+
+        #se ancora bastano, recupero chunk
+        if len(results) < top_k:
+            chunks = self._query_chunks(embedding_chunk, entities)
+            results.extend(chunks)
+
+        #tolgo i risultati duplicati e seleziono i top_k
+        seen_ids = set()
+        unique_results = []
+        for score, meta in sorted(results, key=lambda x: x[0] or 0, reverse=True):
+            pid = meta.get("parent_doc_id")
+            if pid not in seen_ids:
+                referto = meta.get("clinical_report") or meta.get("scheda_ps")
+                if referto:
+                    unique_results.append((score, referto))
+                    seen_ids.add(pid)
+            if len(unique_results) >= top_k:
+                break
+
+        if not unique_results:
+            self.logger.info("Nessun contesto rilevante trovato.")
+            return None
+
+        self.logger.info(f"Totale contesti restituiti: {len(unique_results)}")
+        return "\n\n".join([r[1] for r in unique_results])
+
+    def _query_full_documents(self, embedding, entities):
+        try:
+            metadatas = self.collection.get(include=["metadatas"]).get("metadatas", [])
+        except Exception as e:
+            self.logger.error(f"Errore nel recupero metadati: {e}")
+            return []
+
+        results = []
+        for i, meta in enumerate(metadatas):
+            if not meta or meta.get("type") != self.function_mode:
+                continue
+
+            complete_emb = meta.get("complete_embedding")
+            doc_entities = set(meta.get("entities", []))
+            parent_id = meta.get("parent_doc_id")
+
+            if not complete_emb or not parent_id:
+                continue
+
+            # Entità: se strict, serve almeno un match
+            if entities and not set(entities).intersection(doc_entities):
+                continue
+
+            try:
+                score = self.cosine_similarity(embedding, complete_emb)
+                results.append((score, meta))
+            except Exception as e:
+                self.logger.error(f"Errore nel calcolo similarità doc {i}: {e}")
+
+        return results
+
+    def _query_chunks(self, embedding_chunk, entities):
+        try:
+            results = self.collection.query(
+                query_embeddings=[embedding_chunk],
+                n_results=20,
+                where={"type": self.function_mode},
+                include=["metadatas", "documents"]
+            )
+        except Exception as e:
+            self.logger.error(f"Errore nella query per i chunk: {e}")
+            return []
+
+        chunk_metadatas = results.get("metadatas", [[]])[0] if results.get("metadatas") else []
+        filtered = []
+        for i, meta in enumerate(chunk_metadatas):
+            if not meta:
+                continue
+            doc_entities = set(meta.get("entities", []))
+            if entities and not set(entities).intersection(doc_entities):
+                continue
+            filtered.append((None, meta))  # No embedding score, it's chunk-based
+
+        return filtered
 
 
 def main():
