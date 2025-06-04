@@ -20,7 +20,8 @@ class LLMWrapper:
         self.model = model
         self.max_new_tokens = 1024
 
-    def generator(self, prompt, **kwargs):
+    def generator(self, prompt, temperature=0, **kwargs):
+        kwargs['temperature'] = temperature
         return self.model(prompt, **kwargs) if callable(self.model) else self.model.generate(prompt, **kwargs)
 
     #--------------------------------- FUNZIONI PER LA GENERAZIONE DELLA SCHEDA PS ----------------------------------------
@@ -91,7 +92,8 @@ class LLMWrapper:
             "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
             "chiara e ben strutturata, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente."
-            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
+            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta.EVITA TUTTO CIò CHE NON è ALL'INTERNO DI UNA STRUTTURA JSON. RISPONDI SOLO CON UN OGGETTO JSON VALIDO,.\n\n"
+            "L'OGGETTO JSON DEVE ESSERE FORMATTATO CORRETTAMENTE E DEVE CONSENTIRE DI CHIAMARE LA FUNZIONE json.loads() SENZA GENERARE ERRORI.\n\n"
             "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
             f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{entities}\n\n"
@@ -144,7 +146,8 @@ class LLMWrapper:
             "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico in italiano, formale, "
             "chiaro e ben strutturato, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
             "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente. "
-            "NON SCRIVERE INTRODUZIONI, COMMENTI O SPIEGAZIONI. RISPONDI SOLO CON UN OGGETTO JSON VALIDO.\n\n"
+            "NON SCRIVERE INTRODUZIONI, COMMENTI O SPIEGAZIONI, EVITA TUTTO CIò CHE NON è ALL'INTERNO DI UNA STRUTTURA JSON. RISPONDI SOLO CON UN OGGETTO JSON VALIDO,.\n\n"
+            "L'OGGETTO JSON DEVE ESSERE FORMATTATO CORRETTAMENTE E DEVE CONSENTIRE DI CHIAMARE LA FUNZIONE json.loads() SENZA GENERARE ERRORI.\n\n"
             f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{formatted_entities}\n\n"
             "Struttura attesa:\n"
             f"{json.dumps(esempio_referto, ensure_ascii=False, indent=2)}"

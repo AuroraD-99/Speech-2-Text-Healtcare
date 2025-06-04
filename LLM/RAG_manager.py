@@ -21,7 +21,7 @@ from chromadb import Client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Database.mongodb import DB
-from Pipeline_Manager.ner import NER
+from NER.ner import NER
 from dotenv import load_dotenv
 
 
@@ -343,7 +343,7 @@ class RAGManager:
     def _query_chunks(self, embedding_chunk, entities):
         try:
             results = self.collection.query(
-                query_embeddings=[embedding_chunk],
+                query_embeddings=embedding_chunk,
                 n_results=20,
                 where={"type": self.function_mode},
                 include=["metadatas", "documents"]

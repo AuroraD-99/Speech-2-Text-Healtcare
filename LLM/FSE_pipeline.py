@@ -30,7 +30,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from LLM.FSE_generator import LLMWrapper 
 from LLM.RAG_manager import RAGManager
-from Pipeline_Manager.ner import NER
+from NER.ner import NER
 
 
 class FSEManager:
@@ -69,9 +69,9 @@ class FSEManager:
 
         #---------------------------------------------- Configurazione RAG --------------------------------------------------------------
         self.RAGManager = RAGManager
-        self.chroma_client = self.RAGManager.chroma_client #chroma_client 
+        self.chroma_client = chroma_client #chroma_client 
 
-        self.collection = self.RAGManager.collection #self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
+        self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
         #--------------------------------------------------------------------------------------------------------------------------------
 
         self.JSON_path = os.getenv("JSON_PATH")

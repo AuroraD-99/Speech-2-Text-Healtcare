@@ -90,23 +90,28 @@ class Dashboard:
         
     def modify_report(self, report_id):
         
+        id = str(report_id)
+        
         response = requests.post(
             url = f"{self.controller_url}/get_report_by_id",
             json = {
-                "text": str(report_id)
+                "text": id
             }
         )
         if response.status_code == 200:
             report =  response.json()
-            st.session_state.last_report = report["report"]
+            report = report["report"]
+            st.session_state.last_report = report
             st.session_state.page = "report_modify"
         
     def show_report(self, report_id):
         
+        id = str(report_id)
+        
         response = requests.post(
             url = f"{self.controller_url}/get_report_by_id",
             json = {
-                "text": str(report_id)
+                "text": id 
             }
         )
         if response.status_code == 200:
@@ -126,7 +131,8 @@ class Dashboard:
         st.session_state.report_ready = False
         
         if response.status_code == 200:
-            report = response.json()
+            id = response.json().get("report_id")
+            report = self.db.get_report_by_id(id)
             st.session_state.last_report = report
             st.session_state.report_ready = True
             st.session_state.page = "report_modify"
@@ -289,7 +295,6 @@ class Dashboard:
         try:
             # Recupero tutti i referti del medico attualmente loggato
             reports = self.db.get_all_clinical_reports_by_doctor_cf(st.session_state.user["Anagrafica"]["Codice Fiscale"])
-
             if not reports:
                 st.warning("🔍 Non ci sono referti associati al codice fiscale: " + st.session_state.user["Anagrafica"]["Codice Fiscale"])
             else:
@@ -464,8 +469,12 @@ class Dashboard:
         # Questa funzione apre una pagina per modificare un referto specifico
         st.markdown(f"## 📝 Modifica Referto ID: `{report_id}`")
 
+        
         # Ottieni il referto dal database
         report = self.db.get_report_by_id(report_id)
+        
+        st.markdown(type(report["scheda_ps"]))
+        
         if not report:
             st.error("❌ Referto non trovato.")
             return

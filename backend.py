@@ -50,4 +50,5 @@ def get_report_by_id(report_id: InputText):
     Endpoint to get a clinical report by its ID
     """
     report = db.get_report_by_id(report_id.text)
+    report["_id"] = report_id.text
     return {"message":f"Report with ID {report_id.text} retrieved successfully", "report": report}
