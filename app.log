@@ -820,3 +820,36 @@
 2025-06-03 11:39:03,387 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-03 11:39:31,260 [DashboardDriver] - INFO - Running command: streamlit run
 2025-06-03 11:39:34,426 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:22:10,317 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:30:17,730 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:38:58,421 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:39:54,406 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:42:29,921 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:44:03,277 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:52:35,697 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 10:56:34,378 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 13:45:04,228 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 13:45:12,336 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 13:45:54,306 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 13:50:15,752 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 13:57:44,450 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 13:58:34,090 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:28:32,239 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 15:28:45,214 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:34:21,481 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:34:32,558 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:35:13,192 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:35:27,632 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:35:43,873 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 15:35:54,017 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:36:08,762 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:37:02,868 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:37:14,767 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:38:05,681 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:38:05,722 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:38:15,724 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 15:38:19,000 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:38:31,853 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF CCCGNN00H28f849m.
+2025-06-04 15:40:17,466 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 15:40:40,740 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 15:40:43,943 [DB] - INFO - Connected to MongoDB successfully.
