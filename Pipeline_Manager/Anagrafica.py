@@ -10,7 +10,7 @@ from difflib import SequenceMatcher
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Database.mongodb import DB
-from Pipeline_Manager.ner import NER
+from NER.ner import NER
 
 #TODO: INTEGRARE CON model = GLiNER.from_pretrained("DeepMount00/universal_ner_ita") PER AVERE UNA PRECISIONE MAGGIORE
 

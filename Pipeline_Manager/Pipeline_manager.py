@@ -21,7 +21,7 @@ from LLM.FSE_pipeline import FSEManager
 from Transcriptor.transcription_pipeline import TranscriptionPipeline
 from Database.mongodb import DB
 from Pipeline_Manager.Anagrafica import Anagrafica
-from ner import NER
+from NER.ner import NER
 
 class PipelineManager:
     def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
@@ -65,7 +65,7 @@ class PipelineManager:
         self.transcriptor = TranscriptionPipeline()
 
         #inizializzazione del modello
-        self.FSE_manager = FSEManager(self.chroma_client, self.ner, self.function_mode, self.RAGManager, self.env_file)
+        self.FSE_manager = FSEManager(self.chroma_client, self.ner, self.RAGManager, self.function_mode, self.env_file)
 
         self.anagrafica = Anagrafica(self.ner)
         
@@ -78,6 +78,23 @@ class PipelineManager:
         #---------------------------------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------- FUNZIONI PER LA GESTIONE DELLA PIPELINE ----------------------------------------------
+    
+    def extract_json_string(self, text):
+        start = text.find('{')
+        if start == -1:
+            return None  # Nessuna parentesi graffa di apertura trovata
+        
+        # Conteggia parentesi per trovare la chiusura corrispondente
+        stack = []
+        for i in range(start, len(text)):
+            if text[i] == '{':
+                stack.append('{')
+            elif text[i] == '}':
+                stack.pop()
+                if not stack:
+                    # Abbiamo chiuso l'oggetto JSON iniziale
+                    return text[start:i+1]
+        return None  # Nessuna chiusura trovata
 
     def Pipeline_manager(self, audio_filepath):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
@@ -140,10 +157,10 @@ class PipelineManager:
                                                        self.anagrafica_medico, 
                                                        anagrafica_paziente) 
         
-        ner_clinical_reports = self.ner.extract_medical_entities(clinical_report[0]) #estrazione delle entità mediche dal referto generato
-        self.logger.info(f"Entità mediche estratte dal referto: {ner_clinical_reports}")
         #salvataggio del documento nel DB
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
+        stringa_json = self.extract_json_string(clinical_report[0]["scheda_ps"]) #estraggo la stringa JSON dal referto
+        clinical_report[0]["scheda_ps"] = stringa_json
         document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
 
         #salvataggio dell'embedding (strutturato) nel DB
