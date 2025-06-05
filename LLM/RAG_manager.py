@@ -21,7 +21,7 @@ from chromadb import Client
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Database.mongodb import DB
-from Pipeline_Manager.ner import NER
+from NER.ner import NER
 from dotenv import load_dotenv
 
 
@@ -184,6 +184,8 @@ class RAGManager:
                 except Exception as e:
                     self.logger.warning(f"Errore inserendo chunk {chunk_id} nel RAG: {e}")
                     continue
+            
+        self.logger.info(f"Numero di elementi caricati nel RAG: {self.collection.count()}")
 
     #------------------------------------------ CALCOLO DELL'EMBEDDING ---------------------------------------------
     #per la preparazione del testo fornito - ovvero la trascrizione usata poi per calcolare l'embedding
@@ -191,9 +193,9 @@ class RAGManager:
         return text.strip().replace("\n", " ").replace("  ", " ")
     
     #TODO: VA SCELTA BENE LA CHUNK_SIZE E CHUNK_OVERLAP
-    #TODO: DEVE ESSERE OTTIMIZZATA LA SUDDIVISIONE IN CHUNK perchè influenza il matching
     def split_and_clean(self, text: str, chunk_size: int = 512, chunk_overlap: int = 50):
-        doc = self.nlp(text)
+        doc = self.nlp(text) #uso spacy per migliorare il chunking
+        #COME FUNZIONA ESATTAMENTE?
 
         chunks = []
         current_chunk = ""
@@ -271,7 +273,7 @@ class RAGManager:
         b = np.array(b)
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10)
 
-    def retrieve_context(self, embedding, entities, top_k=2):
+    """def retrieve_context(self, embedding, entities, top_k=2): #c'è un problema con i chunk retrieval
         try:
             embedding_chunk = [e["embedding"] for e in embedding]
         except Exception as e:
@@ -283,27 +285,34 @@ class RAGManager:
         #recupero documenti interi con filtri stringenti
         docs = self._query_full_documents(embedding, entities)
         results.extend(docs)
+        self.logger.info(f"Score match su documenti completi (e con filtraggio delle entità): {docs}")
 
-        #se ancora bastano, recupero chunk
-        if len(results) < top_k:
+        #se ancora bastano, recupero chunk (raddoppio il numero di risultati - caso peggiore (tutti duplicati))
+        if len(results) < 2*top_k:
+            self.logger.info(f"Numero di match insufficiente: {len(results)}. Procedo al matching sui chunk...")
             chunks = self._query_chunks(embedding_chunk, entities)
+            self.logger.info(f"")
             results.extend(chunks)
 
         #tolgo i risultati duplicati e seleziono i top_k
+        self.logger.info(f"Rimozione di eventuali risutlati duplicati")
         seen_ids = set()
         unique_results = []
-        for score, meta in sorted(results, key=lambda x: x[0] or 0, reverse=True):
-            pid = meta.get("parent_doc_id")
+        for score, metadata in sorted(results, key=lambda x: x[0] or 0, reverse=True):
+            pid = metadata.get("parent_doc_id")
             if pid not in seen_ids:
-                referto = meta.get("clinical_report") or meta.get("scheda_ps")
+                referto = metadata.get("clinical_report") or metadata.get("scheda_ps")
                 if referto:
+                    self.logger.info(f"Nuovo referto ottenuto mediante il match - id del documento: {pid}")
                     unique_results.append((score, referto))
                     seen_ids.add(pid)
             if len(unique_results) >= top_k:
                 break
 
         if not unique_results:
-            self.logger.info("Nessun contesto rilevante trovato.")
+            self.logger.info(f"Nessun contesto rilevante trovato mediante l'uso dell'embedding.")
+            self.logger.info(f"Procedo ad individuare i referti con entità simili.")
+            #TODO: QUERY PER MATCH SOLO SULLE ENTITà
             return None
 
         self.logger.info(f"Totale contesti restituiti: {len(unique_results)}")
@@ -329,7 +338,9 @@ class RAGManager:
                 continue
 
             # Entità: se strict, serve almeno un match
-            if entities and not set(entities).intersection(doc_entities):
+            match_entities = len(set(entities).intersection(doc_entities))
+            if entities and match_entities < 0.1*len(set(entities)):
+                self.logger.info(f"Numero di match troppo basso: {match_entities}")
                 continue
 
             try:
@@ -340,29 +351,112 @@ class RAGManager:
 
         return results
 
-    def _query_chunks(self, embedding_chunk, entities):
+    def _query_chunks(self, embedding_chunks, entities):
+        results = []
+
+        for emb in embedding_chunks:
+            try:
+                query_result = self.collection.query(
+                    query_embeddings=[emb],
+                    n_results=10,
+                    where={"type": self.function_mode},
+                    include=["metadatas", "embeddings"]
+                )
+            except Exception as e:
+                self.logger.error(f"Errore nella query per i chunk: {e}")
+                continue
+
+            metadatas = query_result.get("metadatas", [[]])[0]
+            embeddings = query_result.get("embeddings", [[]])[0]
+
+            for meta, chunk_emb in zip(metadatas, embeddings):
+                if not meta:
+                    continue
+
+                doc_entities = set(meta.get("entities", []))
+                entity_match = len(set(entities).intersection(doc_entities))
+
+                if entities and entity_match < 0.1 * len(set(entities)):
+                    self.logger.info(f"Match entità chunk troppo basso: {entity_match}")
+                    continue
+
+                try:
+                    score = self.cosine_similarity(emb, chunk_emb)
+                    results.append((score, meta))
+                except Exception as e:
+                    self.logger.error(f"Errore nel calcolo della similarità per chunk: {e}")
+
+        return results"""
+    
+    def retrieve_context(self, entities, top_k=2):
+        results = []
+
+        # Recupero documenti completi usando solo le entità
         try:
-            results = self.collection.query(
-                query_embeddings=[embedding_chunk],
-                n_results=20,
-                where={"type": self.function_mode},
-                include=["metadatas", "documents"]
-            )
+            docs = self._query_full_documents_by_entities(entities)
+            self.logger.info(f"Match su documenti completi usando solo entità: {docs}")
+            results.extend(docs)
         except Exception as e:
-            self.logger.error(f"Errore nella query per i chunk: {e}")
+            self.logger.error(f"Errore durante il recupero dei documenti per entità: {e}")
+            return None
+
+        # Se non ci sono abbastanza risultati, provo a interrogare i chunk
+        if len(results) < top_k:
+            self.logger.info(f"Risultati insufficienti ({len(results)}). Estendo la ricerca ai chunk...")
+            try:
+                chunks = self._query_chunks_by_entities(entities)
+                self.logger.info(f"Chunk ottenuti dal match sulle entità: {chunks}")
+                results.extend(chunks)
+            except Exception as e:
+                self.logger.error(f"Errore nel recupero dei chunk per entità: {e}")
+
+        # Rimozione duplicati (stesso parent_doc_id) e selezione top_k
+        self.logger.info("Rimozione di eventuali risultati duplicati...")
+        seen_ids = set()
+        unique_results = []
+        for score, metadata in sorted(results, key=lambda x: x[0] or 0, reverse=True):
+            pid = metadata.get("parent_doc_id")
+            if pid not in seen_ids:
+                referto = metadata.get("clinical_report") or metadata.get("scheda_ps")
+                if referto:
+                    self.logger.info(f"Nuovo referto ottenuto tramite entità - documento ID: {pid}")
+                    unique_results.append((score, referto))
+                    seen_ids.add(pid)
+            if len(unique_results) >= top_k:
+                break
+
+        if not unique_results:
+            self.logger.info("Nessun contesto rilevante trovato usando solo le entità.")
+            return None
+
+        self.logger.info(f"Totale contesti restituiti: {len(unique_results)}")
+        return "\n\n".join([r[1] for r in unique_results])
+    
+    def _query_full_documents_by_entities(self, entities):
+        """
+        Recupera documenti interi che contengono tutte (o la maggior parte) delle entità specificate.
+        """
+        try:
+            query_filter = {
+                "entity_labels": {"$in": entities}  # Adatta al tuo sistema di filtro
+            }
+
+            # Esegui la query sul tuo vector store/database
+            matches = self.vector_store.query_metadata(
+                filter=query_filter,
+                namespace="full_documents"
+            )
+
+            results = []
+            for match in matches:
+                score = match.get("score", 1.0)  # Usa 1.0 come default se non c'è uno score
+                metadata = match.get("metadata", {})
+                results.append((score, metadata))
+
+            return results
+        except Exception as e:
+            self.logger.error(f"Errore nella query dei documenti completi per entità: {e}")
             return []
-
-        chunk_metadatas = results.get("metadatas", [[]])[0] if results.get("metadatas") else []
-        filtered = []
-        for i, meta in enumerate(chunk_metadatas):
-            if not meta:
-                continue
-            doc_entities = set(meta.get("entities", []))
-            if entities and not set(entities).intersection(doc_entities):
-                continue
-            filtered.append((None, meta))  # No embedding score, it's chunk-based
-
-        return filtered
 
 
 def main():
