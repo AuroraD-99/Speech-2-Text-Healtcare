@@ -4,6 +4,7 @@ import re
 import time
 from datetime import datetime, timedelta
 import logging    
+import hashlib
 
 import argparse
 from dotenv import load_dotenv
@@ -16,7 +17,6 @@ from sentence_transformers import SentenceTransformer
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from LLM.RAG_manager import RAGManager
 from LLM.FSE_pipeline import FSEManager
 from Transcriptor.transcription_pipeline import TranscriptionPipeline
 from Database.mongodb import DB
@@ -25,7 +25,6 @@ from NER.ner import NER
 
 class PipelineManager:
     def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
-        #e se il medico fa il log-out e un altro fa il login?
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("PipelineManager")
@@ -52,20 +51,11 @@ class PipelineManager:
         #inizializzazione del database
         self.DB_manager = DB()
 
-        #inizializzazione del RAG
-        self.chroma_path = os.getenv("CHROMA_DB_PATH")
-        self.chroma_client = Client() 
-
-        self.RAGManager = RAGManager(self.chroma_path, self.ner, self.DB_manager, self.function_mode, self.anagrafica_medico["Anagrafica"]["Codice Fiscale"])
-
-        self.collection = self.chroma_client.get_or_create_collection("fse_rag_index") 
-        #devi controllare se con questo tutti gli altri file si collegano allo stesso RAG
-
         #inizializzazione del trascrittore
         self.transcriptor = TranscriptionPipeline()
 
         #inizializzazione del modello
-        self.FSE_manager = FSEManager(self.chroma_client, self.ner, self.RAGManager, self.function_mode, self.env_file)
+        self.FSE_manager = FSEManager(self.ner, self.function_mode, self.env_file)
 
         self.anagrafica = Anagrafica(self.ner)
         
@@ -81,11 +71,7 @@ class PipelineManager:
 
     def Pipeline_manager(self, audio_filepath):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
-
-        """Serve una logica di reset o re-inizializzazione del RAGManager e PipelineManager. Al login di un medico dovresti:
-            Ricreare un’istanza del PipelineManager
-            Chiudere o invalidare quelle precedenti"""
-        
+  
         #acquisizione del testo trascritto
         self.logger.info(f"Procedo all'acquisizione della nuova trascrizione...")
         report_text = self.transcriptor.run(audio_filepath)
@@ -102,6 +88,7 @@ class PipelineManager:
         except Exception as e:
             self.logger.warning(f"****Anagrafica del paziente non specificata, dovrai inserirla necessariamente in fase di convalida del documento****")
         
+        file_id = self.compute_id(report_text, self.function_mode)
 
         #Generazione dell'embedding della trascrizione per il RAG - prima procedo all'anonimizzazione del referto
         self.logger.info(f"Procedo all'update del nuovo documento nel RAG...")
@@ -110,10 +97,6 @@ class PipelineManager:
 
         #Controllo sul referto anonimizzato
         self.logger.info(f"Report anonimizzato: {report_text_RAG}")
-        
-        #calcolo dell'embedding del testo
-        embedding_id = self.RAGManager.compute_id(report_text_RAG, self.function_mode) #calcolo l'id univoco su tutto il testo
-        embedding = self.RAGManager.compute_chunk_embeddings(report_text_RAG, self.function_mode) #calcolo gli embedding sui chunk
 
         try:
             #salvataggio della coppia audio + testo nel database 
@@ -123,7 +106,7 @@ class PipelineManager:
             self.DB_manager.insert_transcription( 
                 audio_filename=report_text["filename"],
                 transcription=report_text["transcription"],
-                embedding_id=embedding_id, #id dell'embedding è utilizzato come id anche per le altre collezioni
+                embedding_id=file_id, #id dell'embedding è utilizzato come id anche per le altre collezioni
                 language=report_text["language"],
                 audio_filepath=report_text["audio_filepath"] 
             )
@@ -135,18 +118,15 @@ class PipelineManager:
         #generazione del documento dalla LLM - do alla LLM il referto anonimizzato
         self.logger.debug(f"Procedo alla generazione del nuovo referto...")
         clinical_report = self.FSE_manager.FSE_manager(report_text["timestamp"], 
-                                                       report_text_RAG, 
-                                                       embedding, 
+                                                       report_text_RAG,
                                                        self.anagrafica_medico, 
                                                        anagrafica_paziente) 
         
+        ner_clinical_reports = self.ner.extract_medical_entities(clinical_report[0]) #estrazione delle entità mediche dal referto generato
+        self.logger.info(f"Entità mediche estratte dal referto: {ner_clinical_reports}")
         #salvataggio del documento nel DB
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
-        document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
-
-        #salvataggio dell'embedding (strutturato) nel DB
-        embedding_doc = self.RAGManager.prepare_embedding_doc(report_text_RAG, embedding_id, embedding, self.function_mode)
-        embedding_doc_id = self.DB_manager.insert_embedding(embedding_doc)
+        document_id = self.DB_manager.insert_clinical_report(file_id, clinical_report[0])
 
         self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
         #TODO: MECCANISMO DI RECUPERO IN CASO DI INTERRUZIONE PRIMA DEL SALVATAGGIO IN DB
@@ -154,14 +134,10 @@ class PipelineManager:
         if os.path.exists(clinical_report[1]): #il check non dovrebbe essere necessario ma è meglio metterlo
             os.remove(clinical_report[1])
 
-        #REFRESH PERIODICO DEL RAG OGNI 2 ORE
-        if datetime.now() == self.update_time:
-            self.logger.info(f"Sincronizzazione RAG - MongoDB in corso ...")
-            self.RAGManager.sync_chroma_from_mongo() #fa la sincronizzazione periodica tra il RAG e MongoDB
-            self.update_time = datetime.now() + timedelta(hours=2)
-            self.logger.info(f"Sincronizzazione RAG - MongoDB terminata ...")
-        
         return document_id
+    
+    def compute_id(self, content: str, doc_type: str = "") -> str:
+        return f"{doc_type}_{hashlib.md5(content.encode('utf-8')).hexdigest()}" 
    
 
 #------------------------------------- MAIN DI PROVA ----------------------------------------

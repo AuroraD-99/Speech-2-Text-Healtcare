@@ -29,12 +29,11 @@ from sentence_transformers import SentenceTransformer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from LLM.FSE_generator import LLMWrapper 
-from LLM.RAG_manager import RAGManager
 from NER.ner import NER
 
 
 class FSEManager:
-    def __init__(self, chroma_client, ner, RAGManager, function_mode="Emergency", env_file="key.env"):
+    def __init__(self, ner, function_mode="Emergency", env_file="key.env"):
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("FSEManager")
@@ -67,38 +66,15 @@ class FSEManager:
 
         self.llm = LLMWrapper(model=self.model)
 
-        #---------------------------------------------- Configurazione RAG --------------------------------------------------------------
-        self.RAGManager = RAGManager
-        self.chroma_client = chroma_client #chroma_client 
-
-        self.collection = self.chroma_client.get_or_create_collection(name="fse_rag_index", metadata={"hnsw:space": "cosine"})
         #--------------------------------------------------------------------------------------------------------------------------------
 
         self.JSON_path = os.getenv("JSON_PATH")
         if not os.path.exists(self.JSON_path):
             os.makedirs(self.JSON_path, exist_ok=True)
 
-        #self.ner = NER() #TODO: COMMENTARE, INSERIRE IN PIPELINE MANAGER E PASSARE COME PARAMETRO
         self.ner = ner
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
-    
-    def extract_json_string(self, text):
-        start = text.find('{')
-        if start == -1:
-            return None  # Nessuna parentesi graffa di apertura trovata
-        
-        # Conteggia parentesi per trovare la chiusura corrispondente
-        stack = []
-        for i in range(start, len(text)):
-            if text[i] == '{':
-                stack.append('{')
-            elif text[i] == '}':
-                stack.pop()
-                if not stack:
-                    # Abbiamo chiuso l'oggetto JSON iniziale
-                    return text[start:i+1]
-        return None  # Nessuna chiusura trovata
 
     def _model_download(self):
         self.logger.info(f"Controllo modello in: {self.model_path}")
@@ -194,7 +170,7 @@ class FSEManager:
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL FSE ----------------------------------------
 
-    def FSE_manager(self, timestamp, record, embedding, anagrafica_medico, anagrafica_paziente):
+    def FSE_manager(self, timestamp, record, anagrafica_medico, anagrafica_paziente):
 
         try:
             #Prelevo il testo trascritto
@@ -213,15 +189,10 @@ class FSEManager:
             if self.function_mode == "Emergency":
                 #con il RAG prendo i documenti che hanno un contesto simile a quello che sto elaborando ora
                 self.logger.info(f"Modalità di funzionamento: Emergency...")
-                self.logger.info(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.RAGManager.retrieve_context(embedding, entities) 
 
                 #genero la scheda di ammissione al PS
                 self.logger.info(f"Procedo alla generazione della scheda di ammissione al PS...")
-                scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities, context)
-                scheda_json = self.extract_json_string(scheda_ps)
-                scheda_ps = json.loads(scheda_json)
-                self.logger.info(f"[{timestamp}] Scheda di ammissione al PS generata con successo.")
+                scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities) 
                 self.llm.check_json_format(scheda_ps)
 
                 #Configurazione del formato del file JSON di output
@@ -235,15 +206,9 @@ class FSEManager:
 
             else:
                 self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
-                self.logger.debug(f"Procedo con il recupero dal rag dei documenti simili...")
-                context = self.RAGManager.retrieve_context(embedding, entities, doc_type_filter=self.function_mode)
-
-                self.logger.debug(f"Procedo alla generazione del referto clinico...")
-                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities, context) 
                 
-                clinical_json = self.extract_json_string(clinical_report)
-                clinical_report = json.loads(clinical_json)
-                self.logger.debug(f"Clinical Report JSON: {clinical_report}")
+                self.logger.debug(f"Procedo alla generazione del referto clinico...")
+                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities) #
                 self.llm.check_json_format(clinical_report)
 
                 #Configurazione del formato del file JSON di output

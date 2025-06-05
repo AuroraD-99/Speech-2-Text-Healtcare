@@ -227,31 +227,6 @@ class DB:
     def delete_all_fse(self):
         result = self.fse_collection.delete_many({})
         return result.deleted_count"""
-    
-    #--------------------------------------------------- EMBEDDING ------------------------------------------------------
-
-    def insert_embedding(self, embedding_data: dict) -> bool:
-        try:
-            if not isinstance(embedding_data, dict):
-                raise TypeError("embedding_data must be a dict")
-
-            # Convertiamo eventuali numpy array
-            if isinstance(embedding_data.get("embedding"), np.ndarray):
-                embedding_data["embedding"] = embedding_data["embedding"].tolist()
-
-            result = self.RAG_embedding_cache.insert_one(embedding_data)
-            return result.inserted_id
-        except Exception as e:
-            print(f"[ERROR] insert_embedding: {e}")
-            return False
-
-
-    def get_embedding_by_id(self, doc_id: str) -> dict:
-        """Recupera un embedding dato un ID."""
-        return self.RAG_embedding_cache.find_one({"_id": doc_id})  
-
-    def get_embeddings_by_doc_cf(self, cf: str) -> List[dict]: 
-        return list(self.RAG_embedding_cache.find({"metadata.medico_cf": cf}))
      
     #--------------------------------------------------- PERSONALE MEDICO ------------------------------------------------------
     def insert_operator(self, new_user):
