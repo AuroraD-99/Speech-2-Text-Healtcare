@@ -521,7 +521,6 @@ class Dashboard:
         st.markdown(f"# 👁️ Visualizza Referto")
         st.markdown(f"### ID: `{report_id}`")
         
-        st.success(st.session_state.user)
         
         with st.container():
             if st.button("Torna indietro"):

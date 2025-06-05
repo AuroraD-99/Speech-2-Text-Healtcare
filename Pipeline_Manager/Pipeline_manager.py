@@ -88,7 +88,7 @@ class PipelineManager:
         except Exception as e:
             self.logger.warning(f"****Anagrafica del paziente non specificata, dovrai inserirla necessariamente in fase di convalida del documento****")
         
-        file_id = self.compute_id(report_text, self.function_mode)
+        file_id = self.compute_id(report_text["transcription"], self.function_mode)
 
         #Generazione dell'embedding della trascrizione per il RAG - prima procedo all'anonimizzazione del referto
         self.logger.info(f"Procedo all'update del nuovo documento nel RAG...")
@@ -121,9 +121,6 @@ class PipelineManager:
                                                        report_text_RAG,
                                                        self.anagrafica_medico, 
                                                        anagrafica_paziente) 
-        
-        ner_clinical_reports = self.ner.extract_medical_entities(clinical_report[0]) #estrazione delle entità mediche dal referto generato
-        self.logger.info(f"Entità mediche estratte dal referto: {ner_clinical_reports}")
         #salvataggio del documento nel DB
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
         document_id = self.DB_manager.insert_clinical_report(file_id, clinical_report[0])
@@ -131,8 +128,6 @@ class PipelineManager:
         self.logger.info(f"**** Rimozione del referto paziente dalla cartella temporanea... ****")
         #TODO: MECCANISMO DI RECUPERO IN CASO DI INTERRUZIONE PRIMA DEL SALVATAGGIO IN DB
         #Viene effettuato il selvataggio del JSON temporaneamente anche in locale per prevenire la possibile perdita di info fino al salvataggio nel DB
-        if os.path.exists(clinical_report[1]): #il check non dovrebbe essere necessario ma è meglio metterlo
-            os.remove(clinical_report[1])
 
         return document_id
     
