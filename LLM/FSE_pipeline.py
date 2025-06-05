@@ -82,6 +82,23 @@ class FSEManager:
         self.ner = ner
 
     #------------------------------------- FUNZIONI PER LA GESTIONE DEL MODELLO ----------------------------------------
+    
+    def extract_json_string(self, text):
+        start = text.find('{')
+        if start == -1:
+            return None  # Nessuna parentesi graffa di apertura trovata
+        
+        # Conteggia parentesi per trovare la chiusura corrispondente
+        stack = []
+        for i in range(start, len(text)):
+            if text[i] == '{':
+                stack.append('{')
+            elif text[i] == '}':
+                stack.pop()
+                if not stack:
+                    # Abbiamo chiuso l'oggetto JSON iniziale
+                    return text[start:i+1]
+        return None  # Nessuna chiusura trovata
 
     def _model_download(self):
         self.logger.info(f"Controllo modello in: {self.model_path}")
@@ -201,7 +218,10 @@ class FSEManager:
 
                 #genero la scheda di ammissione al PS
                 self.logger.info(f"Procedo alla generazione della scheda di ammissione al PS...")
-                scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities, context) 
+                scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities, context)
+                scheda_json = self.extract_json_string(scheda_ps)
+                scheda_ps = json.loads(scheda_json)
+                self.logger.info(f"[{timestamp}] Scheda di ammissione al PS generata con successo.")
                 self.llm.check_json_format(scheda_ps)
 
                 #Configurazione del formato del file JSON di output
@@ -219,7 +239,11 @@ class FSEManager:
                 context = self.RAGManager.retrieve_context(embedding, entities, doc_type_filter=self.function_mode)
 
                 self.logger.debug(f"Procedo alla generazione del referto clinico...")
-                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities, context) #
+                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities, context) 
+                
+                clinical_json = self.extract_json_string(clinical_report)
+                clinical_report = json.loads(clinical_json)
+                self.logger.debug(f"Clinical Report JSON: {clinical_report}")
                 self.llm.check_json_format(clinical_report)
 
                 #Configurazione del formato del file JSON di output

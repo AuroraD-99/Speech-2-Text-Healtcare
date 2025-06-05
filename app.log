@@ -988,3 +988,23 @@
 2025-06-04 18:35:31,919 [Controller] - INFO - Creating a new clinical report
 2025-06-04 18:35:40,522 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-04 18:35:52,783 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:36:35,381 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:36:50,588 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 22:36:53,973 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:37:22,310 [Controller] - INFO - Creating a new clinical report
+2025-06-04 22:37:28,266 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:37:36,127 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:37:49,571 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
+2025-06-04 22:39:15,876 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:39:19,425 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 22:39:22,485 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:39:45,638 [Controller] - INFO - Creating a new clinical report
+2025-06-04 22:39:50,675 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:39:58,431 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:50:23,771 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-04 22:50:30,978 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:50:59,934 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:51:12,465 [Controller] - INFO - Creating a new clinical report
+2025-06-04 22:51:20,415 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:51:31,071 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-04 22:55:58,616 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://127.0.0.1:8001/new_report
