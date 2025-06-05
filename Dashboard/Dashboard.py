@@ -116,7 +116,6 @@ class Dashboard:
         )
         if response.status_code == 200:
             report =  response.json()
-            print(report)
             st.session_state.last_report = report["report"]
             st.session_state.page = "show_report"
         
@@ -465,41 +464,55 @@ class Dashboard:
             "stato_referto": stato_referto
         }
         
-    def report_modify_page(self, report_id="6835d760cdc5c3eb8dec00f7"): 
-        # Questa funzione apre una pagina per modificare un referto specifico
+    def report_modify_page(self, report_id="6835d760cdc5c3eb8dec00f7"):
         st.markdown(f"## 📝 Modifica Referto ID: `{report_id}`")
 
-        
         # Ottieni il referto dal database
         report = self.db.get_report_by_id(report_id)
-        
-        st.markdown(type(report["scheda_ps"]))
-        
+
         if not report:
             st.error("❌ Referto non trovato.")
             return
 
-        # Mostra i campi in base al tipo di valore
-        for key, value in report.items():
-            if isinstance(value, str):
-                new_value = st.text_input(f"✏️ {key.capitalize()}", value=value)
-                report[key] = new_value
-            elif isinstance(value, list):
-                new_value = st.text_area(f"🗒️ {key.capitalize()}", value="\n".join(value))
-                report[key] = new_value.split("\n")
-            
+        if "_id" in report:
+            del report["_id"]  # campo non modificabile
 
-        # Bottone per salvare
+        st.markdown("### ✏️ Modifica i campi sottostanti")
+
+        updated_report = {}
+
+        # Funzione ricorsiva per visualizzare e modificare i campi
+        def render_edit_fields(data, parent_key=""):
+            updated_data = {}
+
+            for key, value in data.items():
+                full_key = f"{parent_key}.{key}" if parent_key else key
+
+                if isinstance(value, dict):
+                    st.markdown(f"#### 🔹 {full_key}")
+                    updated_data[key] = render_edit_fields(value, full_key)
+
+                elif isinstance(value, list):
+                    current_value = "\n".join(str(v) for v in value)
+                    edited_value = st.text_area(f"🗒️ {full_key}", value=current_value)
+                    updated_data[key] = [v.strip() for v in edited_value.splitlines() if v.strip()]
+
+                elif isinstance(value, (int, float)):
+                    new_val = st.number_input(f"🔢 {full_key}", value=value)
+                    updated_data[key] = new_val
+
+                else:  # stringa o altro
+                    new_val = st.text_input(f"✏️ {full_key}", value=str(value))
+                    updated_data[key] = new_val
+
+            return updated_data
+
+        updated_report = render_edit_fields(report)
+
         if st.button("💾 Salva Modifiche"):
-            # aggiungi anagrafica medico al referto
-            if "anagrafica_medico" not in report:
-                report["anagrafica_medico"] = st.session_state.user["Anagrafica"]
-            if "ospedale" not in report:
-                report["ospedale"] = st.session_state.user["Ospedale"]
-            self.db.update_clinical_report(report_id, report)
+            self.db.update_clinical_report(report_id, updated_report)
             st.success("✅ Referto aggiornato con successo!")
             time.sleep(2)
-            # ritorna alla pagina principale
             st.session_state.page = "main"
             st.rerun()
 
@@ -507,6 +520,8 @@ class Dashboard:
     def show_report_page(self, report_id="6835d760cdc5c3eb8dec00f7"):
         st.markdown(f"# 👁️ Visualizza Referto")
         st.markdown(f"### ID: `{report_id}`")
+        
+        st.success(st.session_state.user)
         
         with st.container():
             if st.button("Torna indietro"):
@@ -519,94 +534,29 @@ class Dashboard:
             st.error("❌ Referto non trovato.")
             return
 
-        # CSS aggiornato con palette TOML e stile più "medical dark"
-        st.markdown(
-            """
-            <style>
-            /* Container principale referto */
-            .report-box {
-                background-color: #1E1E1E;              /* secondaryBackgroundColor */
-                border: 1.5px solid #4DD0E1;            /* primaryColor */
-                border-radius: 12px;
-                padding: 18px 22px;
-                margin-bottom: 20px;
-                box-shadow: 0 2px 6px rgba(77, 208, 225, 0.35);
-                color: #E0E0E0;                         /* textColor */
-                font-family: "sans-serif", Arial, Helvetica, sans-serif;
-                max-height: 140px;
-                overflow-y: auto;
-                transition: box-shadow 0.3s ease;
-            }
-            .report-box:hover {
-                box-shadow: 0 4px 12px rgba(77, 208, 225, 0.6);
-            }
-            /* Scrollbar stile */
-            .report-box::-webkit-scrollbar {
-                width: 7px;
-            }
-            .report-box::-webkit-scrollbar-thumb {
-                background-color: #4DD0E1;
-                border-radius: 10px;
-            }
-            /* Chiave (titolo campo) */
-            .report-key {
-                font-weight: 700;
-                font-size: 1.2em;
-                color: #4DD0E1;                        /* primaryColor */
-                margin-bottom: 8px;
-                border-bottom: 2px solid #4DD0E1;
-                padding-bottom: 6px;
-                user-select: text;
-            }
-            /* Valore */
-            .report-value {
-                font-size: 1em;
-                color: #E0E0E0;                        /* textColor */
-                white-space: pre-wrap;
-                user-select: text;
-                line-height: 1.4em;
-            }
-            /* Layout colonne */
-            .report-columns > div {
-                padding: 0 12px;
-            }
-            /* Titoli e linee di separazione */
-            hr {
-                border: none;
-                border-top: 1px solid #333;
-                margin: 20px 0;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+        if "_id" in report:
+            del report["_id"]
 
-        items = list(report.items())
-        mid_index = (len(items) + 1) // 2
-        left_items = items[:mid_index]
-        right_items = items[mid_index:]
+        st.subheader("📄 Contenuto del Referto")
 
-        col1, col2 = st.columns(2)
+        def render_json(obj, indent=0):
+            spacer = "&nbsp;" * 4 * indent
+            for key, value in obj.items():
+                if isinstance(value, dict):
+                    st.markdown(f"{spacer}### 🔹 {key}")
+                    render_json(value, indent + 1)
+                elif isinstance(value, list):
+                    st.markdown(f"{spacer}**{key}:**")
+                    for item in value:
+                        if isinstance(item, dict):
+                            render_json(item, indent + 1)
+                        else:
+                            st.markdown(f"{spacer}- {item}")
+                else:
+                    st.markdown(f"{spacer}**{key}:** {value}")
 
-        def render_boxes(container, items_to_render):
-            with container:
-                for key, value in items_to_render:
-                    display_key = key.replace('_', ' ').capitalize()
-                    if isinstance(value, list):
-                        value_str = "\n".join(f"• {item}" for item in value)
-                    else:
-                        value_str = str(value)
-
-                    box_html = f"""
-                    <div class="report-box">
-                        <div class="report-key">{display_key}</div>
-                        <div class="report-value">{value_str}</div>
-                    </div>
-                    """
-                    st.markdown(box_html, unsafe_allow_html=True)
-
-        render_boxes(col1, left_items)
-        render_boxes(col2, right_items)
+        render_json(report)
+        st.write("---")
 
         st.write("---")
 

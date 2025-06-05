@@ -4,6 +4,7 @@ import json
 from json_repair import repair_json
 import transformers
 import torch
+import json5
 
 from datetime import datetime
 from dotenv import load_dotenv
@@ -25,6 +26,18 @@ class LLMWrapper:
         return self.model(prompt, **kwargs) if callable(self.model) else self.model.generate(prompt, **kwargs)
 
     #--------------------------------- FUNZIONI PER LA GENERAZIONE DELLA SCHEDA PS ----------------------------------------
+    
+    def extract_json_from_response(self, response_str: str) -> str:
+        start = response_str.find("{")
+        end = response_str.rfind("}")
+        if start == -1 or end == -1:
+            raise ValueError("JSON non trovato nella risposta")
+        return response_str[start:end+1]
+    
+    def fix_json_format(self, json_str):
+        obj = json5.loads(json_str)
+        
+        return json.dumps(obj, ensure_ascii=False, indent=2)
 
     def __generate_prompt_scheda(self, entities):
         esempio_scheda = {
@@ -110,7 +123,9 @@ class LLMWrapper:
             full_prompt = f"{prompt}\n\nReferto da analizzare: {referto_ps}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
-            return result #[0]["generated_text"].replace(full_prompt, "").strip()
+            result_json = self.extract_json_from_response(result)
+            fixed_json = self.fix_json_format(result_json)
+            return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
         except Exception as e:
             self.logger.error(f"Errore nella generazione scheda: {e}")
             return "{}"
@@ -159,7 +174,10 @@ class LLMWrapper:
         full_prompt = f"{prompt}\n\nPuoi fare riferimento ai seguenti esempi: {report_with_context}\n\nReferto da analizzare: {referto}"
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
-            return result #[0]["generated_text"].replace(full_prompt, "").strip()
+            result_json = self.extract_json_from_response(result)
+            fixed_json = self.fix_json_format(result_json)
+            
+            return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
         except Exception as e:
             self.logger.error(f"Errore nella generazione referto: {e}")
             return "{}"
