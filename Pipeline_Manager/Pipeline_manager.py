@@ -78,23 +78,6 @@ class PipelineManager:
         #---------------------------------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------- FUNZIONI PER LA GESTIONE DELLA PIPELINE ----------------------------------------------
-    
-    def extract_json_string(self, text):
-        start = text.find('{')
-        if start == -1:
-            return None  # Nessuna parentesi graffa di apertura trovata
-        
-        # Conteggia parentesi per trovare la chiusura corrispondente
-        stack = []
-        for i in range(start, len(text)):
-            if text[i] == '{':
-                stack.append('{')
-            elif text[i] == '}':
-                stack.pop()
-                if not stack:
-                    # Abbiamo chiuso l'oggetto JSON iniziale
-                    return text[start:i+1]
-        return None  # Nessuna chiusura trovata
 
     def Pipeline_manager(self, audio_filepath):
         #OSS. VANNO SALVAGUARDATI I FILE AUDIO E JSON => VEDERE COME SI PUò GESTIRE MEGLIO IL SALVATAGGIO E LO STORAGE
@@ -159,8 +142,6 @@ class PipelineManager:
         
         #salvataggio del documento nel DB
         self.logger.info(f"Aggiunta referto all'FSE del paziente...")
-        stringa_json = self.extract_json_string(clinical_report[0]["scheda_ps"]) #estraggo la stringa JSON dal referto
-        clinical_report[0]["scheda_ps"] = stringa_json
         document_id = self.DB_manager.insert_clinical_report(embedding_id, clinical_report[0])
 
         #salvataggio dell'embedding (strutturato) nel DB
