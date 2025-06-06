@@ -216,7 +216,6 @@ class LLMWrapper:
         "Diagnosi: faringite virale."
         "Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore."
         "Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano."
-        "Firma: Dott.ssa Elena Bianchi."
         
         esempio_output = """{
                             "Intestazione": {
