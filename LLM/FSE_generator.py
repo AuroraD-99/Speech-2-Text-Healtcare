@@ -206,18 +206,56 @@ class LLMWrapper:
               "Data redazione": "N/A"
             }
         
+        esempio_trascrizione = "Il giorno 5 giugno 2025 alle ore 09:30 presso l’ambulatorio di medicina generale, ho visitato il paziente [NOME E COGNOME]."
+                                "Motivo della visita: febbre persistente da tre giorni con brividi e malessere generale."
+                                "Anamnesi personale: ipertensione arteriosa in trattamento farmacologico."
+                                "Anamnesi familiare: padre deceduto per infarto a 65 anni, madre diabetica."
+                                "Evento attuale: comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea."
+                                "All’esame obiettivo: paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili."
+                                "Sono stati eseguiti tampone rapido per streptococco e test COVID-19, entrambi negativi."
+                                "Diagnosi: faringite virale."
+                                "Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore."
+                                "Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano."
+                                "Firma: Dott.ssa Elena Bianchi."
+        
+        esempio_output = """{
+                            "Intestazione": {
+                                "Data visita": "2025-06-05",
+                                "Ora visita": "09:30",
+                                "Ambulatorio": "Medicina Generale",
+                                "Medico": "Dott.ssa Elena Bianchi"
+                            },
+                            "Motivo della visita": "Febbre persistente da tre giorni con brividi e malessere generale.",
+                            "Anamnesi": {
+                                "Personale": "Ipertensione arteriosa in trattamento farmacologico.",
+                                "Familiare": "Padre deceduto per infarto a 65 anni, madre diabetica.",
+                                "Evento attuale": "Comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea."
+                            },
+                            "Esame obiettivo": "Paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili.",
+                            "Esami eseguiti": "Tampone rapido per streptococco e test COVID-19, entrambi negativi.",
+                            "Diagnosi": "Faringite virale.",
+                            "Terapia": "Riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore.",
+                            "Follow-up": "Rivalutazione tra 3 giorni se i sintomi persistono o peggiorano.",
+                            "Firma medico": "Dott.ssa Elena Bianchi",
+                            "Data redazione": "2025-06-05"
+                            }
+                            """
+        
         unique_entities = sorted(set(entities), key=str.lower)
         formatted_entities = ", ".join(unique_entities) if unique_entities else "nessuna"
 
         
         return (
-            "Sei un assistente clinico. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare un referto medico in italiano, formale, "
-            "chiaro e ben strutturato, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
-            "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente. "
-            "NON SCRIVERE INTRODUZIONI, COMMENTI O SPIEGAZIONI. RISPONDI SOLO CON UN OGGETTO JSON VALIDO.\n\n"
-            f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{formatted_entities}\n\n"
-            "Struttura attesa:\n"
+            "Sei un assistente clinico. Ricevi un testo discorsivo (esempio trascrizione verbale) e devi generare un referto medico per un paziente che hai visitato."
+            "La scheda deve essere in italiano formale, chiara e ben strutturata in formato JSON. Non inserire dati inventati, attieniti a quelli forniti nel testo."
+            "Se una sezione è assente, scrivi 'N/A'. Ecco un esempio di testo che potresti ricevere:"
+            f"{esempio_trascrizione}"
+            "Ecco un esempio di output relativo alla trascrizione sopra riportata:"
+            f"{esempio_output}"
+            "Ecco lo schema che devi seguire per generare la scheda di ammissione al pronto soccorso:"
             f"{json.dumps(esempio_referto, ensure_ascii=False, indent=2)}"
+            f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{formatted_entities}\n\n"
+            "Rispondi solo con un JSON valido, non scrivere introduzioni, commenti o spiegazioni."
         )
 
                 
