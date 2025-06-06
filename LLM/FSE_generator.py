@@ -1,17 +1,23 @@
 import os
 import sys
 import json
+import json5
 from json_repair import repair_json
 import transformers
 import torch
-import json5
+from guardrails import Guard
 
 from datetime import datetime
 from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from log import Logger
 
+from pydantic import BaseModel
+import json
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from LLM.scheda_ps import SchedaPS
+from LLM.clinical_report import RefertoClinico
 
 class LLMWrapper:
     def __init__(self, model):
@@ -22,37 +28,57 @@ class LLMWrapper:
         self.max_new_tokens = 1024
 
     def generator(self, prompt, **kwargs):
-        raw_output = self.model(prompt, **kwargs) if callable(self.model) else self.model.generate(prompt, **kwargs)
+        return self.model(prompt, **kwargs) if callable(self.model) else self.model.generate(prompt, **kwargs)
+    
+    def model_to_json_schema(self, model: BaseModel) -> dict:
+        return json.loads(model.model_json_schema(mode="json"))["properties"]
+    
+    def _build_default(self, field):
+            if hasattr(field.outer_type_, '__origin__') and field.outer_type_.__origin__ is list:
+                return ["N/A"]
+            elif hasattr(field.outer_type_, '__origin__') and field.outer_type_.__origin__ is dict:
+                return {}
+            elif isinstance(field.default, BaseModel):
+                return self.model_to_default_json(type(field.default))
+            elif isinstance(field.default, list):
+                return field.default
+            elif isinstance(field.default, dict):
+                return field.default
+            elif field.default is not None:
+                return field.default
+            return "N/A"
+    
+    def model_to_default_json(self, model_cls):
+        defaults = {}
+        for field_name, field in model_cls.model_fields.items():
+            alias = field.alias or field_name
+            if issubclass(field.annotation, BaseModel):
+                defaults[alias] = self.model_to_default_json(field.annotation)
+            elif hasattr(field.annotation, '__origin__') and field.annotation.__origin__ is list:
+                defaults[alias] = ["N/A"]
+            else:
+                defaults[alias] = "N/A"
+        return defaults
 
-        # Normalizzazione: cerca di estrarre la stringa
-        if isinstance(raw_output, str):
-            return raw_output
-        elif isinstance(raw_output, list) and isinstance(raw_output[0], dict) and "generated_text" in raw_output[0]:
-            return raw_output[0]["generated_text"]
-        elif isinstance(raw_output, dict) and "text" in raw_output:
-            return raw_output["text"]
-        elif hasattr(raw_output, 'tolist'):  # Torch Tensor
-            return str(raw_output.tolist())
-        else:
-            self.logger.warning(f"Output non riconosciuto: {raw_output}")
-            return str(raw_output)
 
     #--------------------------------- FUNZIONI PER LA GENERAZIONE DELLA SCHEDA PS ----------------------------------------
     
     def extract_json_from_response(self, response_str: str) -> str:
         start = response_str.find("{")
-        if start == -1:
+        end = response_str.rfind("}")
+        if start == -1 or end == -1:
             raise ValueError("JSON non trovato nella risposta")
-        return response_str[start:]
+        return response_str[start:end+1]
     
     def fix_json_format(self, json_str):
-        fix = repair_json(json_str)
-        return json5.loads(fix)
+        obj = json5.loads(json_str)
+        
+        return json.dumps(obj, ensure_ascii=False, indent=2)
 
     def __generate_prompt_scheda(self, entities):
         esempio_scheda = {
             "Chiamata": {
-                "data": "N/A",
+                "data": ["N/A"],
                 "H chiamata": "N/A",
                 "H partenza": "N/A",
                 "H sul posto": "N/A",
@@ -73,7 +99,7 @@ class LLMWrapper:
                 "IP": "N/A",
                 "Medico": "N/A"
             },
-            "Causa trasporto non effettuato": "N/A",
+            "Causa trasporto non effettuato": ["N/A"],
             "Attivazioni/Autorità presenti": {
                 "descrizione": "N/A",
                 "referto": "N/A"
@@ -106,78 +132,47 @@ class LLMWrapper:
                 "Altro": "N/A",
                 "Infusioni/Farmaci": "N/A"
             },
-            "Annotazioni": "N/A"
+            "Annotazioni": ["N/A"]
         }
-        
-        esempio_trascrizione = " Motivo dellintervento e "
-        "sintomi riferiti La paziente ha accusato un intenso dolore al petto, irradiato al braccio sinistro e accompagnato da nausea, mentre era a casa. "
-        "Ha riferito anche di aver avuto episodi simili nei giorni precedenti, ma di entità minore. Contesto clinico La paziente è una donna con una storia "
-        "familiare di malattie cardiovascolari; la madre è deceduta per un infarto del miocardio alletà di 70 anni. La paziente è ipertesa e in trattamento "
-        "con farmaci antipertensivi. Dinamica dellaccesso al PS La chiamata è stata effettuata alle ore 1115 da un familiare. Lintervento è avvenuto in Via "
-        "della Libertà, 25, a Roma. Il trasporto è stato effettuato in ambulanza in codice giallo, con monitoraggio continuo dellECG e della saturazione di "
-        "ossigeno. Trattamenti e interventi effettuati Allarrivo sul posto, la paziente era vigile, collaborante, con parametri vitali nella norma, ma con "
-        "evidente distress respiratorio. È stata sottoposta a ossigenoterapia con maschera facciale a 6 litriminuto e somministrazione di acido "
-        "acetilsalicilico da mg per via endovenosa. La paziente ha ricevuto anche un bolo di morfina da 2 mg per il controllo del dolore. Parametri vitali "
-        "rilevati Pressione arteriosa 80 mmHg Frequenza cardiaca 92 bpm Frequenza respiratoria 22 attimin Temperatura 36,8C Saturazione di ossigeno 88 con"
-        " aria ambiente, migliorata al 94 con ossigenoterapia Eventuale presenza di autorità Non presente. Annotazioni aggiuntive da parte del personale La"
-        " paziente ha riferito di aver assunto gli ultimi pasti regolarmente e di non avere particolari allergie note. La famiglia ha fornito una cartella"
-        " clinica incompleta con precedenti episodi di angina. Esami diagnostici Allelettrocardiogramma eseguito in ambulanza è emerso un sopraslivellamento "
-        "del tratto ST in derivazioni inferiori, suggestivo per infarto miocardico inferiore. Trasporto al PS La paziente è stata trasportata al Pronto "
-        " Soccorso dellOspedale Umberto I di Roma, dove è stata accolta nel percorso Code Rosse. Notazioni È stata avviata la procedura per il trattamento"
-        " trombolitico e la paziente è stata sottoposta a ulteriori indagini diagnostice, tra cui ecocardiogramma e esami del sangue per marker cardiaci. "
-        "Dettagli clinici aggiuntivi La paziente è stata mantenuta sotto stretto monitoraggio per tutta la durata del trasporto e in Pronto Soccorso, con "
-        "controlli continui dei parametri vitali e dellECG. Stato alla fine del trasporto La paziente è arrivata al Pronto Soccorso in buone condizioni"
-        " generali, ma con persistente dolore toracico."
-        
-        esempio_output = """
-        ```\n{\n  \"Chiamata\": {\n    \"data\": \n      \"N/A\"\n    ,\n    \"H chiamata\": \"11:15\",\n    \"H partenza\": \"N/A\",\n    \"H sul posto\":
-        \"N/A\",\n    \"H partenza posto\": \"N/A\",\n    \"H in PS\": \"N/A\",\n    \"H libero e operativo\": \"N/A\",\n    \"luogo intervento\": 
-        \"Via della Libertà, 25, Roma\",\n    \"condizione riferita\": \"Dolore toracico acuto\",\n    \"recapito telefonico\": \"N/A\"\n  },\n 
-        \"Ambulanza\": {\n    \"CRI\": \"N/A\",\n    \"Sel\": \"N/A\"\n  },\n  \"Equipaggio\": {\n    \"Aut.\": \"N/A\",\n    \"Socc1\": \"N/A\",\n  
-        \"Socc2\": \"N/A\",\n    \"IP\": \"N/A\",\n    \"Medico\": \"N/A\"\n  },\n  \"Causa trasporto non effettuato\": \n    \"N/A\"\n  ,\n  
-        \"Attivazioni/Autorità presenti\": {\n    \"descrizione\": \"N/A\",\n    \"referto\": \"N/A\"\n  },\n  \"Decesso\": {\n    \"Ora decesso\": \"\",\n    \"Firma\": \"\"\n  },\n 
-        \"Rifiuto (firma dell'interessato)\": {\n    \"Firma\": \"\"\n  },\n  \"Rilevazioni\": {\n    \"Parametri\": {\n     
-        \"Coscienza\": \"vigile\",\n      \"Cute\": \"N/A\",\n      \"Respiro\": \"regolare\",\n    
-        \"Sp02\": \"88% (aria ambiente), 94% (ossigenoterapia)\",\n      \"FC bpm\": \"92\",\n      \"PA mmHg\": \"80\",\n    
-        \"Glic, Mg/dl\": \"N/A\",\n      \"Temp. C°\": \"36.8\"\n    },\n    \"Glasgow Coma Scale\": {\n      \"Apertura occhi\": \"N/A\",\n   
-        \"Risposta verbale\": \"N/A\",\n      \"Risposta motoria\": \"N/A\"\n    },\n    \"Pupille\": \"N/A\",\n   
-        \"Lesioni riscontrate\": \"nessuna\"\n  },\n  \"Provvedimenti\": {\n    \"Respiro\": \"Ossigenoterapia\",\n  
-        \"Circolo\": \"Monitoraggio ECG\",\n    \"Immobilizzazione\": \"N/A\",\n    \"Altro\": \"ECG in loco\",\n  
-        \"Infusioni/Farmaci\": \"Acido acetilsalicilico, morfina\"\n  },\n  \"Annotazioni\": \n   
-        \"Paziente collaborante, nessuna difficoltà durante il trasporto. La paziente ha riferito di aver assunto gli ultimi pasti regolarmente e di non 
-        avere particolari allergie note.\"\n  \n}\n```", 
-
-        """
-
 
         self.logger.info(f"Entities: {entities}")
 
         return (
-            "Sei un medico in pronto soccorso. Ricevi un testo discorsivo (esempio trascrizione verbale) e devi generare una scheda di ammissione del paziente al pronto soccorso."
-            "La scheda deve essere in italiano formale, chiara e ben strutturata in formato JSON. Non inserire dati inventati, attieniti a quelli forniti nel testo."
-            "Se una sezione è assente, scrivi 'N/A'. Ecco un esempio di testo che potresti ricevere:"
-            f"{esempio_trascrizione}"
-            "Ecco un esempio di output relativo alla trascrizione sopra riportata:"
-            f"{esempio_output}"
-            "Ecco lo schema che devi seguire per generare la scheda di ammissione al pronto soccorso:"
+            "Sei un medico d’emergenza. Ricevi un testo discorsivo (es. trascrizione verbale) e devi generare una scheda di ammissione al Pronto Soccorso (PS) in italiano, formale, "
+            "chiara e ben strutturata, in formato JSON. Non inserire dati inventati anche se plausibili per il contesto. Se una sezione è assente, scrivi 'N/A'.\n\n"
+            "Compila questo schema basandoti esclusivamente sulle informazioni fornite nel testo seguente."
+            "Non aggiungere paragrafi introduttivi, produci solo la scheda richiesta."
+            "Struttura attesa:\n"
             f"{json.dumps(esempio_scheda, ensure_ascii=False, indent=2)}"
             f"Le seguenti entità sono state riconosciute nel testo e possono aiutarti a completare la scheda:\n{entities}\n\n"
-            "Rispondi solo con un JSON valido, non scrivere introduzioni, commenti o spiegazioni."
         )
 
 
-    def generate_scheda_from_report(self, referto_ps, entities): #DA CONTROLLAREa
+    def generate_scheda_from_report(self, referto_ps, entities): #DA CONTROLLARE
+        #schema = PydanticSchema(SchedaPS) 
+        guard = Guard.for_pydantic(output_class=SchedaPS)
+
+        esempio_scheda = self.model_to_default_json(SchedaPS)
+
+        self.logger.info(f"Entities: {entities}")
+
         prompt = self.__generate_prompt_scheda(entities)
-        self.logger.info(f"Generazione della scheda PS senza contesto")
-        full_prompt = f"{prompt}\n\nEcco il vero input: {referto_ps} \n\n Ora scrivi il vero output:"
+        self.logger.info(f"Generazione della scheda PS con contesto")
+        full_prompt = f"{prompt}\n\nReferto da analizzare: {referto_ps}"
+        
         try:
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
-            self.logger.info(f"Risultato della generazione: {result}")
+            
+            # Validazione e parsing con Guardrails
+            validated_output = guard.parse(result)
+            validated_dict = validated_output.model_dump_json()
+            # validated_dict è un dizionario valido secondo RefertoClinico
+            self.logger.info(f"Output json: {validated_dict}")
+            #Provo a salvare il risultato per vedere cosa ha prodotto
+            self.save_to_json(validated_dict, "assets/transcriptions/prova_guardrail_pydantic.json")
+
             result_json = self.extract_json_from_response(result)
-            self.logger.info(f"JSON estratto dalla risposta: {result_json}")
             fixed_json = self.fix_json_format(result_json)
-            self.logger.info(f"JSON corretto: {fixed_json}")
-            # Salva le variabili result, result_json e fixed_json in un file JSON
             return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
         except Exception as e:
             self.logger.error(f"Errore nella generazione scheda: {e}")
@@ -260,24 +255,25 @@ class LLMWrapper:
 
                 
     def generate_clinical_report(self, referto, entities): #DA CONTROLLARE
+        #schema = PydanticSchema(RefertoClinico)
+        guard = Guard.for_pydantic(output_class=RefertoClinico)
+        
         prompt = self.__generate_prompt_report(entities) 
         full_prompt = f"{prompt}\n\nReferto da analizzare: {referto}"
+        
         try:
-            test_path = "./assets/test"  # <-- percorso della cartella di test
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
-            out_file = os.path.join(test_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
+
+            # Validazione e parsing con Guardrails
+            validated_output = guard.parse(result)
+            validated_dict = validated_output.model_dump_json()
+            # validated_dict è un dizionario valido secondo RefertoClinico
+            self.logger.info(f"Output json: {validated_dict}")
+            #Provo a salvare il risultato per vedere cosa ha prodotto
+            self.save_to_json(validated_dict, "assets/transcriptions/prova_guardrail_pydantic.json")
+
             result_json = self.extract_json_from_response(result)
             fixed_json = self.fix_json_format(result_json)
-            
-            # Salva le variabili result, result_json e fixed_json in un file JSON
-            with open(out_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "result": result,
-                    "result_json": result_json,
-                    "fixed_json": fixed_json
-                }, f, ensure_ascii=False, indent=2)
-            self.logger.info(f"Referto salvato in {out_file}")
             
             return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
         except Exception as e:
