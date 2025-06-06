@@ -207,16 +207,16 @@ class LLMWrapper:
             }
         
         esempio_trascrizione = "Il giorno 5 giugno 2025 alle ore 09:30 presso l’ambulatorio di medicina generale, ho visitato il paziente [NOME E COGNOME]."
-                                "Motivo della visita: febbre persistente da tre giorni con brividi e malessere generale."
-                                "Anamnesi personale: ipertensione arteriosa in trattamento farmacologico."
-                                "Anamnesi familiare: padre deceduto per infarto a 65 anni, madre diabetica."
-                                "Evento attuale: comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea."
-                                "All’esame obiettivo: paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili."
-                                "Sono stati eseguiti tampone rapido per streptococco e test COVID-19, entrambi negativi."
-                                "Diagnosi: faringite virale."
-                                "Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore."
-                                "Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano."
-                                "Firma: Dott.ssa Elena Bianchi."
+        "Motivo della visita: febbre persistente da tre giorni con brividi e malessere generale."
+        "Anamnesi personale: ipertensione arteriosa in trattamento farmacologico."
+        "Anamnesi familiare: padre deceduto per infarto a 65 anni, madre diabetica."
+        "Evento attuale: comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea."
+        "All’esame obiettivo: paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili."
+        "Sono stati eseguiti tampone rapido per streptococco e test COVID-19, entrambi negativi."
+        "Diagnosi: faringite virale."
+        "Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore."
+        "Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano."
+        "Firma: Dott.ssa Elena Bianchi."
         
         esempio_output = """{
                             "Intestazione": {
