@@ -52,19 +52,238 @@ class Dashboard:
         self.controller_url = os.getenv('CONTROLLER_URL', 'http://127.0.0.1:8003')
         
     def sidebar_query(self):
-        st.sidebar.markdown("## 🔍 Esplora Referti")
+        tipo_referto = st.sidebar.selectbox(
+            "Seleziona tipo referto", ["Tutti", "Ospedale", "Emergency"]
+        )
 
+        filtro_paziente = st.sidebar.text_input("Filtro paziente (nome, cognome, CF)")
+
+        start_date = st.sidebar.date_input("Data inizio", value=None)
+        end_date = st.sidebar.date_input("Data fine", value=None)
+
+        filtro_patologia = ""
+        filtro_farmaco = ""
+        filtro_deceduti = False
+        filtro_forze_ordine = False
+
+        if tipo_referto == "Ospedale":
+            filtro_patologia = st.sidebar.text_input("Filtro Patologia (Diagnosi)")
+            filtro_farmaco = st.sidebar.text_input("Filtro Farmaco (Terapia)")
+
+        if tipo_referto == "Emergency":
+            filtro_deceduti = st.sidebar.checkbox("Mostra solo pazienti deceduti")
+            filtro_forze_ordine = st.sidebar.checkbox("Mostra solo pazienti con intervento forze dell'ordine")
+
+        return {
+            "tipo_referto": tipo_referto,
+            "filtro_paziente": filtro_paziente,
+            "start_date": start_date if isinstance(start_date, (type(None), datetime.date)) else None,
+            "end_date": end_date if isinstance(end_date, (type(None), datetime.date)) else None,
+            "filtro_patologia": filtro_patologia,
+            "filtro_farmaco": filtro_farmaco,
+            "filtro_deceduti": filtro_deceduti,
+            "filtro_forze_ordine": filtro_forze_ordine,
+        }
+
+
+    
+    
+    def filtra_referti(self):
+        st.markdown("## 🔍 Filtra Referti Clinici")
+
+        user = st.session_state.get("user", {})
+        medico_cf = user.get("Anagrafica", {}).get("Codice Fiscale", "")
+
+        st.markdown("---")
+        st.markdown("### 🗂️ Riepilogo referti dei tuoi pazienti")
+
+        try:
+            self.db.refresh_queue_for_doctor(medico_cf)
+            reports = self.db.get_all_clinical_reports_by_doctor_cf(medico_cf)
+
+            if not reports:
+                st.warning("🔍 Non ci sono referti associati al tuo codice fiscale.")
+                return
+
+            filtri = self.sidebar_query()
+
+            filtro_attivo = (
+                filtri["tipo_referto"] != "Tutti" or
+                filtri["filtro_paziente"] != "" or
+                filtri["start_date"] is not None or
+                filtri["end_date"] is not None or
+                (filtri["tipo_referto"] == "Ospedale" and (filtri["filtro_patologia"] or filtri["filtro_farmaco"])) or
+                (filtri["tipo_referto"] == "Emergency" and (filtri["filtro_deceduti"] or filtri["filtro_forze_ordine"]))
+            )
+
+            container = st.sidebar.container(border=True)
+            with container:
+                st.markdown(f"#### 🗂️ Tipo referto scelto: {filtri['tipo_referto']}")
+                st.markdown(f"#### 📋 Numero referti totali: {len(reports)}")
+
+            if not filtro_attivo:
+                # Nessun filtro attivo: mostra i primi 100 referti ordinati per timestamp decrescente
+                reports_sorted = sorted(reports, key=lambda x: x.get("timestamp", ""), reverse=True)
+                filtered_reports = reports_sorted[:100]
+            else:
+                def match_report(report):
+                    # Tipo referto
+                    if filtri["tipo_referto"] != "Tutti" and report.get("type", "") != filtri["tipo_referto"]:
+                        return False
+
+                    # Filtro paziente
+                    nominativo = report["dati paziente"].get("nominativo", {})
+                    nome_paziente = nominativo.get("nome", "").lower()
+                    cognome_paziente = nominativo.get("cognome", "").lower()
+                    codice_fiscale_paziente = report["dati paziente"].get("codice_fiscale", "").lower()
+                    filtro_paz = filtri["filtro_paziente"].lower()
+
+                    if filtro_paz:
+                        if (filtro_paz not in nome_paziente and
+                            filtro_paz not in cognome_paziente and
+                            filtro_paz not in codice_fiscale_paziente):
+                            return False
+
+                    # Filtro data
+                    timestamp_str = report.get("timestamp", "")
+                    if timestamp_str:
+                        from datetime import datetime
+                        try:
+                            ts = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+                            if filtri["start_date"] and ts.date() < filtri["start_date"]:
+                                return False
+                            if filtri["end_date"] and ts.date() > filtri["end_date"]:
+                                return False
+                        except Exception:
+                            return False
+
+                    # Filtri specifici per tipo referto
+
+                    if filtri["tipo_referto"] == "Ospedale":
+                        filtro_patologia = str(filtri.get("filtro_patologia", "")).lower()
+                        filtro_farmaco = str(filtri.get("filtro_farmaco", "")).lower()
+
+                        clinical_report = report.get("clinical_report", "")
+
+                        if isinstance(clinical_report, dict):
+                            diagnosi = str(clinical_report.get("Diagnosi", "")).lower()
+                            terapia = str(clinical_report.get("Terapia", "")).lower()
+                        else:
+                            # Se clinical_report è stringa o altro, converti tutto in stringa
+                            testo_clinical_report = str(clinical_report).lower()
+                            diagnosi = testo_clinical_report
+                            terapia = testo_clinical_report
+
+                        if filtro_patologia and filtro_patologia not in diagnosi:
+                            return False
+
+                        if filtro_farmaco and filtro_farmaco not in terapia:
+                            return False
+
+                    elif filtri["tipo_referto"] == "Emergency":
+                        # filtro deceduti su scheda_ps.Decesso.Ora decesso
+                        if filtri.get("filtro_deceduti", False):
+                            ora_decesso = report.get("scheda_ps", {}).get("Decesso", {}).get("Ora decesso", "")
+                            if not ora_decesso or ora_decesso == "N/A":
+                                return False
+
+                        # filtro forze ordine su scheda_ps.Attivazioni/Autorità presenti.descrizione
+                        if filtri.get("filtro_forze_ordine", False):
+                            descrizione = report.get("scheda_ps", {}).get("Attivazioni/Autorità presenti", {}).get("descrizione", "")
+                            if not descrizione or descrizione == "N/A":
+                                return False
+
+                    return True
+
+                filtered_reports = list(filter(match_report, reports))
+                filtered_reports.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+
+            with container:
+                st.markdown(f"#### 🔎 Numero referti filtrati: {len(filtered_reports)}")
+
+            if not filtered_reports:
+                st.warning("Nessun referto trovato con i filtri selezionati.")
+                return
+
+            # Raggruppa per paziente
+            grouped = {}
+            for report in filtered_reports:
+                nominativo = report["dati paziente"].get("nominativo", {})
+                paziente = f"{nominativo.get('cognome', '')} {nominativo.get('nome', '')}".strip()
+                grouped.setdefault(paziente, []).append(report)
+
+            grouped = dict(sorted(grouped.items(), key=lambda item: item[0].split()[-1].lower()))
+
+            # Visualizza referti
+            for paziente, referti in grouped.items():
+                with st.expander(f"🧑‍⚕️ Paziente: {paziente} ({len(referti)} referti)"):
+                    for referto in referti:
+                        st.markdown(f"""
+                        - 🩺 {referto.get('type', 'N/A')}
+                        - 📄 **ID Referto**: `{referto.get('_id', 'N/A')}`
+                        - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
+                        """)
+                        with st.container():
+                            col1, col2, col3 = st.columns(3)
+                            with col3:
+                                delete_key = f"delete_{referto.get('_id')}"
+                                confirm_key = f"confirm_delete_{referto.get('_id')}"
+
+                                if st.button("❌ Cancella Referto", key=delete_key):
+                                    st.session_state[confirm_key] = True
+
+                                if st.session_state.get(confirm_key, False):
+                                    st.warning("⚠️ Sei sicuro di voler cancellare questo referto?")
+                                    col_confirm, col_cancel = st.columns(2)
+                                    with col_confirm:
+                                        if st.button("✅ Conferma", key=f"confirm_{referto.get('_id')}"):
+                                            self.db.delete_clinical_report(referto.get('_id'))
+                                            self.db.refresh_queue_for_doctor(medico_cf)
+                                            del st.session_state[confirm_key]
+                                            st.session_state.deleted = True
+                                            st.experimental_rerun()
+                                    with col_cancel:
+                                        if st.button("❎ Annulla", key=f"cancel_{referto.get('_id')}"):
+                                            del st.session_state[confirm_key]
+                                            st.experimental_rerun()
+
+                            with col2:
+                                st.button(
+                                    "✏️ Modifica Referto",
+                                    key=f"modify_{referto.get('_id')}",
+                                    on_click=self.modify_report,
+                                    args=(referto.get('_id'),),
+                                )
+
+                            with col1:
+                                st.button(
+                                    "👁️ Visualizza Referto",
+                                    key=f"show_{referto.get('_id')}",
+                                    on_click=self.show_report,
+                                    args=(referto.get('_id'),),
+                                )
+
+        except Exception as e:
+            st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
+
+
+        if st.session_state.get("deleted", False):
+            st.session_state["deleted"] = False
+            st.rerun()
+            
+        # Pulsanti azioni
         if st.sidebar.button("🔄 Ricarica", use_container_width=True):
             st.rerun()
 
         if st.sidebar.button("🏠 Torna alla Home", use_container_width=True):
             st.session_state.page = "main"
             st.rerun()
-        
+
         if st.sidebar.button("🔒 Logout", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
+
         
     def genera_anagrafica(self, dizionario:dict):
         """
@@ -375,6 +594,7 @@ class Dashboard:
                 st.session_state.page = "login"
                 st.rerun()
 
+    
 
     def main_page(self):
         st.markdown("## 🏠 Inserire nome APP")
@@ -849,15 +1069,15 @@ class Dashboard:
                             )
 
         render_read_only_fields(report)
-
+    
+        
     def run(self):
         if st.session_state.logged_in:
             if st.session_state.page == "main":
                 self.sidebar()
                 self.main_page()
             elif st.session_state.page == "query_report":
-                self.sidebar_query()
-                self.main_page()
+                self.filtra_referti()
             elif st.session_state.page == "report_modify":
                 self.report_modify_page(st.session_state.last_report["_id"])
             elif st.session_state.page == "show_report":
