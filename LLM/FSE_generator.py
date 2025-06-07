@@ -260,23 +260,15 @@ class LLMWrapper:
                 
     def generate_clinical_report(self, referto, entities): #DA CONTROLLARE
         prompt = self.__generate_prompt_report(entities) 
+        self.logger.info(f"Generazione del referto clinico senza contesto")
         full_prompt = f"{prompt}\n\nReferto da analizzare: {referto}"
         try:
-            test_path = "./assets/test"  # <-- percorso della cartella di test
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
-            out_file = os.path.join(test_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
             result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
+            self.logger.info(f"Risultato della generazione: {result}")
             result_json = self.extract_json_from_response(result)
+            self.logger.info(f"JSON estratto dalla risposta: {result_json}")
             fixed_json = self.fix_json_format(result_json)
-            
-            # Salva le variabili result, result_json e fixed_json in un file JSON
-            with open(out_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "result": result,
-                    "result_json": result_json,
-                    "fixed_json": fixed_json
-                }, f, ensure_ascii=False, indent=2)
-            self.logger.info(f"Referto salvato in {out_file}")
+            self.logger.info(f"JSON corretto: {fixed_json}")
             
             return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
         except Exception as e:

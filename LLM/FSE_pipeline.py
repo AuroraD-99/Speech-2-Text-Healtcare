@@ -31,6 +31,88 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from LLM.FSE_generator import LLMWrapper 
 from NER.ner import NER
 
+struttura_clinical_report = {
+    "Intestazione": {
+        "Data visita": "N/A",
+        "Ora visita": "N/A",
+        "Ambulatorio": "N/A",
+        "Medico": "N/A"
+    },
+    "Motivo della visita": "N/A",
+    "Anamnesi": {
+        "Personale": "N/A",
+        "Familiare": "N/A",
+        "Evento attuale": "N/A"
+    },
+    "Esame obiettivo": "N/A",
+    "Esami eseguiti": "N/A",
+    "Diagnosi": "N/A",
+    "Terapia": "N/A",
+    "Follow-up": "N/A",
+    "Firma medico": "N/A",
+    "Data redazione": "N/A"
+}
+
+
+scheda_base_ps = {
+            "Chiamata": {
+                "data": "N/A",
+                "H chiamata": "N/A",
+                "H partenza": "N/A",
+                "H sul posto": "N/A",
+                "H partenza posto": "N/A",
+                "H in PS": "N/A",
+                "H libero e operativo": "N/A",
+                "luogo intervento": "N/A",
+                "condizione riferita": "N/A"
+            },
+            "Ambulanza": {
+                "CRI": "N/A",
+                "Sel": "N/A"
+            },
+            "Equipaggio": {
+                "Aut.": "N/A",
+                "Socc1": "N/A",
+                "Socc2": "N/A",
+                "IP": "N/A",
+                "Medico": "N/A"
+            },
+            "Causa trasporto non effettuato": "N/A",
+            "Attivazioni/Autorità presenti": {
+                "descrizione": "N/A",
+                "referto": "N/A"
+            },
+            "Decesso": {"Ora decesso": "", "Firma": "N/A"},
+            "Rifiuto (firma dell'interessato)": {"Firma": "N/A"},
+            "Rilevazioni": {
+                "Parametri": {
+                    "Coscienza": "N/A",
+                    "Cute": "N/A",
+                    "Respiro": "N/A",
+                    "Sp02": "N/A",
+                    "FC bpm": "N/A",
+                    "PA mmHg": "N/A0",
+                    "Glic, Mg/dl": "N/A",
+                    "Temp. C°": "N/A"
+                },
+                "Glasgow Coma Scale": {
+                    "Apertura occhi": "N/A",
+                    "Risposta verbale": "N/A",
+                    "Risposta motoria": "N/A"
+                },
+                "Pupille": "N/A",
+                "Lesioni riscontrate": "N/A"
+            },
+            "Provvedimenti": {
+                "Respiro": "N/A",
+                "Circolo": "N/A",
+                "Immobilizzazione": "N/A",
+                "Altro": "N/A",
+                "Infusioni/Farmaci": "N/A"
+            },
+            "Annotazioni": "N/A"
+        }
+
 
 class FSEManager:
     def __init__(self, ner, function_mode="Emergency", env_file="key.env"):
@@ -193,8 +275,17 @@ class FSEManager:
                 #genero la scheda di ammissione al PS
                 self.logger.info(f"Procedo alla generazione della scheda di ammissione al PS...")
                 scheda_ps = self.llm.generate_scheda_from_report(report_text, formatted_entities) 
-                self.llm.check_json_format(scheda_ps)
+                is_invalid_json = not self.llm.check_json_format(scheda_ps)
+                is_none_or_empty = (
+                    scheda_ps is None or
+                    (isinstance(scheda_ps, str) and scheda_ps.strip() in ["", "{}", "[]"]) or
+                    (isinstance(scheda_ps, dict) and not scheda_ps)
+                )
 
+                if is_invalid_json or is_none_or_empty:
+                    self.logger.info(f"[{timestamp}] Scheda di ammissione generata è vuota o non valida, utilizzo la struttura predefinita.")
+                    scheda_ps = scheda_base_ps
+                    
                 #Configurazione del formato del file JSON di output
                 full_output = {
                         "timestamp": timestamp,
@@ -208,9 +299,16 @@ class FSEManager:
                 self.logger.debug(f"Modalità di funzionamento: Follow-up o Visita...")
                 
                 self.logger.debug(f"Procedo alla generazione del referto clinico...")
-                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities) #
-                self.llm.check_json_format(clinical_report)
-
+                clinical_report = self.llm.generate_clinical_report(report_text, formatted_entities) 
+                
+                is_invalid_json = not self.llm.check_json_format(clinical_report)
+                is_none_or_empty = (clinical_report is None or
+                                    (isinstance(clinical_report, str) and clinical_report.strip() in ["", "{}", "[]"]) or
+                                    (isinstance(clinical_report, dict) and not clinical_report))
+                
+                if is_invalid_json or is_none_or_empty:
+                    self.logger.info(f"[{timestamp}] Il referto clinico generato è vuoto o non valido, utilizzo la struttura predefinita.")
+                    clinical_report = struttura_clinical_report
                 #Configurazione del formato del file JSON di output
                 full_output = {
                         "timestamp": timestamp,

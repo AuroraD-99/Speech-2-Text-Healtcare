@@ -34,7 +34,7 @@ class DB:
             self.logger = Logger(self.__class__.__name__).get_logger()
             self.logger.info("Connected to MongoDB successfully.")
             #Per le code Redis
-            #self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
         except ConnectionFailure as e:
             self.logger.error(f"Failed to connect to MongoDB: {e}")
             raise
@@ -114,6 +114,15 @@ class DB:
         report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
         report["validated"] = False
         result = self.reports_collection.insert_one(report)
+        
+        
+        try:
+            doctor_cf = report["dati medico"]["Anagrafica"]["Codice Fiscale"]
+            self.enqueue_report_for_doctor(doctor_cf, str(result.inserted_id))  # Aggiunge il referto alla coda del medico
+            self.logger.info(f"Referto inserito nella coda per il medico con CF: {doctor_cf}")
+        except KeyError as e:
+            self.logger.error(f"Errore nell'inserimento del referto: {e}. Assicurati che il report contenga i dati del medico.")
+            raise ValueError(f"Report non valido: {e} non trovato nei dati del report.")
         return result.inserted_id
 
     
@@ -123,11 +132,34 @@ class DB:
         """
         return list(self.reports_collection.find({"patient_id": patient_id}))
     
-    def get_all_clinical_reports_by_doctor_cf(self, doctor_cf): #prendo tutti i referti di un medico che sono stati validati
-        """
-        Returns all clinical reports for a specific doctor.
-        """
-        return list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf}))
+    def get_all_clinical_reports_by_doctor_cf(self, doctor_cf):
+        
+        report_ids = self.get_queue_for_doctor(doctor_cf)
+
+        if not report_ids:
+            self.logger.warning(f"Nessun report trovato nella coda per il medico con CF {doctor_cf}.")
+            reports = list(self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf}))
+
+            for report in reports:
+                self.enqueue_report_for_doctor(doctor_cf, str(report["_id"]))
+            
+            return reports
+
+        # Converti gli ID in ObjectId in sicurezza
+        object_ids = []
+        for report_id in report_ids:
+            try:
+                object_ids.append(ObjectId(report_id))
+            except Exception as e:
+                self.logger.warning(f"ID non valido nella coda Redis: {report_id} → {e}")
+
+        reports = list(self.reports_collection.find({"_id": {"$in": object_ids}}))
+
+        # Ricostruzione ordinata
+        id_to_report = {str(report["_id"]): report for report in reports}
+        ordered_reports = [id_to_report[report_id] for report_id in report_ids if report_id in id_to_report]
+
+        return ordered_reports
     
     def get_validated_clinical_report(self, report_id: str) -> dict:
         #Recupera un referto validato. Se non è validato, restituisce None e mostra un warning.
@@ -162,8 +194,9 @@ class DB:
         """
         Update a clinical report by report_id.
         """
+        self.logger.info(f"Aggiornamento del referto con ID {report_id} con i nuovi dati: {new_report}")
         result = self.reports_collection.update_one(
-            {"_id": report_id},
+            {"_id": ObjectId(report_id)},
             {"$set": new_report}
         )
         return result.modified_count
@@ -172,6 +205,11 @@ class DB:
         """
         Delete a clinical report by report_id.
         """
+        report = self.reports_collection.find_one({"_id": report_id})
+        if report:
+            doctor_cf = report["dati medico"]["Anagrafica"]["Codice Fiscale"]
+            key = f"queue:referti:{doctor_cf}"
+            self.redis.lrem(key, 0, str(report_id))
         result = self.reports_collection.delete_one({"_id": report_id})
         return result.deleted_count
     
@@ -316,36 +354,47 @@ class DB:
 
     #----------------------------------------- PER LE CODE REDIS --------------------------------------------------
     #TODO: FINIRE DI INTEGRARE NEL SISTEMA LE CODE REDIS
-    """def enqueue_report_for_doctor(self, doctor_cf: str, report_id: str):
-        
+    def enqueue_report_for_doctor(self, doctor_cf: str, report_id: str):
+        """
         Aggiunge un referto alla coda Redis per il medico identificato dal CF.
-        
+        """
         key = f"queue:referti:{doctor_cf}"
         self.redis.rpush(key, report_id)  # inserisce in coda (push a destra)
 
     def dequeue_report_for_doctor(self, doctor_cf: str) -> Optional[str]:
-        
+        """
         Estrae il prossimo report_id dalla coda Redis per il medico (FIFO).
-        
+        """
         key = f"queue:referti:{doctor_cf}"
         return self.redis.lpop(key)
 
     def get_queue_for_doctor(self, doctor_cf: str) -> List[str]:
-        
+        """
         Ritorna tutti i report_id attualmente nella coda del medico.
-        
+        """
         key = f"queue:referti:{doctor_cf}"
         return self.redis.lrange(key, 0, -1)
 
     def clear_queue_for_doctor(self, doctor_cf: str):
         key = f"queue:referti:{doctor_cf}"
         self.redis.delete(key)
+    
+    def refresh_queue_for_doctor(self, doctor_cf: str):
+        """
+        Ricostruisce la coda Redis dei referti per il medico specificato.
+        """
+        self.clear_queue_for_doctor(doctor_cf)
+        reports = self.reports_collection.find({"dati medico.Anagrafica.Codice Fiscale": doctor_cf})
+        for report in reports:
+            self.enqueue_report_for_doctor(doctor_cf, str(report["_id"]))
+        self.logger.info(f"Coda Redis aggiornata per il medico {doctor_cf}.")
+
 
     
     # Chiude la connessione al database
     def close(self):
         self.client.close()
-    """
+   
 
 
 if __name__ == "__main__":

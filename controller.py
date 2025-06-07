@@ -17,6 +17,12 @@ class InputText(BaseModel):
 class InputReport(BaseModel):
     text: str
     anagrafica_medico: dict
+    function_mode: str
+    
+class ReportUpdate(BaseModel):
+    report_id: str
+    updated_data: dict
+    
     
 class Controller:
     def __init__(self, env_file='key.env'):
@@ -86,7 +92,8 @@ class Controller:
                 url = f"{self.backend_url}/new_report",
                 json = {
                     "text": input_var.text,
-                    "anagrafica_medico": input_var.anagrafica_medico
+                    "anagrafica_medico": input_var.anagrafica_medico,
+                    "function_mode": input_var.function_mode
                 }
             )
             response.raise_for_status()

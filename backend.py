@@ -19,18 +19,30 @@ class InputReport(BaseModel):
     """
     text:str
     anagrafica_medico:dict
+    function_mode : str
 
+class ReportUpdate(BaseModel):
+    """
+    Data model for updating a report
+    """
+    report_id : str
+    updated_data : dict
+    
+    
 @backend_app.post("/new_report")
 def new_report(request: InputReport):
     """
     Endpoint to create a new clinical report.
     """
     filepath = request.text
-    pipeline_manager = PipelineManager(request.anagrafica_medico)
+    print("BACKEND: function mode selezionata: " + request.function_mode)
+    pipeline_manager = PipelineManager(anagrafica_medico=request.anagrafica_medico, function_mode=request.function_mode)
     report_id = str(pipeline_manager.Pipeline_manager(filepath))
+    report = db.get_report_by_id(report_id)
+    report["_id"] = str(report_id)
     return {
         "message": "New clinical report created successfully",
-        "report_id": str(report_id)
+        "report": report
         }
 
 @backend_app.post("/delete_report")
