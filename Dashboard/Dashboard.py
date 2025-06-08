@@ -39,6 +39,10 @@ class Dashboard:
             st.session_state.validate = False
         if "cf" not in st.session_state:
             st.session_state.cf = ""
+        if "login_amministratore" not in st.session_state:
+            st.session_state.login_amministratore = False
+        if "admin_report_to_show" not in st.session_state:
+            st.session_state.admin_report_to_show = None
         
         try:
             locale.setlocale(locale.LC_ALL, 'it_IT.UTF-8')
@@ -439,6 +443,352 @@ class Dashboard:
             return filename
         return None
 
+    def login_amministratore(self):
+        
+        st.markdown("## 🛡️ Login Amministratore")
+
+        with st.container():
+            col1, col2 = st.columns(2)
+            with col1:
+                st.text_input("📧 Email", key="admin_login_email", placeholder="es: admin@locale.it")
+            with col2:
+                st.text_input("🔑 Password", type="password", key="admin_login_password", placeholder="Password amministratore")
+
+        if st.button("🚪 Accedi come Amministratore", use_container_width=True):
+            user = self.db.get_operator(st.session_state.admin_login_email)
+            if user and user["Anagrafica"]["Ruolo"] == "Amministratore":
+                hashed_password = user["Anagrafica"]["Password"]
+                if isinstance(hashed_password, str):
+                    hashed_password = hashed_password.encode('utf-8')
+
+                if bcrypt.checkpw(st.session_state.admin_login_password.encode('utf-8'), hashed_password):
+                    st.session_state.logged_in = True
+                    st.session_state.user = user
+
+                    # Se primo accesso, reindirizza alla pagina completamento profilo
+                    if user["Anagrafica"].get("Primo Accesso", True):
+                        st.success("🔧 Primo accesso rilevato. Completa il tuo profilo amministratore.")
+                        st.session_state.page = "completa_registrazione_admin"
+                    else:
+                        st.success(f"✅ Benvenuto, {user['Anagrafica']['Nome']} {user['Anagrafica']['Cognome']}!")
+                        st.session_state.page = "admin_dashboard"
+
+                    time.sleep(2)
+                    st.rerun()
+                else:
+                    st.error("❌ Credenziali non valide")
+            else:
+                st.error("❌ Utente non trovato o non autorizzato")
+                
+        st.markdown("---")
+        # Pulsante per tornare al login operatore
+        if st.button("🔙 Torna al Login Operatore", use_container_width=True):
+            st.session_state.page = "login"
+            st.rerun()
+    
+    def completa_registrazione_admin(self):
+        st.markdown("## 📝 Completa Registrazione Amministratore")
+
+        admin_data = st.session_state.user  # Precaricato dal login
+        email = admin_data["Anagrafica"]["Email"]
+        
+        with st.form("complete_admin_form"):
+            st.markdown("### 👤 Dati Anagrafici")
+            col1, col2 = st.columns(2)
+            with col1:
+                nome = st.text_input("🧍 Nome", value=admin_data["Anagrafica"].get("Nome", ""))
+                cognome = st.text_input("🧍‍♂️ Cognome", value=admin_data["Anagrafica"].get("Cognome", ""))
+            with col2:
+                cellulare = st.text_input("📱 Cellulare", value=admin_data["Anagrafica"].get("Cellulare", ""))
+                cf = st.text_input("🧾 Codice Fiscale", value=admin_data["Anagrafica"].get("Codice Fiscale", ""))
+
+            st.markdown("### 🔐 Scegli una nuova password")
+            nuova_password = st.text_input("🔑 Nuova Password", type="password")
+
+            st.markdown("### 🏥 Informazioni Struttura Ospedaliera")
+            col3, col4 = st.columns(2)
+            with col3:
+                nome_struttura = st.text_input("🏢 Nome della Struttura", value=admin_data.get("Ospedale", {}).get("Nome Ospedale", ""))
+                reparto = st.text_input("🏨 Reparto", value=admin_data.get("Ospedale", {}).get("Reparto", ""))
+            with col4:
+                città = st.text_input("📍 Città", value=admin_data.get("Ospedale", {}).get("Città", ""))
+                provincia = st.text_input("🌍 Provincia", value=admin_data.get("Ospedale", {}).get("Provincia", ""))
+                cap = st.text_input("📬 CAP", value=admin_data.get("Ospedale", {}).get("CAP", ""))
+
+            st.markdown("### 🛡️ Ruolo")
+            st.selectbox("Ruolo", options=["Amministratore"], index=0, disabled=True)
+
+            col_reg, col_back = st.columns(2)
+            with col_reg:
+                submitted = st.form_submit_button("✅ Completa Registrazione")
+            with col_back:
+                go_back = st.form_submit_button("⬅️ Logout")
+
+        # Gestione logout
+        if go_back:
+            st.session_state.clear()
+            st.rerun()
+
+        # Validazione e aggiornamento
+        if submitted:
+            cf_pattern = r"^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$"
+            password_pattern = r"^(?=.*[,.!#]).{8,}$"  # Almeno 8 caratteri + almeno un carattere speciale
+
+            if not nome.strip() or not cognome.strip():
+                st.error("❗ Nome e Cognome non possono essere vuoti.")
+            elif not cellulare.isdigit() or not (10 <= len(cellulare) <= 11):
+                st.error("📱 Il cellulare deve contenere 10 o 11 cifre.")
+            elif not re.match(cf_pattern, cf.upper()):
+                st.error("🧾 Codice Fiscale non valido. Deve seguire il formato italiano.")
+            elif not nuova_password:
+                st.error("🔐 Devi inserire una nuova password.")
+            elif bcrypt.checkpw(nuova_password.encode('utf-8'), admin_data["Anagrafica"]["Password"]):
+                st.error("🔁 La nuova password non può essere uguale a quella attuale.")
+            elif not re.match(password_pattern, nuova_password):
+                st.error("❗ La password deve contenere almeno 8 caratteri e almeno uno tra: , . ! #")
+            elif not nome_struttura.strip() or not reparto.strip() or not città.strip() or not provincia.strip() or not cap.strip():
+                st.error("🏥 Tutti i campi relativi alla struttura devono essere compilati.")
+            elif not cap.isdigit() or len(cap) != 5:
+                st.error("📬 Il CAP deve essere un numero di 5 cifre.")
+            else:
+                updated_user = {
+                    "Anagrafica": {
+                        "Email": email,
+                        "Password": nuova_password,
+                        "Nome": nome,
+                        "Cognome": cognome,
+                        "Cellulare": cellulare,
+                        "Codice Fiscale": cf.upper(),
+                        "Ruolo": "Amministratore",
+                        "Primo Accesso": False
+                    },
+                    "Ospedale": {
+                        "Nome Ospedale": nome_struttura,
+                        "Città": città,
+                        "Provincia": provincia,
+                        "CAP": cap,
+                        "Reparto": reparto,
+                    }
+                }
+
+                self.db.update_administrator(admin_data["_id"], updated_user)
+
+                st.success("✅ Registrazione completata con successo! Verrai reindirizzato al pannello amministrativo.")
+                time.sleep(2)
+                st.session_state.user = updated_user
+                st.session_state.page = "admin_dashboard"
+                st.rerun()
+                
+    def get_nested(self, data, path, default='N/A'):
+        keys = path.split(".")
+        for key in keys:
+            data = data.get(key, {})
+            if not isinstance(data, dict):
+                return data if data else default
+        return data or default
+
+    
+    def admin_dashboard(self):
+        def sidebar_admin():
+            with st.sidebar:
+                st.markdown("### 🔎 Filtri di Ricerca")
+                
+                # Filtro medico compatto
+                filtro_medico = st.text_input("🔍 Cerca medico (nome, cognome, CF)")
+                
+                # Filtro paziente compatto
+                filtro_paziente = st.text_input("🔍 Cerca paziente (nome, cognome, CF)")
+
+                # Intervallo date
+                data_inizio = st.date_input("📅 Data Inizio", value=None)
+                data_fine = st.date_input("📅 Data Fine", value=None)
+                
+                # Tipologia
+                tipo_referto = st.selectbox("📄 Tipo Referto", options=["", "Pronto Soccorso", "Ospedale"])
+                
+                limit = st.number_input("🔢 Numero massimo di report", min_value=1, value=10, step=1)
+                
+                # Costruzione query
+                query = {}
+
+                # Filtro medico su nome/cognome/CF
+                if filtro_medico:
+                    query["$or"] = [
+                        {"dati medico.Anagrafica.Nome": {"$regex": filtro_medico, "$options": "i"}},
+                        {"dati medico.Anagrafica.Cognome": {"$regex": filtro_medico, "$options": "i"}},
+                        {"dati medico.Anagrafica.Codice Fiscale": {"$regex": filtro_medico, "$options": "i"}}
+                    ]
+
+                # Filtro paziente su nome/cognome/CF
+                if filtro_paziente:
+                    query.setdefault("$and", []).append({
+                        "$or": [
+                            {"dati paziente.nominativo.nome": {"$regex": filtro_paziente, "$options": "i"}},
+                            {"dati paziente.nominativo.cognome": {"$regex": filtro_paziente, "$options": "i"}},
+                            {"dati paziente.codice fiscale": {"$regex": filtro_paziente, "$options": "i"}}
+                        ]
+                    })
+
+                # Filtro per tipo
+                if tipo_referto:
+                    query["type"] = tipo_referto if tipo_referto!="Pronto Soccorso" else "Emergency"
+
+                # Intervallo date
+                if data_inizio and data_fine:
+                    query["timestamp"] = {
+                        "$gte": data_inizio.strftime("%Y-%m-%d"),
+                        "$lte": data_fine.strftime("%Y-%m-%d")
+                    }
+                
+                with st.container():
+                    
+                    if st.button("📊 Analytics",use_container_width=True):
+                        st.session_state.page = "analytics"
+                        st.rerun()
+                    
+                    if st.button("🔒 Logout", use_container_width=True):
+                        st.session_state.clear()
+                        st.rerun()
+                return query, limit
+
+        def dashboard_admin(reports):
+            
+            st.markdown("## 📋 Report Clinici - Amministratore")
+            st.markdown("##### Visualizza e gestisci i referti clinici generati da tutti i medici della struttura.") 
+            
+            if not reports:
+                st.info("❗ Nessun report disponibile al momento.")
+            else:
+                for report in reports:
+                    with st.container():
+                        st.markdown("---")
+                        cols = st.columns([3, 2, 2])
+                        with cols[0]:
+                            st.markdown(f"**🧑‍⚕️ Medico:** `{self.get_nested(report, 'dati medico.Anagrafica.Nome')} {self.get_nested(report, 'dati medico.Anagrafica.Cognome')}`")
+                            st.markdown(f"**👤 Paziente:** {self.get_nested(report, 'dati paziente.nominativo.nome')} {self.get_nested(report, 'dati paziente.nominativo.cognome')}")
+                        with cols[1]:
+                            st.markdown(f"**📅 Data:** {report.get('timestamp', 'N/A').split()[0]}")
+                            st.markdown(f"**🔬 Tipo Referto:** `{report.get('type')}`")
+                        with cols[2]:
+                            st.markdown(f"**🏥 Reparto:** {self.get_nested(report, 'dati medico.Ospedale.Reparto')}")
+                            st.markdown(f"**📌 Validato:** `{'Si' if report.get('validated', 'In attesa') else 'No'}`")
+
+                        with st.container():
+                            if st.button("Visualizza referto", key = f"show_report_{report['_id']}", use_container_width=True):
+                                st.session_state.page = "show_report_admin"
+                                st.session_state.admin_report_to_show = report
+                                st.rerun()
+                        st.markdown(" ")
+            
+        
+        query, limit = sidebar_admin()
+        reports = self.db.get_all_clinical_reports(query, limit)
+        dashboard_admin(reports)
+    
+    def analytics(self):
+        st.success("Ciao")
+        
+        with st.sidebar:
+            with st.container():
+                if st.button("🔙 Torna indietro", use_container_width=True):
+                    st.session_state.page = "admin_dashboard"
+                    st.rerun()
+    
+    def show_report_admin(self, report):
+        st.markdown(f"# 👁️ Visualizza Referto")
+        #st.markdown("### Referto del signor/a: " + report["dati paziente"]["nominativo"]["nome"] + " " + report["dati paziente"]["nominativo"]["cognome"] + " Data: " + report["timestamp"])
+
+        with st.container():
+            if st.button("⬅️ Torna indietro"):
+                st.session_state.page = "admin_dashboard"
+                st.rerun()
+
+        st.divider()
+
+        
+        if not report:
+            st.error("❌ Referto non trovato.")
+            return
+
+        if "_id" in report:
+            del report["_id"]  # campo non visualizzabile
+
+        def format_key(key):
+            """Converte underscore in spazi e mette in maiuscolo ogni parola."""
+            return key.replace("_", " ").title()
+
+        def render_read_only_fields(data, parent_key="", level=0):
+            excluded_keys = {"validated", "report_id", "dati medico", "timestamp", "type", "Message"}
+
+            col1, col2, col3 = st.columns(3)
+            columns = [col1, col2, col3]
+            field_counter = 0
+
+            for key, value in data.items():
+                if key in excluded_keys:
+                    continue
+
+                full_key = f"{parent_key}.{key}" if parent_key else key
+                display_key = format_key(key)
+                target_col = columns[field_counter % 3]
+                field_counter += 1
+
+                header_level = min(5, 3 + level)
+                header_prefix = "#" * header_level
+
+                if isinstance(value, dict):
+                    st.markdown(f"{header_prefix} 📂 {display_key}")
+                    render_read_only_fields(value, full_key, level=level + 1)
+                    st.divider()
+
+                elif isinstance(value, list):
+                    current_value = "\n".join(str(v) for v in value)
+                    line_count = current_value.count("\n") + 1
+                    height = min(400, 48 + 20 * line_count)
+
+                    with target_col:
+                        st.text_area(
+                            f"📋 {display_key}",
+                            value=current_value,
+                            key=full_key,
+                            height=height,
+                            disabled=True
+                        )
+
+                elif isinstance(value, (int, float)):
+                    with target_col:
+                        st.number_input(
+                            f"🔢 {display_key}",
+                            value=value,
+                            key=full_key,
+                            disabled=True
+                        )
+
+                else:
+                    str_value = str(value)
+                    line_count = str_value.count("\n") + 1
+                    height = min(400, 48 + 20 * line_count + len(str_value) // 4)
+
+                    with target_col:
+                        if len(str_value) > 50 or "\n" in str_value:
+                            st.text_area(
+                                f"📄 {display_key}",
+                                value=str_value,
+                                key=full_key,
+                                height=height,
+                                disabled=True
+                            )
+                        else:
+                            st.text_input(
+                                f"🗒️ {display_key}",
+                                value=str_value,
+                                key=full_key,
+                                disabled=True
+                            )
+
+        render_read_only_fields(report)
+          
+        
     def login(self):
         st.markdown("## 🔐 Login Operatore Sanitario")
         
@@ -506,6 +856,12 @@ class Dashboard:
         
         if st.button("📝 Non hai un account? Registrati", use_container_width=True):
             st.session_state.page = "register"
+            st.rerun()
+        
+            
+        
+        if st.button("🛡️ Vai al login amministratore", use_container_width=True):
+            st.session_state.page = "login_amministratore"
             st.rerun()
 
     def register(self):
@@ -1078,13 +1434,23 @@ class Dashboard:
                 self.main_page()
             elif st.session_state.page == "query_report":
                 self.filtra_referti()
+            elif st.session_state.page == "completa_registrazione_admin":
+                self.completa_registrazione_admin()
             elif st.session_state.page == "report_modify":
                 self.report_modify_page(st.session_state.last_report["_id"])
             elif st.session_state.page == "show_report":
                 self.show_report_page(st.session_state.last_report["_id"])
+            elif st.session_state.page == "admin_dashboard":
+                self.admin_dashboard()
+            elif st.session_state.page == "show_report_admin":
+                self.show_report_admin(st.session_state.admin_report_to_show)
+            elif st.session_state.page == "analytics":
+                self.analytics()
         else:
             if st.session_state.page == "login":
                 self.login()
+            elif st.session_state.page == "login_amministratore":
+                self.login_amministratore()
             elif st.session_state.page == "register":
                 self.register()
 

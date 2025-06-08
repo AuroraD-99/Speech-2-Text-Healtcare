@@ -178,11 +178,11 @@ class DB:
         """
         return self.reports_collection.find_one({"_id": ObjectId(report_id)})
     
-    def get_all_clinical_reports(self):
+    def get_all_clinical_reports(self, query={}, limit = 30):
         """
         Returns all clinical reports.
         """
-        return list(self.reports_collection.find())
+        return list(self.reports_collection.find(query).limit(limit))
     
     def find_clinical_report_by_patient(self, patient_name):
         """
@@ -294,7 +294,7 @@ class DB:
         La password viene cryptata prima di essere memorizzata nel database.
         """
         # Controlla se l'operatore esiste già
-        existing_operator = self.operators_collection.find_one({"Email": new_user["Anagrafica"]["Email"]})
+        existing_operator = self.get_operator(new_user["Anagrafica"]["Email"])
         if existing_operator:
             raise ValueError("Operatore già esistente")
 
@@ -343,11 +343,25 @@ class DB:
         Aggiorna i dati di un operatore medico dato il nome utente.
         """
         # Crittografia della nuova password se presente
-        if "Password" in updated_data:
-            updated_data["Anagrafica"]["Password"] = self.hash_password(updated_data["Anagrafica"]["Password"])
+        
+        hashed_password = self.hash_password(updated_data["Anagrafica"]["Password"])
+        updated_data["Anagrafica"]["Password"] = hashed_password
+        result = self.operators_collection.update_one(
+            {"Anagrafica.Email": email},
+            {"$set": updated_data}
+        )
+        return result.modified_count
+    
+    def update_administrator(self, id, updated_data):
+        """
+        Aggiorna i dati di un amministratore dato l'id.
+        """
+        # Crittografia della nuova password se presente
+        hashed_password = self.hash_password(updated_data["Anagrafica"]["Password"])
+        updated_data["Anagrafica"]["Password"] = hashed_password
 
         result = self.operators_collection.update_one(
-            {"email": email},
+            {"_id": ObjectId(id)},
             {"$set": updated_data}
         )
         return result.modified_count
@@ -401,14 +415,24 @@ if __name__ == "__main__":
     # Esempio di utilizzo
     db = DB()    
     
-    db.insert_clinical_report(
-        report_id="12345",
-        report={
-            "name": "Mario Rossi",
-            "patient_id": "P123",
-            "doctor_cf": "D456",
-            "report_text": "Questo è un esempio di referto clinico.",
-            "validated": False
+    db.insert_operator({
+        "Anagrafica": {
+            "Email": "amministratore1@gmail.com",
+            "Password": "GennyPeppeAurora123.",
+            "Nome": "Gennaro",
+            "Cognome": "Esposito",
+            "Cellulare": "3331234567",
+            "Codice Fiscale": "ESPGRN80A01H703Z",
+            "Ruolo": "Amministratore",
+            "Primo Accesso": True,  # Indica se è il primo accesso
+        },
+        "Ospedale": {
+            "Nome Ospedale": "Ospedale Generico",
+            "Città": "Napoli",
+            "Provincia": "NA",
+            "CAP": "80100",
+            "Reparto": "Amministrazione",
         }
-    )
+    }
+)
     
