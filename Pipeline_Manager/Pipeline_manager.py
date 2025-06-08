@@ -309,14 +309,14 @@ class PipelineManager:
                 self.logger.warning(f"Nessun medico trovato per la specializzazione '{specializzazione}' (query: '{q}'). Salto...")
                 continue
 
-            report_context = {
-                "query": q,
-                "medico": medico
-            }
+            for _ in range(20):  # Genera 20 referti per ogni query
+                report_context = {
+                    "query": q,
+                    "medico": medico
+                }
+                articoli.append((report_context, q))
 
-            articoli.append((report_context, q))
-
-        with open('assets/project_dataset.jsonl', 'w', encoding='utf-8') as f:
+        with open('assets/project_dataset.jsonl', 'a', encoding='utf-8') as f:
             for report_context, query_text in articoli:
                 medico_info = report_context["medico"]
                 anagrafica_medico = medico_info["dati medico"]["Anagrafica"]
