@@ -686,7 +686,6 @@ class Dashboard:
         dashboard_admin(reports)
     
     def analytics(self):
-        st.success("Ciao")
         
         with st.sidebar:
             with st.container():
