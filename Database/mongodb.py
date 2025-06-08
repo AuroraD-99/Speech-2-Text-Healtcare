@@ -255,6 +255,8 @@ class DB:
         
         La password viene cryptata prima di essere memorizzata nel database.
         """
+        #TODO: FORSE SI PUò DARE UNA LISTA DA CUI SCEGLIERE IL RUOLO
+        #TODO: AGGIUNGERE ANCHE REFERENTE PER GLI INTERN
         # Controlla se l'operatore esiste già
         existing_operator = self.operators_collection.find_one({"Email": new_user["Anagrafica"]["Email"]})
         if existing_operator:

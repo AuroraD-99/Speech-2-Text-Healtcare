@@ -6,10 +6,19 @@ import transformers
 import torch
 import json5
 
+import random
+
 from datetime import datetime
 from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from log import Logger
+
+import random
+import requests
+import csv
+from datetime import datetime
+from collections import Counter
+from groq import Groq
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -17,25 +26,40 @@ class LLMWrapper:
     def __init__(self, model):
         self.logger = Logger(self.__class__.__name__).get_logger()
 
-        #Gestione del modello
-        self.model = model
         self.max_new_tokens = 1024
 
-    def generator(self, prompt, **kwargs):
-        raw_output = self.model(prompt, **kwargs) if callable(self.model) else self.model.generate(prompt, **kwargs)
+        #Modello 
+        api_key_2 = os.getenv("API_KEY_2") 
+        api_key_3 = os.getenv("API_KEY_3") 
+        api_key_4 = os.getenv("API_KEY_4") 
+        api_key_5 = os.getenv("API_KEY_5")
 
-        # Normalizzazione: cerca di estrarre la stringa
-        if isinstance(raw_output, str):
-            return raw_output
-        elif isinstance(raw_output, list) and isinstance(raw_output[0], dict) and "generated_text" in raw_output[0]:
-            return raw_output[0]["generated_text"]
-        elif isinstance(raw_output, dict) and "text" in raw_output:
-            return raw_output["text"]
-        elif hasattr(raw_output, 'tolist'):  # Torch Tensor
-            return str(raw_output.tolist())
-        else:
-            self.logger.warning(f"Output non riconosciuto: {raw_output}")
-            return str(raw_output)
+        self.client_story_2 = Groq(api_key=api_key_2)
+        self.client_story_3 = Groq(api_key=api_key_3)
+        self.client_story_4 = Groq(api_key=api_key_4)
+        self.client_story_5 = Groq(api_key=api_key_5)
+
+        self.model = model
+
+    def generate_random_annotations(self):
+        random_note = random.choice([
+                "Ha una storia clinica di ipertensione.",
+                "È un paziente allergico alla penicillina.",
+                "Ha avuto accessi recenti al pronto soccorso per dolori toracici.",
+                "È affetto anche da diabete mellito tipo 2.",
+                "Ha avuto un incidente d'auto.",
+                "È risultato positivo al COVID-19.",
+                "È una visita di controllo.",
+                "È una visita di routine.",
+                "Ha riportato sintomi diversi nelle ultime visite.",
+                "Ha una reazione avversa ai farmaci.",
+                "È stato recentemente sottoposto a esami aggiuntivi."
+        ]) #se necessario prova ad aggiungere altro
+
+        name = random.choice(["a", "b", "c", "d", "e", "f", "g", "h", "i", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "z"])
+        surname = random.choice(["a", "b", "c", "d", "e", "f", "g", "h", "i", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "z"])
+
+        return random_note, name, surname
 
     #--------------------------------- FUNZIONI PER LA GENERAZIONE DELLA SCHEDA PS ----------------------------------------
     
@@ -168,20 +192,30 @@ class LLMWrapper:
 
     def generate_scheda_from_report(self, referto_ps, entities): #DA CONTROLLAREa
         prompt = self.__generate_prompt_scheda(entities)
-        self.logger.info(f"Generazione della scheda PS senza contesto")
         full_prompt = f"{prompt}\n\nEcco il vero input: {referto_ps} \n\n Ora scrivi il vero output:"
-        try:
-            result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
-            self.logger.info(f"Risultato della generazione: {result}")
-            result_json = self.extract_json_from_response(result)
-            self.logger.info(f"JSON estratto dalla risposta: {result_json}")
-            fixed_json = self.fix_json_format(result_json)
-            self.logger.info(f"JSON corretto: {fixed_json}")
-            # Salva le variabili result, result_json e fixed_json in un file JSON
-            return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
-        except Exception as e:
-            self.logger.error(f"Errore nella generazione scheda: {e}")
-            return "{}"
+
+        clients = [self.client_story_2, self.client_story_3]
+
+        for i, client in enumerate(clients):
+            try:
+                result = client.chat.completions.create(
+                        messages=[{"role": "user", "content": full_prompt}], #prompt + "\n\nReferto da analizzare:\n" + referto_simulato + "\n \nScheda di ammissione al pronto soccorso:\n" + scheda_ps
+                        model=self.model,
+                        temperature=0.2,
+                        max_completion_tokens=1200
+                    )
+                content = result.choices[0].message.content.strip()
+
+                self.logger.info(f"Risultato della generazione: {content}")
+                result_json = self.extract_json_from_response(content)
+                self.logger.info(f"JSON estratto dalla risposta: {result_json}")
+                fixed_json = self.fix_json_format(result_json)
+                self.logger.info(f"JSON corretto: {fixed_json}")
+                # Salva le variabili result, result_json e fixed_json in un file JSON
+                return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
+            except Exception as e:
+                self.logger.error(f"Errore nella generazione scheda: {e}")
+                return "{}"
         
     def __generate_prompt_report(self, entities):
         esempio_referto = {
@@ -206,17 +240,17 @@ class LLMWrapper:
               "Data redazione": "N/A"
             }
         
-        esempio_trascrizione = "Il giorno 5 giugno 2025 alle ore 09:30 presso l’ambulatorio di medicina generale, ho visitato il paziente [NOME E COGNOME]."
-                                "Motivo della visita: febbre persistente da tre giorni con brividi e malessere generale."
-                                "Anamnesi personale: ipertensione arteriosa in trattamento farmacologico."
-                                "Anamnesi familiare: padre deceduto per infarto a 65 anni, madre diabetica."
-                                "Evento attuale: comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea."
-                                "All’esame obiettivo: paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili."
-                                "Sono stati eseguiti tampone rapido per streptococco e test COVID-19, entrambi negativi."
-                                "Diagnosi: faringite virale."
-                                "Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore."
-                                "Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano."
-                                "Firma: Dott.ssa Elena Bianchi."
+        esempio_trascrizione = """Il giorno 5 giugno 2025 alle ore 09:30 presso l’ambulatorio di medicina generale, ho visitato il paziente [NOME E COGNOME].
+                                Motivo della visita: febbre persistente da tre giorni con brividi e malessere generale.
+                                Anamnesi personale: ipertensione arteriosa in trattamento farmacologico.
+                                Anamnesi familiare: padre deceduto per infarto a 65 anni, madre diabetica.
+                                Evento attuale: comparsa di febbre fino a 38.5°C, dolori muscolari diffusi, cefalea.
+                                All’esame obiettivo: paziente vigile, in buone condizioni generali, temperatura 38.2°C, gola arrossata, linfonodi laterocervicali palpabili.
+                                Sono stati eseguiti tampone rapido per streptococco e test COVID-19, entrambi negativi.
+                                Diagnosi: faringite virale.
+                                Terapia: riposo, paracetamolo 1000mg ogni 8 ore in caso di febbre o dolore.
+                                Follow-up: rivalutazione tra 3 giorni se i sintomi persistono o peggiorano.
+                                Firma: Dott.ssa Elena Bianchi."""
         
         esempio_output = """{
                             "Intestazione": {
@@ -262,27 +296,42 @@ class LLMWrapper:
     def generate_clinical_report(self, referto, entities): #DA CONTROLLARE
         prompt = self.__generate_prompt_report(entities) 
         full_prompt = f"{prompt}\n\nReferto da analizzare: {referto}"
-        try:
-            test_path = "./assets/test"  # <-- percorso della cartella di test
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
-            out_file = os.path.join(test_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
-            result = self.generator(full_prompt, max_new_tokens=self.max_new_tokens)
-            result_json = self.extract_json_from_response(result)
-            fixed_json = self.fix_json_format(result_json)
-            
-            # Salva le variabili result, result_json e fixed_json in un file JSON
-            with open(out_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "result": result,
-                    "result_json": result_json,
-                    "fixed_json": fixed_json
-                }, f, ensure_ascii=False, indent=2)
-            self.logger.info(f"Referto salvato in {out_file}")
-            
-            return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
-        except Exception as e:
-            self.logger.error(f"Errore nella generazione referto: {e}")
-            return "{}"
+
+        clients = [self.client_story_4, self.client_story_5]
+
+        for i, client in enumerate(clients):
+            try:
+                test_path = "./assets/test"  # <-- percorso della cartella di test
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # <-- underscore al posto di `:` e `-`
+                out_file = os.path.join(test_path, f"{timestamp}.json")  # opzionale: aggiungi ".json"
+                
+                result = client.chat.completions.create(
+                        messages=[{"role": "user", "content": full_prompt}], #prompt + "\n\nReferto da analizzare:\n" + referto_simulato + "\n \nScheda di ammissione al pronto soccorso:\n" + scheda_ps
+                        model=self.model,
+                        temperature=0.2,
+                        max_completion_tokens=1200
+                    )
+                content = result.choices[0].message.content.strip()
+
+                self.logger.info(f"Risultato della generazione: {content}")
+                result_json = self.extract_json_from_response(content)
+                self.logger.info(f"JSON estratto dalla risposta: {result_json}")
+                fixed_json = self.fix_json_format(result_json)
+                self.logger.info(f"JSON corretto: {fixed_json}")
+                
+                # Salva le variabili result, result_json e fixed_json in un file JSON
+                with open(out_file, 'w', encoding='utf-8') as f:
+                    json.dump({
+                        "result": result,
+                        "result_json": result_json,
+                        "fixed_json": fixed_json
+                    }, f, ensure_ascii=False, indent=2)
+                self.logger.info(f"Referto salvato in {out_file}")
+                
+                return fixed_json #[0]["generated_text"].replace(full_prompt, "").strip()
+            except Exception as e:
+                self.logger.error(f"Errore nella generazione referto: {e}")
+                return "{}"
 
     def check_json_format(self, document): #pydantic
         """
