@@ -31,18 +31,18 @@ Il sistema espone le seguenti funzioanlità principali:
 
 ### Metodo 1 (Consigliato): Docker
 - **Clona il repository**
-'''
+```
 git clone https://github.com/AuroraD-99/Speech-2-Voice-Healtcare.git
-'''
+```
 
 - **Costruisci le immagini docker**
-'''
+```
 docker-compose build
-'''
+```
 
 - **Fai partire i container Docker**
-'''
+```
 docker-compose up -d
-'''
+```
 
 - **Ora il sistema è accessibile tramite la dashboard alla porta 8501**
