@@ -7,7 +7,6 @@ import re
 import dotenv
 
 import requests
-import threading
 from codicefiscale import codicefiscale
 import datetime
 import locale
@@ -18,9 +17,6 @@ import seaborn as sns
 from pandas.plotting import parallel_coordinates
 
 import io
-import base64
-
-from pydub import AudioSegment
 
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Indenter, KeepTogether
@@ -28,11 +24,10 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib import colors
 
-from streamlit_mic_recorder import mic_recorder
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Database.mongodb import DB
-from audio_recorder import AudioRecorder
 
 class Dashboard:
     def __init__(self, env_file="key.env"):
@@ -47,8 +42,6 @@ class Dashboard:
             st.session_state.page = "login"
         if "logged_in" not in st.session_state:
             st.session_state.logged_in = False
-        if "audio_recorder" not in st.session_state:
-            st.session_state.audio_recorder = AudioRecorder()
         if "last_report" not in st.session_state:
             st.session_state.last_report = None
         if "function_mode" not in st.session_state:
@@ -305,23 +298,16 @@ class Dashboard:
                 del st.session_state[key]
             st.rerun()
 
-    def save_audio_file(self, audio_bytes):
-        # audio_bytes è già un oggetto bytes (non serve decodifica base64)
-        folder = "./assets/audios"
-        os.makedirs(folder, exist_ok=True)
-        timestamp = int(time.time())
+    def save_audio_file_from_upload(self, audio_file):
+        output_dir = "./assets/audios"
+        os.makedirs(output_dir, exist_ok=True)
+        filename = os.path.join(output_dir, f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav")
 
-        # Scegli un'estensione (es: webm, wav, mp3) se la conosci, altrimenti usa .webm di default
-        audio_format = "webm"
-        original_path = os.path.join(folder, f"recorded_{timestamp}.{audio_format}")
-        with open(original_path, "wb") as f:
-            f.write(audio_bytes)
+        audio_data = audio_file.read()
+        with open(filename, "wb") as f:
+            f.write(audio_data)
 
-        # Converto in .wav con pydub
-        final_path = os.path.join(folder, f"recorded_{timestamp}.wav")
-        AudioSegment.from_file(original_path).export(final_path, format="wav")
-
-        return final_path
+        return filename
     
     def genera_anagrafica(self, dizionario:dict):
         """
@@ -1675,39 +1661,27 @@ class Dashboard:
 
         st.sidebar.markdown("---")
         
-        if not st.session_state.is_recording:
-            if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
-                st.session_state.is_recording = True
-                st.rerun()
-        else:
-            st.sidebar.markdown("### 🎙️ Registrazione in corso...")
-            audio_bytes = mic_recorder()
-            if audio_bytes:
-                filename = self.save_audio_file(audio_bytes["bytes"])
-                st.session_state.is_recording = False
-                st.session_state.last_audio_file = filename
-                st.sidebar.success(f"✅ Registrazione salvata: {filename}")
+        audio_file = st.sidebar.audio_input("🎤 Registra Audio", key="mic_recorder")
 
-                with st.spinner("Creazione referto in corso..."):
-                    self.new_report(filename)
+        if audio_file is not None:
+            filename = self.save_audio_file_from_upload(audio_file)
+            st.sidebar.success(f"✅ Registrazione salvata: {filename}")
 
-                if st.session_state.report_ready:
-                    report = st.session_state.last_report
-                    if "Error" in report:
-                        st.sidebar.error(f"❌ Errore: {report['Error']}")
-                    else:
-                        st.sidebar.success(f"✅ Referto creato con ID: {report.get('_id', 'N/A')}")
-                        time.sleep(2)
+            with st.spinner("Creazione referto in corso..."):
+                self.new_report(filename)
+
+            if st.session_state.report_ready:
+                report = st.session_state.last_report
+                if "Error" in report:
+                    st.sidebar.error(f"❌ Errore: {report['Error']}")
                 else:
-                    st.sidebar.error("❌ Errore durante il salvataggio.")
-
-                st.rerun()
-
-            if st.sidebar.button("⏹️ Annulla registrazione", use_container_width=True):
-                st.session_state.is_recording = False
-                st.rerun()
+                    st.sidebar.success(f"✅ Referto creato con ID: {report.get('_id', 'N/A')}")
+                    time.sleep(2)
+            else:
+                st.sidebar.error("❌ Errore durante il salvataggio.")
 
         st.sidebar.markdown("---")
+
         if st.sidebar.button("📂 Esplora Referti", use_container_width=True):
             st.session_state.page = "query_report"
             st.rerun()

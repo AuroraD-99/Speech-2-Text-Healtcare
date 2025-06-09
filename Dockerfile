@@ -1,56 +1,39 @@
-# Usa un'immagine Python slim che è una buona base per applicazioni più piccole.
+# Usa un'immagine Python slim come base leggera
 FROM python:3.10-slim
 
-# Imposta output non bufferizzato per Python. Utile per il logging in tempo reale nei container.
+# Output Python non bufferizzato (utile per logging in real-time)
 ENV PYTHONUNBUFFERED=1
 
-# Imposta la directory di lavoro all'interno del container.
+# Imposta la directory di lavoro
 WORKDIR /app
 
-# --- Configurazione del Locale Italiano ---
+# --- Configurazione del locale Italiano ---
 RUN apt-get update && \
     apt-get install -y --no-install-recommends locales ca-certificates && \
     sed -i '/it_IT.UTF-8/s/^# //' /etc/locale.gen && \
     locale-gen && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
 ENV LANG=it_IT.UTF-8
 ENV LANGUAGE=it_IT:it:en
 ENV LC_ALL=it_IT.UTF-8
-# --- Fine Configurazione Locale ---
+# --- Fine locale ---
 
-# --- Dipendenze di Sistema Aggiuntive ---
-# Le installiamo prima di installare le dipendenze Python, così PyAudio può compilare correttamente.
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        gcc \
-        libpq-dev \
-        portaudio19-dev \
-        pulseaudio \
-        libasound-dev \
-        build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-# --- Fine Dipendenze di Sistema Aggiuntive ---
-
-# --- Installazione delle Dipendenze Python ---
+# Installa dipendenze Python (assicurati che requirements.txt non contenga pyaudio)
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-# --- Fine Installazione Dipendenze Python ---
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Copia il resto del codice dell'applicazione.
+# Copia tutto il codice nel container
 COPY . .
 
-# Copia e rendi eseguibile lo script entrypoint.
+# Copia e rende eseguibile lo script di entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Espone le porte necessarie per la tua applicazione.
+# Espone le porte usate dalla tua app
 EXPOSE 8001 8003 8501
 
-# L'ENTRYPOINT è lo script che verrà eseguito quando il container si avvia.
+# Imposta lo script di entrypoint e il comando default
 ENTRYPOINT ["/app/entrypoint.sh"]
-
-# Il CMD fornisce argomenti predefiniti all'ENTRYPOINT
 CMD ["bash"]

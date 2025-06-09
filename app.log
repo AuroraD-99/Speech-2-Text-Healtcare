@@ -19550,3 +19550,31 @@
 2025-06-09 18:44:53,834 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-09 18:46:42,904 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
 2025-06-09 18:46:45,041 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:07:57,658 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 21:08:17,013 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:08:22,803 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:08:43,704 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:08:46,400 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:11:08,266 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:11:10,936 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:11:23,845 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:11:51,815 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:12:02,739 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:20:11,128 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:21:12,002 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:21:23,327 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:21:30,023 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:25:48,800 [Controller] - INFO - Creating a new clinical report
+2025-06-09 21:25:59,499 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:26:00,417 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:26:10,404 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:27:31,172 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 21:27:49,160 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:28:04,967 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:28:08,635 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-09 21:28:21,239 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:28:32,806 [Controller] - INFO - Creating a new clinical report
+2025-06-09 21:28:42,552 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:28:50,831 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 21:32:20,869 [DB] - INFO - Referto inserito nella coda per il medico con CF: QRCSNN80A41H501U
+2025-06-09 21:32:24,866 [Controller] - INFO - Retrieving clinical report with ID: 684736c202b4728afd8a70a7

@@ -22,7 +22,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from ctransformers import AutoModelForCausalLM as cAutoModelForCausalLM
 
 
-from chromadb import Client
 from sentence_transformers import SentenceTransformer
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
