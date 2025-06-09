@@ -808,6 +808,8 @@ if __name__ == "__main__":
     db = DB()
     load_dotenv('key.env', override=True)
     dataset_path = os.getenv("dataset_path")
+    
+    print(dataset_path)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     medici_file_path = os.path.join(base_dir, "medici_unici.json")
@@ -837,8 +839,9 @@ if __name__ == "__main__":
             data = [json.loads(line) for line in file]
 
         for idx, row in enumerate(data):  # Limita a 5 righe per test
+            print(row)
             line_number = idx + 1
-            report_str = row.get("referto")
+            report_str = row.get("referto") or row.get("scheda_ps")
             transcription_str = row.get("referto_simulato")
             report_id = row.get("report_id")
 

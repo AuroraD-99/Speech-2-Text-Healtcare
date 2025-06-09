@@ -1,0 +1,26 @@
+MEDICI REGISTRATI
+
+ANNA QUERCIA
+
+MARIO ROSSI
+
+PAOLO AMATO
+
+MARIA VERDI
+
+LAURA MORETTI
+
+ALESSANDRO CONTI
+
+CHIARA ROSSI
+
+GIUSEPPE ESPOSITO
+
+FILIPPO GRECO
+
+L'EMAIL DEI MEDICI è SEMPRE nome.cognome@fintoemail.it mentre la password è Password123.
+
+
+AMMINISTRATORI REGISTRATI
+
+email: amministratore1@gmail.com pass: Password123.
