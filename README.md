@@ -46,3 +46,29 @@ docker-compose up -d
 ```
 
 - **Ora il sistema è accessibile tramite la dashboard alla porta 8501**
+
+### Metodo 2: installazione manuale
+- **Prerequisiti**
+ - Assicurati di aver installato i seguenti componenti
+  - MongoDB
+  - Redis
+- **Clona il repository**
+```
+git clone https://github.com/AuroraD-99/Speech-2-Voice-Healtcare.git
+```
+- **Installa tutte le dipendenze**
+```
+pip install requirements.txt
+```
+- **Esegui in 3 shell diverse i seguenti comandi**
+```
+uvicorn backend:backend_app --host 0.0.0.0 --port 8001
+```
+```
+uvicorn controller:app --host 0.0.0.0 --port 8003
+```
+```
+streamlit run ./Dashboard/Dashboard.py --server.runOnSave=true
+```
+- **Attendi l'apertura dei due server uvicorn, dopodiché potrai iniziare ad utilizzare il sistema dalla dashboard streamlit**
+```
