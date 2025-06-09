@@ -2330,3 +2330,34 @@
 2025-06-09 02:16:08,687 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
 2025-06-09 02:16:08,694 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
 2025-06-09 02:16:08,744 [Controller] - INFO - Retrieving clinical report with ID: 6842fc835e0f9239c1212bfe
+2025-06-09 02:17:08,215 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 02:17:36,390 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 02:18:20,957 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 02:19:12,642 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:19,480 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:19,522 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:23,036 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:23,141 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:24,932 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:24,947 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:30,533 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:30,570 [DB] - INFO - Aggiornamento del referto con ID 6844348c447703f59058f220 con i nuovi dati: {'dati paziente': {'sesso': 'M', 'data_nascita': '28/06/2000', 'età': '24', 'luogo_nascita': {'città': 'Napoli', 'provincia': 'Napoli'}, 'residenza': {'città': 'Napoli', 'provincia': 'Napoli', 'indirizzo': 'Via Ugo Foscolo 127'}, 'recapito_telefonico': '3333333333', 'dati_dichiarati_da': 'N/A', 'nominativo': {'nome': 'Gennaro ', 'cognome': 'Iannicelli'}, 'codice_fiscale': 'NNCGNR00H28F839M'}, 'clinical_report': {'Intestazione': {'Data visita': '2025-05-25', 'Ora visita': '11:40', 'Ambulatorio': 'N/A', 'Medico': 'N/A'}, 'Motivo della visita': 'Intossicazione con forti capogiri e sudorazione elevata.', 'Anamnesi': {'Personale': 'N/A', 'Familiare': 'N/A', 'Evento attuale': 'Apparizione di febbre, capogiri e sudorazione.'}, 'Esame obiettivo': 'Paziente con febbre a 40°C', 'Esami eseguiti': 'N/A', 'Diagnosi': 'Intossicazione non specificata.', 'Terapia': 'Paracetamolo una settimana mattina e sera.', 'Follow-up': 'N/A', 'Firma medico': 'N/A', 'Data redazione': '2025-05-25'}, 'validated': True}
+2025-06-09 02:19:30,577 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:32,661 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:35,846 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:35,856 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:37,251 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:37,260 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:57,759 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:57,769 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:19:58,880 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:19:58,887 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:20:01,149 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:20:17,020 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:20:22,750 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:20:22,854 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:20:22,862 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:20:30,651 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 02:39:19,565 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 02:39:59,455 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 02:41:13,646 [DB] - INFO - Connected to MongoDB successfully.

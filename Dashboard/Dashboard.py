@@ -599,8 +599,79 @@ class Dashboard:
             if not isinstance(data, dict):
                 return data if data else default
         return data or default
-
     
+    def registra_amministratore(self):
+        st.markdown("## 📝 Registrazione Nuovo amministratore")
+
+        with st.form("register_form"):
+            st.markdown("### 👤 Dati Anagrafici")
+            col1, col2 = st.columns(2)
+            with col1:
+                email = st.text_input("📧 Email")
+                password = st.text_input("🔑 Password", type="password")
+                nome = st.text_input("🧍 Nome (opzionale)")
+                cognome = st.text_input("🧍‍♂️ Cognome (opzionale)")
+            with col2:
+                cellulare = st.text_input("📱 Cellulare (opzionale)")
+                cf = st.text_input("🧾 Codice Fiscale (opzionale)")
+                ruolo = st.text_input("💼 Ruolo", value="Amministratore", disabled=True)
+
+            st.markdown("### 🏥 Informazioni Struttura Ospedaliera (opzionali)")
+            col3, col4 = st.columns(2)
+            with col3:
+                nome_struttura = st.text_input("🏢 Nome della Struttura")
+                reparto = st.text_input("🏨 Reparto")
+            with col4:
+                città = st.text_input("📍 Città")
+                provincia = st.text_input("🌍 Provincia")
+                cap = st.text_input("📬 CAP")
+
+            col_reg, col_back = st.columns(2)
+            with col_reg:
+                submitted = st.form_submit_button("📌 Registrati")
+            with col_back:
+                go_back = st.form_submit_button("⬅️ Indietro")
+
+        if go_back:
+            st.session_state.page = "admin_dashboard"
+            st.rerun()
+
+        if submitted:
+            # Validazione minima solo per email e password
+            email_pattern = r"^[\w\.-]+@(?:gmail\.com|yahoo\.com|libero\.it|outlook\.com|hotmail\.com|icloud\.com)$"
+            password_pattern = r"^(?=.*[.,!&#]).{8,16}$"
+
+            if not re.match(email_pattern, email):
+                st.error("📧 Inserisci un'email valida (es. @gmail.com, @libero.it, ecc.)")
+            elif not re.match(password_pattern, password):
+                st.error("🔑 La password deve essere lunga 8-16 caratteri e contenere almeno uno tra: . , ! & #")
+            elif self.db.get_operator(email):
+                st.error("📧 Email già registrata.")
+            else:
+                new_user = {
+                    "Anagrafica": {
+                        "Email": email,
+                        "Password": password,
+                        "Nome": nome,
+                        "Cognome": cognome,
+                        "Cellulare": cellulare,
+                        "Codice Fiscale": cf,
+                        "Ruolo": "Amministratore",
+                    },
+                    "Ospedale": {
+                        "Nome Ospedale": nome_struttura,
+                        "Città": città,
+                        "Provincia": provincia,
+                        "CAP": cap,
+                        "Reparto": reparto,
+                    }
+                }
+                self.db.insert_operator(new_user)
+                st.success("✅ Registrazione nuovo amministratore completata con successo! Fornisci le credenziali al nuovo amministratore per consentirgli l'accesso.")
+                time.sleep(2)
+                st.session_state.page = "admin_dashboard"
+                st.rerun()
+        
     def admin_dashboard(self):
         def sidebar_admin():
             with st.sidebar:
@@ -658,7 +729,9 @@ class Dashboard:
                     if st.button("📊 Analytics",use_container_width=True):
                         st.session_state.page = "analytics"
                         st.rerun()
-                    
+                    if st.button("👤 Registra nuovo admin", use_container_width=True):
+                        st.session_state.page = "register_admin"
+                        st.rerun()
                     if st.button("🔒 Logout", use_container_width=True):
                         st.session_state.clear()
                         st.rerun()
@@ -1958,6 +2031,8 @@ class Dashboard:
                 self.show_report_admin(st.session_state.admin_report_to_show)
             elif st.session_state.page == "analytics":
                 self.analytics()
+            elif st.session_state.page == "register_admin":
+                self.registra_amministratore()
         else:
             if st.session_state.page == "login":
                 self.login()
