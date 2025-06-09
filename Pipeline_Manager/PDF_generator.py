@@ -6,7 +6,6 @@ from datetime import datetime
 import logging    
 
 import json
-from json2pdf_converter import generate
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

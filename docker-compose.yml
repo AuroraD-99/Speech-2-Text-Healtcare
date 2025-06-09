@@ -1,0 +1,97 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - mynetwork
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    command: uvicorn backend:backend_app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - key.env
+    volumes:
+      - .:/app
+      - ./assets:/app/assets
+    networks:
+      - mynetwork
+    depends_on:
+      - mongo
+      - redis
+
+  controller:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: controller
+    command: uvicorn controller:app --host 0.0.0.0 --port 8003
+    ports:
+      - "8003:8003"
+    env_file:
+      - key.env
+    volumes:
+      - .:/app
+      - ./assets:/app/assets
+    networks:
+      - mynetwork
+    depends_on:
+      - mongo
+      - redis
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dashboard
+    command: streamlit run Dashboard/Dashboard.py --server.runOnSave=true --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    env_file:
+      - key.env
+    volumes:
+      - .:/app
+      - ./assets:/app/assets
+    networks:
+      - mynetwork
+    depends_on:
+      - mongo
+      - redis
+      - backend
+      - controller
+
+  init-db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: init-db
+    command: python init_db.py
+    depends_on:
+      - mongo
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  mongo_data:

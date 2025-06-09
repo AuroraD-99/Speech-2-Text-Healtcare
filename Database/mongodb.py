@@ -14,7 +14,7 @@ import datetime
 from dotenv import load_dotenv
 import json
 import random
-from datetime import datetime, timedelta
+import datetime
 
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 #Struttura embedding: è necessaria per ottimizzare il RAG, così ogni volta che viene inizializzato il sistema non è necessario ricalcolare gli embeddings
 
 class DB:
-    def __init__(self, uri="mongodb://localhost:27017/", db_name="clinical_report_transcriptions"):
+    def __init__(self, uri="mongodb://mongo:27017/", db_name="clinical_report_transcriptions"):
         """
         Inizializza la connessione al database MongoDB.
         """
@@ -40,7 +40,7 @@ class DB:
             self.logger = Logger(self.__class__.__name__).get_logger()
             self.logger.info("Connected to MongoDB successfully.")
             #Per le code Redis
-            self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+            self.redis = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
         except ConnectionFailure as e:
             self.logger.error(f"Failed to connect to MongoDB: {e}")
             raise
@@ -138,11 +138,11 @@ class DB:
         
         def genera_timestamp_casuale():
             oggi = datetime.now()
-            un_anno_fa = oggi - timedelta(days=365)
+            un_anno_fa = oggi - datetime.timedelta(days=365)
 
             # Genera un datetime casuale tra un anno fa e oggi
             delta_secondi = int((oggi - un_anno_fa).total_seconds())
-            timestamp_casuale = un_anno_fa + timedelta(seconds=random.randint(0, delta_secondi))
+            timestamp_casuale = un_anno_fa + datetime.timedelta(seconds=random.randint(0, delta_secondi))
 
             # Formatta nel formato corretto: "YYYY-MM-DD HH:MM:SS"
             return timestamp_casuale.strftime("%Y-%m-%d %H:%M:%S")
@@ -794,124 +794,101 @@ class DB:
 
         results = list(self.reports_collection.aggregate(pipeline))
         return results
-
-
-
-
     
-    # Chiude la connessione al database
-    def close(self):
-        self.client.close()
-   
+    # FUNZIONE PER POPOLARE IL DATABASE CON I DATI DEL DATASET
+    def popola_db(self, dataset_path: str):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        medici_file_path = os.path.join(base_dir, "medici_unici.json")
+        medici_unici_set = set()
+        medici_unici_list = []
 
-if __name__ == "__main__":
-    db = DB()
-    load_dotenv('key.env', override=True)
-    dataset_path = os.getenv("dataset_path")
-    
-    print(dataset_path)
+        ospedale_fisso_base = {
+            "Nome Ospedale": "Ospedale Maggiore",
+            "Città": "Bologna",
+            "Provincia": "BO",
+            "CAP": "40138",
+        }
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    medici_file_path = os.path.join(base_dir, "medici_unici.json")
-    medici_unici_set = set()
-    medici_unici_list = []
+        reparti_possibili = [
+            "Pronto Soccorso",
+            "Medicina d'urgenza",
+            "Terapia intensiva",
+            "Cardiologia",
+            "Ortopedia",
+            "Neurologia"
+        ]
 
-    # Ospedale fisso senza reparto
-    ospedale_fisso_base = {
-        "Nome Ospedale": "Ospedale Maggiore",
-        "Città": "Bologna",
-        "Provincia": "BO",
-        "CAP": "40138",
-        # "Reparto": ... -> da scegliere casualmente
-    }
+        try:
+            with open(dataset_path, 'r', encoding='utf-8') as file:
+                data = [json.loads(line) for line in file]
 
-    reparti_possibili = [
-        "Pronto Soccorso",
-        "Medicina d'urgenza",
-        "Terapia intensiva",
-        "Cardiologia",
-        "Ortopedia",
-        "Neurologia"
-    ]
+            for idx, row in enumerate(data):
+                line_number = idx + 1
+                report_str = row.get("referto") or row.get("scheda_ps")
+                transcription_str = row.get("referto_simulato")
+                report_id = row.get("report_id")
 
-    try:
-        with open(dataset_path, 'r', encoding='utf-8') as file:
-            data = [json.loads(line) for line in file]
+                if transcription_str:
+                    self.insert_transcription(transcription=transcription_str)
 
-        for idx, row in enumerate(data):  # Limita a 5 righe per test
-            print(row)
-            line_number = idx + 1
-            report_str = row.get("referto") or row.get("scheda_ps")
-            transcription_str = row.get("referto_simulato")
-            report_id = row.get("report_id")
+                if report_str and report_id:
+                    try:
+                        loaded = json.loads(report_str)
+                        report_data = loaded[0] if isinstance(loaded, list) and len(loaded) > 0 else loaded
 
-            if transcription_str:
-                db.insert_transcription(transcription=transcription_str)
-            if report_str and report_id:
-                try:
-                    loaded = json.loads(report_str)
-                    report_data = loaded[0] if isinstance(loaded, list) and len(loaded) > 0 else loaded
+                        dati_medico = report_data.get("dati medico", {})
+                        anagrafica_keys = ["Email", "Nome", "Cognome", "Cellulare", "Codice Fiscale", "Ruolo"]
+                        anagrafica = {k: dati_medico.get(k, "N/A") for k in anagrafica_keys}
 
-                    dati_medico = report_data.get("dati medico", {})
-                    anagrafica_keys = ["Email", "Nome", "Cognome", "Cellulare", "Codice Fiscale", "Ruolo"]
-                    anagrafica = {k: dati_medico.get(k, "N/A") for k in anagrafica_keys}
+                        chiave_medico = anagrafica.get("Codice Fiscale", "") + anagrafica.get("Email", "")
+                        if chiave_medico not in medici_unici_set:
+                            medici_unici_set.add(chiave_medico)
+                            reparto_casuale = random.choice(reparti_possibili)
+                            ospedale_con_reparto = {**ospedale_fisso_base, "Reparto": reparto_casuale}
+                            medici_unici_list.append({
+                                "Anagrafica": anagrafica,
+                                "Ospedale": ospedale_con_reparto
+                            })
 
-                    chiave_medico = anagrafica.get("Codice Fiscale", "") + anagrafica.get("Email", "")
-                    if chiave_medico not in medici_unici_set:
-                        medici_unici_set.add(chiave_medico)
-                        # Il reparto è scelto casualmente solo qui, nei dati unici medici
                         reparto_casuale = random.choice(reparti_possibili)
                         ospedale_con_reparto = {**ospedale_fisso_base, "Reparto": reparto_casuale}
-                        medici_unici_list.append({
+                        report_data["dati medico"] = {
                             "Anagrafica": anagrafica,
                             "Ospedale": ospedale_con_reparto
-                        })
+                        }
 
-                    # Ricostruisco il referto con reparto casuale
-                    reparto_casuale = random.choice(reparti_possibili)
-                    ospedale_con_reparto = {**ospedale_fisso_base, "Reparto": reparto_casuale}
-                    report_data["dati medico"] = {
-                        "Anagrafica": anagrafica,
-                        "Ospedale": ospedale_con_reparto
-                    }
+                        report_data["validated"] = True
+                        self.insert_clinical_report_from_dataset(report_id=report_id, report=report_data)
 
-                    report_data["validated"] = True
+                        print(f"[✔️ Riga {line_number}] Referto inserito correttamente.")
+                    except json.JSONDecodeError as e:
+                        print(f"[Errore parsing JSON - Riga {line_number}] {e}")
+                    except Exception as e:
+                        print(f"[Errore inserimento - Riga {line_number}] {e}")
 
-                    db.insert_clinical_report(report_id=report_id, report=report_data)
-                    print(f"[✔️ Riga {line_number}] Referto inserito correttamente.")
+            with open(medici_file_path, 'w', encoding='utf-8') as f:
+                json.dump(medici_unici_list, f, indent=2, ensure_ascii=False)
+            print(f"\n✅ File medici unici salvato in: {medici_file_path}")
 
-                except json.JSONDecodeError as e:
-                    print(f"[Errore parsing JSON - Riga {line_number}] {e}")
+            for medico in medici_unici_list:
+                medico["Anagrafica"]["Password"] = "Password123."
+                try:
+                    self.insert_operator(medico)
+                    print(f"[✔️ Operatore] Inserito: {medico['Anagrafica']['Codice Fiscale']}")
                 except Exception as e:
-                    print(f"[Errore inserimento - Riga {line_number}] {e}")
+                    print(f"[❌ Errore inserimento operatore] {e}")
 
-        with open(medici_file_path, 'w', encoding='utf-8') as f:
-            json.dump(medici_unici_list, f, indent=2, ensure_ascii=False)
-        print(f"\n✅ File medici unici salvato in: {medici_file_path}")
-        
-        # Inserimento dei medici nel database operatori
-        for medico in medici_unici_list:
-            medico["Anagrafica"]["Password"] = "Password123."
-            new_data = {
-                **medico,
-            }
-            try:
-                db.insert_operator(new_data)
-                print(f"[✔️ Operatore] Inserito: {medico['Anagrafica']['Codice Fiscale']}")
-            except Exception as e:
-                print(f"[❌ Errore inserimento operatore] {e}")
+        except Exception as e:
+            print(f"[❌ Errore JSON] Errore nel parsing del dataset: {e}")
 
-    except Exception as e:
-        print(f"[❌ Errore JSON] Errore nel parsing del dataset: {e}")
-        
-    amministratore = {
+        amministratore = {
             "Anagrafica": {
                 "Email": "amministratore1@gmail.com",
                 "Password": "Password123.",
                 "Nome": "Gennaro",
                 "Cognome": "Esposito",
                 "Cellulare": "3331234567",
-                "Codice Fiscale": "GNSGNN80A01H703Z",  # Esempio di CF
+                "Codice Fiscale": "GNSGNN80A01H703Z",
                 "Ruolo": "Amministratore",
                 "Primo Accesso": True
             },
@@ -923,5 +900,11 @@ if __name__ == "__main__":
                 "Reparto": "Amministrazione",
             },
         }
-        
-    db.insert_operator(amministratore)
+
+        self.insert_operator(amministratore)
+
+    
+    # Chiude la connessione al database
+    def close(self):
+        self.client.close()
+   

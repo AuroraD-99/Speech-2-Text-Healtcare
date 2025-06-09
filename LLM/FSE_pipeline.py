@@ -12,7 +12,6 @@ import argparse
 from dotenv import load_dotenv
 
 import json
-from json2pdf_converter import generate
 
 import subprocess
 import torch

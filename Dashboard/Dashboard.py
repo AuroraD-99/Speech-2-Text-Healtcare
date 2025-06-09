@@ -18,12 +18,17 @@ import seaborn as sns
 from pandas.plotting import parallel_coordinates
 
 import io
+import base64
+
+from pydub import AudioSegment
 
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Indenter, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib import colors
+
+from streamlit_mic_recorder import mic_recorder
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Database.mongodb import DB
@@ -36,6 +41,8 @@ class Dashboard:
         if "db" not in st.session_state:
             st.session_state.db = DB()  # salva l'istanza nella sessione
         self.db = st.session_state.db
+        if "is_recording" not in st.session_state:
+            st.session_state.is_recording = False
         if "page" not in st.session_state:
             st.session_state.page = "login"
         if "logged_in" not in st.session_state:
@@ -57,12 +64,9 @@ class Dashboard:
         if "admin_report_to_show" not in st.session_state:
             st.session_state.admin_report_to_show = None
         
-        try:
-            locale.setlocale(locale.LC_ALL, 'it_IT.UTF-8')
-        except locale.Error:
-            # Se la localizzazione italiana non è disponibile, usa una fallback
-            locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-            
+        
+        locale.setlocale(locale.LC_ALL, 'it_IT.UTF-8')
+        
         # Imposta l'environment variable per FastAPI
         dotenv.load_dotenv(env_file, override=True)
         
@@ -301,7 +305,24 @@ class Dashboard:
                 del st.session_state[key]
             st.rerun()
 
-        
+    def save_audio_file(self, audio_bytes):
+        # audio_bytes è già un oggetto bytes (non serve decodifica base64)
+        folder = "./assets/audios"
+        os.makedirs(folder, exist_ok=True)
+        timestamp = int(time.time())
+
+        # Scegli un'estensione (es: webm, wav, mp3) se la conosci, altrimenti usa .webm di default
+        audio_format = "webm"
+        original_path = os.path.join(folder, f"recorded_{timestamp}.{audio_format}")
+        with open(original_path, "wb") as f:
+            f.write(audio_bytes)
+
+        # Converto in .wav con pydub
+        final_path = os.path.join(folder, f"recorded_{timestamp}.wav")
+        AudioSegment.from_file(original_path).export(final_path, format="wav")
+
+        return final_path
+    
     def genera_anagrafica(self, dizionario:dict):
         """
         Il dizionario user ha la seguente struttura
@@ -1300,7 +1321,7 @@ class Dashboard:
     
 
     def main_page(self):
-        st.markdown("## 🏠 Inserire nome APP")
+        st.markdown("## 🏠 Clinical report AI Assistant")
 
         # Recupero dati operatore
         user = st.session_state.get("user", {})
@@ -1654,40 +1675,42 @@ class Dashboard:
 
         st.sidebar.markdown("---")
         
-        is_recording = st.session_state.get("is_recording", False)
-
-        if not is_recording:
-            # Mostra il bottone "Nuovo Referto"
+        if not st.session_state.is_recording:
             if st.sidebar.button("➕ Nuovo Referto", use_container_width=True):
-                self.start_audio_recording()
                 st.session_state.is_recording = True
-                st.rerun()  # ricarica la pagina per aggiornare UI
+                st.rerun()
         else:
-            # Mostra bottone "Termina registrazione" e spinner di registrazione in corso
             st.sidebar.markdown("### 🎙️ Registrazione in corso...")
-            if st.sidebar.button("⏹️ Termina registrazione", use_container_width=True):
-                filename = self.stop_audio_recording()
+            audio_bytes = mic_recorder()
+            if audio_bytes:
+                filename = self.save_audio_file(audio_bytes["bytes"])
                 st.session_state.is_recording = False
-                if filename:
-                    st.sidebar.success(f"✅ Registrazione salvata: {filename}")
-                    with st.spinner("Creazione referto in corso..."):
-                        self.new_report(filename)
-                    if st.session_state.report_ready:
-                        report = st.session_state.last_report
-                        if "Error" in report:
-                            st.sidebar.error(f"❌ Errore: {report['Error']}")
-                        else:
-                            st.sidebar.success(f"✅ Referto creato con ID: {report.get('_id', 'N/A')}")
-                            time.sleep(2)  # Attendi un attimo per mostrare il messaggio
-                                
-                        
+                st.session_state.last_audio_file = filename
+                st.sidebar.success(f"✅ Registrazione salvata: {filename}")
+
+                with st.spinner("Creazione referto in corso..."):
+                    self.new_report(filename)
+
+                if st.session_state.report_ready:
+                    report = st.session_state.last_report
+                    if "Error" in report:
+                        st.sidebar.error(f"❌ Errore: {report['Error']}")
                     else:
-                        st.sidebar.error("❌ Errore durante il salvataggio.")
-                    st.rerun()  # ricarica pagina per aggiornare UI
+                        st.sidebar.success(f"✅ Referto creato con ID: {report.get('_id', 'N/A')}")
+                        time.sleep(2)
+                else:
+                    st.sidebar.error("❌ Errore durante il salvataggio.")
+
+                st.rerun()
+
+            if st.sidebar.button("⏹️ Annulla registrazione", use_container_width=True):
+                st.session_state.is_recording = False
+                st.rerun()
+
         st.sidebar.markdown("---")
         if st.sidebar.button("📂 Esplora Referti", use_container_width=True):
-                st.session_state.page = "query_report"
-                st.rerun()
+            st.session_state.page = "query_report"
+            st.rerun()
                 
                 
         if st.sidebar.button("🔄 Ricarica", use_container_width=True):
