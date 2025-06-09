@@ -15,4 +15,4 @@ La documentazione clinica tradizionale si basa pesantemente sull’inserimento m
 - Migliorare l'accuratezza e la standardizzazione dei referti
 
 ## Architettura
-![Architettura del sistema](assets/Diagrams/architettura.png)
+![Architettura del sistema](assets/Diagrams/architettura.jpg)
