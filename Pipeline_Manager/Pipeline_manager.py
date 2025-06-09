@@ -29,7 +29,7 @@ from Pipeline_Manager.Anagrafica import Anagrafica
 from NER.ner import NER
 
 class PipelineManager:
-    def __init__(self, anagrafica_medico, function_mode="Emergency", env_file="key.env"):
+    def __init__(self, anagrafica_medico, function_mode="Ospedale", env_file="key.env"):
 
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("PipelineManager")
@@ -374,17 +374,10 @@ class PipelineManager:
                 self.logger.info(f"Aggiunta referto all'FSE del paziente...")
                 #document_id = self.DB_manager.insert_clinical_report(file_id, clinical_report[0])
 
-                if query_type == "report":
-                    json_dump = {
+
+                json_dump = {
                                     "referto_simulato": testo_simulato_pulito,
                                     "referto": json.dumps(clinical_report, ensure_ascii=False),
-                                    "report_id": file_id,
-                                    "validated": True,
-                                }
-                else:
-                    json_dump = {
-                                    "referto_simulato": testo_simulato_pulito,
-                                    "scheda_ps": json.dumps(clinical_report, ensure_ascii=False),
                                     "report_id": file_id,
                                     "validated": True,
                                 }
@@ -444,44 +437,10 @@ class PipelineManager:
                       }
                     ]
 
-        query_scheda = [
-                        {
-                            "role": "user",
-                            "content": f"""Sei un infermiere che lavora in pronto soccorso (PS) e hai appena completato la valutazione e il trasporto di un paziente.
-                                            Sulla base della patologia {context}, **simula una scheda di ammissione al pronto soccorso realistica, in forma di racconto dettagliato in stile conversazionale**, che includa tutte le informazioni necessarie per poter essere successivamente convertita in un file JSON strutturato come nell'esempio.
-
-                                            **La descrizione deve includere chiaramente, anche sotto forma narrativa:**
-                                            - **Motivo dell'intervento e sintomi riferiti**
-                                            - **Contesto clinico coerente con il testo**
-                                            - **Dinamica dell'accesso al PS** (modalità di chiamata, orari, luogo, trasporto in ambulanza, eventuali rifiuti o decessi)
-                                            - **Trattamenti e interventi effettuati (es. ossigenoterapia, farmaci, monitoraggio)**
-                                            - **Parametri vitali rilevati**
-                                            - **Eventuale presenza di autorità**
-                                            - **Annotazioni aggiuntive da parte del personale**
-                                            - **Non sempre sono disponibili dati dell'anamnesi personale pregressa del paziente**
-                                            - **Inserisci i dati appartenenti all'anagrafica con nome che inizia per {name} e cognome per {surname}, coerenti (es. età compatibile con la patologia). **
-                                            - **Non inserire i dati del medico o infermiere in quanto il referto deve essere il frutto di un dettato in prima persona**
-                                            -
-                                            - **Utilizza elementi casuali e verosimili come {random_note} per rendere il racconto più realistico**
-
-                                            **Il testo deve essere scritto come se fosse un dettato clinico, in prima persona, di un professionista del PS, da cui un medico possa facilmente compilare una scheda di accesso in JSON.**
-                                            **Inizia il testo direttamente con l'anamnesi del paziente senza aggiungere alcuna introduzione.**
-
-                                            Esempio di elementi da includere:
-                                            - "Il paziente ha accusato dolore toracico acuto mentre si trovava a casa..."
-                                            - "Chiamata effettuata alle ore 08:30, intervento in Via Roma 12..."
-                                            - "All’arrivo sul posto, il paziente era vigile, collaborante, parametri nella norma..."
-                                            - "Trasportato al PS in codice giallo con monitoraggio continuo..."
-
-                                            Non omettere informazioni importanti e non usare abbreviazioni non mediche.
-                                            **Non realizzare testi troppo lunghi, basati su una dinamica reale di visita di un paziente**"""
-                        }
-                    ]
-
+        
 
         query_options = {
             "referto": query_referto,
-            "scheda": query_scheda
         }
         query_type = random.choice(list(query_options.keys()))
         query = query_options[query_type]
@@ -522,7 +481,7 @@ if __name__ == "__main__":
 
     manager = PipelineManager(
         anagrafica_medico=anagrafica_medico,
-        function_mode="Emergency"
+        function_mode="Ospedale"  # Forza sempre Ospedale
     )
 
     manager.Pipeline_manager()
