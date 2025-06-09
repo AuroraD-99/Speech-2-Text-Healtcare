@@ -11,6 +11,19 @@ import threading
 from codicefiscale import codicefiscale
 import datetime
 import locale
+import pandas as pd
+import altair as alt
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pandas.plotting import parallel_coordinates
+
+import io
+
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Indenter, KeepTogether
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib import colors
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Database.mongodb import DB
@@ -245,11 +258,11 @@ class Dashboard:
                                             self.db.refresh_queue_for_doctor(medico_cf)
                                             del st.session_state[confirm_key]
                                             st.session_state.deleted = True
-                                            st.experimental_rerun()
+                                            st.rerun()
                                     with col_cancel:
                                         if st.button("❎ Annulla", key=f"cancel_{referto.get('_id')}"):
                                             del st.session_state[confirm_key]
-                                            st.experimental_rerun()
+                                            st.rerun()
 
                             with col2:
                                 st.button(
@@ -686,12 +699,274 @@ class Dashboard:
         dashboard_admin(reports)
     
     def analytics(self):
-        
+        # Sidebar
         with st.sidebar:
-            with st.container():
-                if st.button("🔙 Torna indietro", use_container_width=True):
-                    st.session_state.page = "admin_dashboard"
-                    st.rerun()
+            if st.button("🔙 Torna alla Dashboard", use_container_width=True):
+                st.session_state.page = "admin_dashboard"
+                st.rerun()
+
+        # Titolo principale
+        
+        st.title("🧠 Data Analytics")
+        
+        # Indice Analisi
+        st.subheader("📑 Indice delle Analisi Disponibili")
+        st.markdown("""
+        - ⏳ **Analisi Temporale**: Statistiche sui referti in base all'intervallo di tempo.
+        - 👨‍⚕️ **Analisi per Medico**: Quantità e distribuzione dei referti per medico e reparto.
+        - 🧩 **Query Complesse**: Analisi avanzate multi-parametro o nidificate.
+        """)
+        st.markdown("---")
+
+        # Tabs per le sezioni
+        tab_temp, tab_medico, tab_complesse = st.tabs(["⏳ Analisi Temporale", "👨‍⚕️ Analisi per Medico", "🧩 Analisi Avanzate"])
+
+        with tab_temp:
+            self.show_analisi_temporale()
+
+        with tab_medico:
+            self.show_analisi_per_medico()
+
+        with tab_complesse:
+            self.show_analisi_complesse()
+
+
+    def show_analisi_temporale(self):
+        st.markdown("## ⏳ Analisi Temporale dei Referti Clinici")
+        st.markdown("Definisci un intervallo temporale per eseguire le analisi.")
+        data_start = st.date_input("📅 Data inizio")
+        data_end = st.date_input("📅 Data fine")
+
+        if data_start and data_end and data_start <= data_end:
+            
+            data_start = str(data_start) + " 00:00:01"
+            data_end = str(data_end) + " 23:59:59"
+            media_referti, max_referti, referto_comune, decessi = self.db.analitiche_temporali(data_start, data_end)
+            st.markdown(f"- 📊 Media referti/giorno: **{media_referti}**")
+            st.markdown(f"- 📅 Giorno con più referti: **{max_referti}**")
+            st.markdown(f"- 🔬 Tipologia più comune: **{referto_comune}**")
+            st.markdown(f"- ⚠️ Decessi (Emergency): **{decessi}**")
+            
+            # Linear plot numero di referti per giorno
+            st.markdown("**📈 Andamento giornaliero dei referti:**")
+            
+            # Step 1: Recupera dati aggregati dal db (lista di dict con "date" e "count")
+            data = self.db.numero_referti_giornalieri(data_start, data_end)
+            # Esempio output: [{"date": "2025-06-01", "count": 15}, {"date": "2025-06-02", "count": 20}, ...]
+
+            if not data:
+                st.warning("Nessun dato trovato nell'intervallo selezionato.")
+                return
+            
+            # Step 2: Costruisci DataFrame
+            df = pd.DataFrame(data)
+            df['date'] = pd.to_datetime(df['date'])
+
+            # Step 3: Crea il grafico lineare con Altair
+            chart = alt.Chart(df).mark_line(point=True).encode(
+                x=alt.X('date:T', title='Data'),
+                y=alt.Y('count:Q', title='Numero di referti'),
+                tooltip=['date:T', 'count:Q']
+            ).properties(
+                width=700,
+                height=400,
+                title="Andamento giornaliero numero di referti"
+            ).interactive()
+
+            # Step 4: Mostra con Streamlit
+            st.altair_chart(chart)
+            
+        else:
+            st.warning("Seleziona un intervallo di tempo valido.")
+
+
+    def show_analisi_per_medico(self):
+        st.markdown("Analisi aggregate per singolo medico e per reparto.")
+
+        # Top 10 medici per numero di referti
+        st.markdown("## **🏆 Top 10 medici per numero di referti:**")
+        st.markdown("Visualizza i medici con il maggior numero di referti prodotti.")
+        top_medici = self.db.top_medici(limit=10)
+        for i, medico in enumerate(top_medici, 1):
+            cf = medico['nome_completo'] or "Sconosciuto"
+            count = medico['count']
+            st.markdown(f"{i}. Dott/Dott.ssa: `{cf}` — Numero referti: {count}")
+
+        # Referti per reparto (grafico)
+        st.markdown("## **📊 Numero di referti per reparto:**")
+        reparti = self.db.referti_per_reparto()
+
+        if repartis := [r['reparto'] for r in reparti if r['reparto']]:
+            counts = [r['count'] for r in reparti if r['reparto']]
+            labels = [r['reparto'] for r in reparti if r['reparto']]
+
+            fig, ax = plt.subplots(figsize=(8, 4.5))  # Dimensione più compatta e proporzionata
+
+            ax.bar(labels, counts, color='#4c72b0', edgecolor='black', alpha=0.85)
+
+            ax.set_ylabel('Numero Referti', fontsize=12)
+            ax.set_title('Referti per Reparto', fontsize=14, weight='bold')
+
+            plt.xticks(rotation=45, ha='right', fontsize=10)
+            plt.yticks(fontsize=10)
+
+            # Rimuovi bordo superiore e destro per uno stile più "pulito"
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+
+            # Layout automatico per evitare sovrapposizioni
+            plt.tight_layout()
+
+            st.pyplot(fig)
+
+        else:
+            st.info("Nessun dato reparto disponibile.")
+            
+        def mostra_referti_per_fascia(start_date, end_date):
+            data = self.db.referti_per_fascia_oraria(start_date, end_date)
+            if not data:
+                st.info("Nessun dato trovato per l'intervallo selezionato.")
+                return
+
+            df = pd.DataFrame(list(data.items()), columns=["Fascia Oraria", "Numero Referti"])
+
+            fig, ax = plt.subplots(figsize=(6, 6))  # Grafico quadrato, dimensioni moderate
+
+            colors = ['#66b3ff', '#99ff99', '#ffcc99', '#ff9999']
+
+            wedges, texts, autotexts = ax.pie(
+                df["Numero Referti"],
+                labels=df["Fascia Oraria"],
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=colors,
+                textprops={'fontsize': 11, 'weight': 'bold', 'color': 'black'}
+            )
+
+            ax.set_title("Distribuzione carico di lavoro per fascia oraria nell'ultimo mese", fontsize=14, weight='bold')
+
+            # Migliora la leggibilità delle etichette (sposta un po' le label)
+            for text in texts:
+                text.set_fontsize(11)
+                text.set_weight('bold')
+
+            # Disegna un cerchio al centro per effetto donut (opzionale)
+            centre_circle = plt.Circle((0,0),0.70,fc='white')
+            fig.gca().add_artist(centre_circle)
+
+            # Assicura che il grafico sia un cerchio perfetto
+            ax.axis('equal')
+
+            plt.tight_layout()
+            st.pyplot(fig)
+            
+        st.markdown("## **⏰ Distribuzione dei referti per fascia oraria:**")
+        st.markdown("Visualizza la distribuzione dei referti clinici per fascia oraria negli ultimi 30 giorni.")
+        
+        now = datetime.datetime.now()
+        thirty_days_ago = now - datetime.timedelta(days=30)
+        
+        now = now.strftime("%Y-%m-%d %H:%M:%S")
+        thirty_days_ago = thirty_days_ago.strftime("%Y-%m-%d %H:%M:%S")
+        
+        mostra_referti_per_fascia(thirty_days_ago, now)
+
+
+    def show_analisi_complesse(self):
+        st.markdown("Analisi avanzate sui dati dei referti clinici.")
+
+        st.markdown("### **📅 Referti totali per reparto e giorno della settimana**")
+        st.markdown("Visualizza il numero di referti per reparto e giorno della settimana negli ultimi 365 giorni.")
+
+        now_dt = datetime.datetime.now()
+        year_ago_dt = now_dt - datetime.timedelta(days=365)
+
+        # Passa date come stringhe nel formato esatto usato in MongoDB
+        now_str = now_dt.strftime("%Y-%m-%d %H:%M:%S")
+        year_ago_str = year_ago_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Correggi l'ordine: start_date = year_ago, end_date = now
+        heatmap = self.db.heatmap_reparto_giorno(year_ago_str, now_str)
+
+        df_heat = pd.DataFrame(heatmap).fillna(0).T
+
+        # Assicurati che le colonne siano tutte presenti, ordinale e riempi missing con 0
+        cols_order = [1, 2, 3, 4, 5, 6, 7]
+        df_heat = df_heat.reindex(columns=cols_order, fill_value=0)
+
+        day_labels = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab']
+        df_heat.columns = day_labels
+
+        plt.figure(figsize=(12, max(4, len(df_heat)*0.4)))
+        sns.heatmap(df_heat, annot=True, fmt=".0f", cmap="YlGnBu")
+        plt.title("Numero di referti per reparto e giorno della settimana")
+        plt.xlabel("Giorno della settimana")
+        plt.ylabel("Reparto")
+        st.pyplot(plt.gcf())
+
+        st.markdown("### **🔬 Analisi per tipologia di referto**")
+        st.markdown("Analizza la stagionalità dei referti per tipo negli ultimi 365 giorni.")
+        
+        results = self.db.stagionalita_tipo_referto(year_ago_str, now_str)
+
+        # Trasforma in DataFrame
+        df = pd.DataFrame(results)
+
+        # Controlla che ci siano risultati
+        if df.empty:
+            st.write("Nessun dato disponibile per il periodo selezionato.")
+        else:
+            df["date"] = df["_id"].apply(lambda x: x["date"])
+            df["type"] = df["_id"].apply(lambda x: x["type"])
+            df["count"] = df["count"]
+
+            # Pivot per avere le date in indice e i tipi come colonne
+            df_pivot = df.pivot(index="date", columns="type", values="count").fillna(0)
+
+            # Converti date in datetime
+            df_pivot.index = pd.to_datetime(df_pivot.index)
+
+            plt.figure(figsize=(12,6))
+            for col in df_pivot.columns:
+                plt.plot(df_pivot.index, df_pivot[col], label=col)
+
+            plt.title("Analisi di stagionalità per tipo di referto (ultimi 365 giorni)")
+            plt.xlabel("Data")
+            plt.ylabel("Numero di referti")
+            plt.legend()
+            plt.grid(True)
+
+            st.pyplot(plt.gcf())
+            
+        # PARALLEL COORDINATES PLOT
+        st.markdown("### **📊 Analisi parallela per reparto**")
+        st.markdown("Visualizza le relazioni tra il totale dei referti, i giorni di lavoro e la media giornaliera per reparto.")
+        
+        results = self.db.parallel_coords_data(year_ago_str, now_str)
+
+        if not results:
+            st.write("Nessun dato disponibile.")
+        else:
+            df = pd.DataFrame(results)
+            
+            # Rinomina colonne per comodità
+            df.rename(columns={"_id": "Reparto"}, inplace=True)
+
+            # Parallel coordinates plot richiede la colonna con la classe (qui il reparto)
+            # Assicuriamoci che le colonne siano tutte numeriche tranne la prima
+            df_plot = df[["Reparto", "totale_referti", "giorni_attivi", "media_giornaliera"]].copy()
+
+            plt.figure(figsize=(12,6))
+            parallel_coordinates(df_plot, class_column="Reparto", colormap=plt.get_cmap("tab20"))
+
+            plt.title("Analisi parallela su totale referti, giorni di lavoro e media giornaliera per reparto")
+            plt.ylabel("Valori aggregati")
+            plt.xticks(rotation=45)
+            plt.grid(True)
+            st.pyplot(plt.gcf())
+
+                    
+        
     
     def show_report_admin(self, report):
         st.markdown(f"# 👁️ Visualizza Referto")
@@ -994,7 +1269,7 @@ class Dashboard:
                             - 🗓️ **Data**: {referto.get('timestamp', 'N/A')}
                             """)
                             with st.container():
-                                col1, col2, col3 = st.columns(3)
+                                col1, col2, col3, col4 = st.columns(4)
                                 with col3: 
                                     delete_key = f"delete_{referto.get('_id')}"
                                     confirm_key = f"confirm_delete_{referto.get('_id')}"
@@ -1033,12 +1308,250 @@ class Dashboard:
                                     on_click=self.show_report,
                                     args = (referto.get('_id'),),
                                     )
+                                
+                                with col4:
+                                    report_id = str(referto.get('_id'))  # 👈 converto in stringa
+                                    download_key = f"trigger_download_{report_id}"
+
+                                    if st.button("📥 Scarica Referto", key=f"btn_{report_id}"):
+                                        st.session_state[f"download_pdf_{report_id}"] = True
+
+                                    if st.session_state.get(f"download_pdf_{report_id}", False):
+                                        report_to_download = self.get_report_by_id(report_id)
+                                        pdf_data, file_name = self.download_report(report_to_download)  # 👈 già convertito in str
+                                        if pdf_data:
+                                            st.download_button(
+                                                label="⬇️ Clicca per scaricare",
+                                                data=pdf_data,
+                                                file_name=file_name,
+                                                mime="application/pdf",
+                                                key=f"download_btn_{report_id}"
+                                            )
         except Exception as e:
             st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
 
         if st.session_state.deleted:
             st.session_state.deleted = False
             st.rerun()
+    
+    def format_key_text(self, s: str) -> str:
+        # Sostituisce underscore con spazi e capitalizza parole
+        parts = s.split('_')
+        # Maiuscola solo la prima lettera di ogni parola tranne se è una preposizione/articolo breve
+        # (qui semplice capitalizzazione per tutte parole)
+        return ' '.join(p.capitalize() for p in parts)
+
+    def download_report(self, report):
+
+        try:
+            exclude_keys = {"_id", "report_id", "validated", "timestamp", "type"}
+
+            dati_paziente = report.get("dati paziente", {})
+            nominativo = dati_paziente.get("nominativo", {})
+            nome_paziente = nominativo.get("nome", "Sconosciuto")
+            cognome_paziente = nominativo.get("cognome", "Sconosciuto")
+
+            dati_medico = report.get("dati medico", {})
+            nome_medico = dati_medico.get("nome", "Sconosciuto")
+            cognome_medico = dati_medico.get("cognome", "Sconosciuto")
+            codice_fiscale = dati_medico.get("codice fiscale", "Sconosciuto")
+
+            # Data referto dalla stringa timestamp (formato "YYYY-MM-DD HH:MM:SS")
+            timestamp_str = report.get("timestamp", "")
+            try:
+                data_referto = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").date()
+            except:
+                data_referto = "data_sconosciuta"
+
+            file_name = f"{nome_paziente}_{cognome_paziente}_{data_referto}.pdf".replace(" ", "_")
+
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=A4,
+                                    rightMargin=50, leftMargin=50,
+                                    topMargin=50, bottomMargin=50)
+
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle('titleStyle', parent=styles['Title'], alignment=TA_CENTER, fontSize=18, spaceAfter=15)
+            section_style = ParagraphStyle('sectionStyle', parent=styles['Heading2'], fontSize=14, spaceBefore=12, spaceAfter=8)
+            sub_section_style = ParagraphStyle('subSectionStyle', parent=styles['Heading3'], fontSize=12, spaceBefore=8, spaceAfter=6)
+            normal_style = styles['BodyText']
+            normal_style.spaceAfter = 6
+
+            story = []
+
+            # 1) Titolo come prima riga
+            tipo_referto = report.get("type", "")
+            if tipo_referto == "Ospedale":
+                story.append(Paragraph("Referto Ospedaliero", title_style))
+            elif tipo_referto == "Emergency":
+                story.append(Paragraph("Referto di Pronto Soccorso", title_style))
+            else:
+                story.append(Paragraph("Referto Clinico", title_style))
+
+            story.append(Spacer(1, 20))
+
+            # 2) Anagrafiche medico e paziente in rettangoli affiancati
+            medico_info = [
+                [Paragraph("<b>Dati Medico</b>", section_style)],
+                [Paragraph(f"Nome: {nome_medico}", normal_style)],
+                [Paragraph(f"Cognome: {cognome_medico}", normal_style)],
+                [Paragraph(f"Codice Fiscale: {codice_fiscale}", normal_style)],
+            ]
+            paziente_info = [
+                [Paragraph("<b>Dati Paziente</b>", section_style)],
+                [Paragraph(f"Nome: {nome_paziente}", normal_style)],
+                [Paragraph(f"Cognome: {cognome_paziente}", normal_style)],
+                [Paragraph(f"Data Referto: {str(data_referto)}", normal_style)],
+            ]
+
+            # Tabelle con bordi per rettangoli
+            table_medico = Table(medico_info, colWidths=[doc.width/2 - 10])
+            table_medico.setStyle(TableStyle([
+                ('BOX', (0, 0), (-1, -1), 1, colors.darkblue),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ]))
+
+            table_paziente = Table(paziente_info, colWidths=[doc.width/2 - 10])
+            table_paziente.setStyle(TableStyle([
+                ('BOX', (0, 0), (-1, -1), 1, colors.darkgreen),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ]))
+
+            # Affiancati in una riga
+            info_row = Table([[table_medico, table_paziente]], colWidths=[doc.width/2, doc.width/2])
+            info_row.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ]))
+
+            story.append(info_row)
+            story.append(Spacer(1, 25))
+
+            # 3) Funzione ricorsiva per il contenuto con rettangoli per le macro-categorie
+            def print_dict(d, level=0):
+                exclude_keys_local = exclude_keys.union({"dati paziente", "dati medico"})
+                
+                for key, value in d.items():
+                    if key in exclude_keys_local:
+                        continue
+
+                    key_text = self.format_key_text(key)
+                    indent = 10 * level
+
+                    if isinstance(value, dict):
+                        # Rettangolo per macro-categoria livello 0 solo (le chiavi principali)
+                        if level == 0:
+                            section_content = []
+                            section_content.append(Paragraph(f"<b>{key_text}</b>", section_style))
+                            section_content.append(Spacer(1, 8))
+
+                            # Contenuto ricorsivo più indentato
+                            inner_content = inner_print(value, level + 1)
+                            section_content.extend(inner_content)
+
+                            table = Table([[section_content]], colWidths=[doc.width])
+                            table.setStyle(TableStyle([
+                                ('BOX', (0, 0), (-1, -1), 1.2, colors.darkblue),
+                                ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
+                                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                            ]))
+                            story.append(table)
+                            story.append(Spacer(1, 15))
+
+                        else:
+                            # Per livelli >0 usa paragrafi con indentazione progressiva e stile più piccolo
+                            story.append(Indenter(left=indent))
+                            style = sub_section_style if level == 1 else normal_style
+                            story.append(Paragraph(f"<b>{key_text}</b>", style))
+                            print_dict(value, level + 1)
+                            story.append(Indenter(left=-indent))
+
+                    elif isinstance(value, list):
+                        story.append(Indenter(left=indent))
+                        story.append(Paragraph(f"<b>{key_text}</b>", normal_style))
+                        for item in value:
+                            if isinstance(item, dict):
+                                print_dict(item, level + 1)
+                            else:
+                                story.append(Paragraph(f"- {str(item)}", normal_style))
+                        story.append(Indenter(left=-indent))
+
+                    else:
+                        val_str = str(value) if value is not None else ""
+                        story.append(Indenter(left=indent))
+                        story.append(Paragraph(f"<b>{key_text}:</b> {val_str}", normal_style))
+                        story.append(Indenter(left=-indent))
+
+            def inner_print(d, level=1):
+                # Stampa ricorsiva contenuti interni senza creare rettangoli (usata dentro i rettangoli macro)
+                content = []
+                indent = 10 * level
+                for k, v in d.items():
+                    if k in exclude_keys or k in ("timestamp", "type", "dati paziente", "dati medico"):
+                        continue
+
+                    key_text = self.format_key_text(k)
+
+                    if isinstance(v, dict):
+                        content.append(Indenter(left=indent))
+                        content.append(Paragraph(f"<b>{key_text}</b>", sub_section_style if level == 1 else normal_style))
+                        content.extend(inner_print(v, level + 1))
+                        content.append(Indenter(left=-indent))
+
+                    elif isinstance(v, list):
+                        content.append(Indenter(left=indent))
+                        content.append(Paragraph(f"<b>{key_text}</b>", normal_style))
+                        for item in v:
+                            if isinstance(item, dict):
+                                content.extend(inner_print(item, level + 1))
+                            else:
+                                content.append(Paragraph(f"- {str(item)}", normal_style))
+                        content.append(Indenter(left=-indent))
+
+                    else:
+                        val_str = str(v) if v is not None else ""
+                        content.append(Indenter(left=indent))
+                        content.append(Paragraph(f"<b>{key_text}:</b> {val_str}", normal_style))
+                        content.append(Indenter(left=-indent))
+
+                return content
+
+            # Filtra e stampa il contenuto del report esclusi campi interni già mostrati
+            filtered_report = {k: v for k, v in report.items() if k not in exclude_keys and k not in ("timestamp", "type")}
+            print_dict(filtered_report)
+
+            # Build PDF
+            doc.build(story)
+            buffer.seek(0)
+            pdf_bytes = buffer.getvalue()
+            return pdf_bytes, file_name
+
+        except Exception as e:
+            print(f"Errore nella generazione del PDF: {e}")
+            return None, None
+
+    def _convert_object_ids(self, obj):
+        if isinstance(obj, dict):
+            return {k: self._convert_object_ids(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_object_ids(v) for v in obj]
+        elif str(type(obj)).endswith("ObjectId'>"):
+            return str(obj)
+        return obj
+        
         
     def sidebar(self):
         st.sidebar.markdown("## 👤 Anagrafica Operatore")

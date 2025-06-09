@@ -2042,3 +2042,291 @@
 2025-06-08 15:52:05,926 [DashboardDriver] - INFO - Running command: streamlit run
 2025-06-08 15:52:10,734 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-08 17:03:45,304 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 20:54:35,116 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 20:54:40,084 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 20:55:49,590 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:29:48,950 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:29:59,146 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:47:30,885 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:47:34,352 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:50:12,752 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:50:21,475 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:51:47,874 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:53:38,004 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:54:18,795 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:54:22,436 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:55:53,935 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:55:57,427 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 21:58:12,165 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 21:58:15,664 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:02:32,651 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:02:36,100 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:03:41,253 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:03:44,758 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:04:47,268 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:04:50,687 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:05:18,510 [DB] - INFO - Numero di decessi tra 2025-06-08 00:00:00 e 2025-06-08 23:59:59.999999: []
+2025-06-08 22:10:17,619 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:10:21,162 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:16:19,604 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:16:20,572 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:16:24,116 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:16:43,487 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:23:37,878 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:23:48,032 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:23:54,552 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:25:30,886 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:25:42,724 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:26:03,617 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:29:56,782 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:30:16,228 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:30:45,552 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:33:24,312 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:33:50,515 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:34:36,134 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:34:47,871 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:35:18,568 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:35:55,910 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:36:30,167 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:36:36,889 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:36:50,416 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:37:20,845 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:37:27,166 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:44:00,252 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:44:02,312 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 22:44:27,306 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:44:33,450 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:46:53,604 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:46:57,075 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 22:58:43,681 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 22:58:53,725 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:02:34,819 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:02:38,874 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:19:21,822 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:19:33,132 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:22:22,076 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:22:26,078 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:25:57,884 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:25:59,913 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:26:03,219 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:26:05,271 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:26:29,915 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:26:31,949 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:27:04,282 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:27:30,105 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:27:32,159 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:28:13,036 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:28:15,077 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:08,017 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:30:10,078 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,080 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,081 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,083 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,084 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,085 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,087 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,088 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,089 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:10,090 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:43,708 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:30:45,768 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,770 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,771 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,773 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,774 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,775 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,776 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,777 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,779 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:45,780 [DB] - INFO - Referto inserito nella coda per il medico con CF: RSSMRA80A01H501Z
+2025-06-08 23:30:54,168 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:30:58,697 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:35:00,171 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:35:05,251 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-08 23:48:12,050 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-08 23:48:24,720 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:12:40,328 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:13:09,410 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:17:11,413 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:24:36,568 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:24:54,524 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:29:16,338 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:29:21,735 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:31:11,374 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:31:16,795 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:33:04,369 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:33:09,802 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:38:24,644 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:38:30,133 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:40:56,774 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:41:02,318 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:42:58,627 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:43:03,616 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:44:12,213 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:44:20,427 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:46:24,428 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:46:29,212 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:53:03,153 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:54:22,609 [DB] - INFO - Coda Redis aggiornata per il medico NNCGNN00H28F839M.
+2025-06-09 00:54:24,703 [DB] - INFO - Coda Redis aggiornata per il medico NNCGNN00H28F839M.
+2025-06-09 00:54:24,704 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF NNCGNN00H28F839M.
+2025-06-09 00:54:55,176 [DB] - INFO - Coda Redis aggiornata per il medico NNCGNN00H28F839M.
+2025-06-09 00:54:55,177 [DB] - WARNING - Nessun report trovato nella coda per il medico con CF NNCGNN00H28F839M.
+2025-06-09 00:55:06,269 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 00:55:27,627 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 00:55:40,824 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 00:56:29,089 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 00:57:15,389 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 00:57:59,281 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:07:22,433 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:07:26,074 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:09:48,698 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 01:10:07,632 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 01:13:05,393 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:13:08,458 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:14:17,855 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:14:19,802 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:17:46,272 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:17:50,782 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:17:58,942 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:18:24,130 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:18:31,779 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:19:45,731 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:06,426 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:06,869 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:10,886 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:10,895 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:12,062 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:12,071 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:36,541 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:36,549 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:36,564 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:20:37,175 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:37,182 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:37,196 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:20:46,420 [Controller] - INFO - Retrieving clinical report with ID: 6843025b005c393bd6227a46
+2025-06-09 01:20:46,433 [Controller] - INFO - Retrieving clinical report with ID: 6843025b005c393bd6227a46
+2025-06-09 01:20:49,418 [Controller] - INFO - Retrieving clinical report with ID: 6843025b005c393bd6227a46
+2025-06-09 01:20:49,505 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:49,511 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:49,527 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:20:51,771 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:51,784 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:58,266 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:58,355 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:20:58,361 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:20:58,376 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:24:25,052 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:24:25,059 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:24:25,070 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:26:30,396 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:26:30,404 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:26:30,415 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:26:45,595 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:26:45,602 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:26:45,615 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:26:48,634 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:26:48,641 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:26:48,653 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:26:50,206 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:26:50,215 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:26:50,230 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:27:20,504 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:27:20,511 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:27:20,527 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:27:24,327 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:27:24,334 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:27:24,351 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:27:25,206 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:27:25,213 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:27:25,230 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:30:28,435 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:30:28,441 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:30:28,460 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:30:32,804 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:30:32,811 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:30:32,828 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:30:33,749 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:30:33,756 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:30:33,780 [Controller] - INFO - Retrieving clinical report with ID: 684308773f09f6fa32341431
+2025-06-09 01:30:43,580 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 01:31:02,464 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 01:31:15,512 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:31:19,187 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:31:19,195 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:31:19,901 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:31:19,909 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:37:26,101 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:37:45,479 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:38:06,675 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:43:11,314 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:43:50,931 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:44:09,559 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:45:16,992 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:45:19,771 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:45:27,294 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:46:48,681 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:48:23,034 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:49:43,864 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:50:45,612 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:50:49,551 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:50:50,722 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:52:50,836 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:52:56,549 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 01:53:19,680 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-09 01:53:25,154 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-09 01:53:41,047 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:53:45,089 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:56:51,946 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:57:14,449 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:57:14,764 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:57:17,205 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:57:17,213 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 01:57:19,189 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 01:57:19,197 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:00:42,136 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:00:42,142 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:01:19,975 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:01:19,982 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:01:36,336 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:01:36,343 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:01:44,072 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:01:44,080 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:06:26,884 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:06:26,890 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:07:03,685 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:07:03,692 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:07:13,678 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:07:13,686 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:07:18,363 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:07:18,369 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:10:22,345 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:10:22,352 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:10:46,255 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:10:46,263 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:11:00,919 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:11:00,927 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:11:33,358 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:11:33,366 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:14:09,487 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:14:09,493 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:14:21,567 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:14:21,576 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:14:22,958 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:14:22,965 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:14:25,044 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:14:25,053 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:15:18,253 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:15:18,259 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:15:32,240 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:15:32,247 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:15:48,535 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:15:48,542 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:15:53,185 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:15:53,193 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:16:07,570 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:16:07,577 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:16:07,626 [Controller] - INFO - Retrieving clinical report with ID: 6842fc835e0f9239c1212bfe
+2025-06-09 02:16:08,687 [DB] - INFO - Coda Redis aggiornata per il medico CCCGNN00H28f849m.
+2025-06-09 02:16:08,694 [Controller] - INFO - Retrieving clinical report with ID: 6844348c447703f59058f220
+2025-06-09 02:16:08,744 [Controller] - INFO - Retrieving clinical report with ID: 6842fc835e0f9239c1212bfe

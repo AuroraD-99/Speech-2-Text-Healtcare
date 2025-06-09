@@ -10,6 +10,8 @@ import bcrypt
 from bson import Binary
 from bson import ObjectId
 import redis
+import datetime
+
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
 # Struttura clinical report: sottoparte della struttura FSE
@@ -402,6 +404,358 @@ class DB:
         for report in reports:
             self.enqueue_report_for_doctor(doctor_cf, str(report["_id"]))
         self.logger.info(f"Coda Redis aggiornata per il medico {doctor_cf}.")
+        
+        
+    # ---------------------SEZIONE ANALYTICS--------------------------
+    def mean_reports(self, start_date, end_date):
+        """
+        Calcola la media dei referti totali diviso il numero di giorni dell'intervallo.
+        start_date, end_date sono stringhe nel formato 'YYYY-MM-DD HH:mm:ss'.
+        """
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date, "$lte": end_date}}},
+            {"$count": "total_reports"}
+        ]
+        result = list(self.reports_collection.aggregate(pipeline))
+        total_reports = result[0]["total_reports"] if result else 0
+        
+
+        # Calcolo numero giorni nell'intervallo
+        fmt = "%Y-%m-%d %H:%M:%S"
+        start_dt = datetime.datetime.strptime(start_date, fmt)
+        end_dt = datetime.datetime.strptime(end_date, fmt)
+        days_diff = (end_dt - start_dt).days + 1  # +1 per includere entrambi i giorni
+        
+
+        if days_diff <= 0:
+            return 0
+
+        return total_reports / days_diff
+
+    def max_reports(self, start_date, end_date):
+        """
+        Calcola il numero massimo di referti giornalieri tra due date (stringhe nel formato 'YYYY-MM-DD HH:mm:ss').
+        """
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date, "$lte": end_date}}},
+            {
+                "$group": {
+                    "_id": {"$substr": ["$timestamp", 0, 10]},  # data YYYY-MM-DD
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$group": {
+                    "_id": None,
+                    "max_count": {"$max": "$count"}
+                }
+            }
+        ]
+        result = list(self.reports_collection.aggregate(pipeline))
+        return result[0]["max_count"] if result else 0
+
+    def most_common_type(self, start_date, end_date):
+        """
+        Trova il tipo di referto più comune tra due date.
+        """
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date, "$lte": end_date}}},
+            {"$group": {"_id": "$type", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 1}
+        ]
+        result = list(self.reports_collection.aggregate(pipeline))
+        return result[0]["_id"] if result else None
+
+    def deaths(self, start_date_str, end_date_str):
+        """
+        Calcola il numero di decessi tra due date stringa.
+        Il campo scheda_ps.Decesso.Ora decesso deve essere un orario valido,
+        cioè non vuoto, non 'N/A' e deve corrispondere a un pattern orario HH:mm o HH.mm.
+        """
+
+        pipeline = [
+            {
+                "$match": {
+                    "timestamp": {"$gte": start_date_str, "$lte": end_date_str},
+                    "scheda_ps.Decesso.Ora decesso": {
+                        "$exists": True,
+                        "$ne": "",
+                        "$ne": "N/A",
+                        # regex per formati 18:30 oppure 18.30 (ore da 00 a 23, minuti da 00 a 59)
+                        "$regex": r"^(?:[01]\d|2[0-3])[:.][0-5]\d$"
+                    }
+                }
+            },
+            {"$count": "death_count"}
+        ]
+        result = list(self.reports_collection.aggregate(pipeline))
+        return result[0]["death_count"] if result else 0
+
+
+    def analitiche_temporali(self, start_date, end_date):
+        """
+        Esegue un'analisi temporale dei referti tra due date.
+        start_date, end_date sono stringhe 'YYYY-MM-DD HH:mm:ss'.
+        """
+        media = self.mean_reports(start_date, end_date)
+        massimo = self.max_reports(start_date, end_date)
+        tipo_comune = self.most_common_type(start_date, end_date)
+        decessi = self.deaths(start_date, end_date)
+        return media, massimo, tipo_comune, decessi
+    
+    def numero_referti_giornalieri(self, start_date, end_date):
+        """
+        Restituisce il numero di referti giornalieri tra due date.
+        start_date, end_date sono stringhe nel formato 'YYYY-MM-DD HH:mm:ss'.
+        """
+        pipeline = [
+            {
+                "$match": {
+                    "timestamp": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$dateFromString": {
+                                    "dateString": "$timestamp",
+                                    "format": "%Y-%m-%d %H:%M:%S"
+                                }
+                            }
+                        }
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {"$sort": {"_id": 1}}
+        ]
+
+        results = list(self.reports_collection.aggregate(pipeline))
+        return [{"date": r["_id"], "count": r["count"]} for r in results]
+    
+    def top_medici(self, limit=10):
+        """
+        Restituisce i primi 'limit' medici ordinati per numero di referti,
+        usando il campo dati medico.Anagrafica.Codice Fiscale.
+        """
+        pipeline = [
+            {
+                "$group": {
+                    "_id": "$dati medico.Anagrafica.Codice Fiscale",
+                    "count": {"$sum": 1},
+                    "nome": {"$first": "$dati medico.Anagrafica.Nome"},
+                    "cognome": {"$first": "$dati medico.Anagrafica.Cognome"}
+                }
+            },
+            {"$sort": {"count": -1}},
+            {"$limit": limit}
+        ]
+        results = list(self.reports_collection.aggregate(pipeline))
+        return [
+            {
+                "nome_completo": f"{r.get('nome', '')} {r.get('cognome', '')}".strip(),
+                "count": r["count"]
+            }
+            for r in results
+    ]
+
+
+
+    def referti_per_reparto(self):
+        """
+        Restituisce il conteggio dei referti per reparto,
+        usando il campo dati medico.Ospedale.Reparto.
+        """
+        pipeline = [
+            {"$group": {
+                "_id": "$dati medico.Ospedale.Reparto",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}}
+        ]
+        results = list(self.reports_collection.aggregate(pipeline))
+        return [{"reparto": r["_id"], "count": r["count"]} for r in results]
+
+
+
+    def referti_per_fascia_oraria(self, start_date, end_date):
+        """
+        Conta il numero di referti per fascia oraria (Mattina, Pomeriggio, Sera, Notte)
+        nel range di date indicato.
+        start_date e end_date sono stringhe 'YYYY/MM/DD HH:mm:ss'.
+        """
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date, "$lte": end_date}}},
+            {"$addFields": {
+                "hour": {"$toInt": {"$substr": ["$timestamp", 11, 2]}}  # estrae ore dalla stringa "YYYY/MM/DD HH:mm:ss"
+            }},
+            {"$addFields": {
+                "fascia": {
+                    "$switch": {
+                        "branches": [
+                            {"case": {"$and": [{"$gte": ["$hour", 6]}, {"$lt": ["$hour", 12]}]}, "then": "Mattina"},
+                            {"case": {"$and": [{"$gte": ["$hour", 12]}, {"$lt": ["$hour", 18]}]}, "then": "Pomeriggio"},
+                            {"case": {"$and": [{"$gte": ["$hour", 18]}, {"$lt": ["$hour", 24]}]}, "then": "Sera"},
+                        ],
+                        "default": "Notte"
+                    }
+                }
+            }},
+            {"$group": {
+                "_id": "$fascia",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"_id": 1}}  # Ordina per fascia
+        ]
+
+        results = list(self.reports_collection.aggregate(pipeline))
+        return {r["_id"]: r["count"] for r in results}
+
+
+    def heatmap_reparto_giorno(self, start_date, end_date):
+        pipeline = [
+            {
+                "$match": {
+                    "timestamp": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "reparto": {
+                        "$ifNull": ["$dati medico.Ospedale.Reparto", "Sconosciuto"]
+                    },
+                    "dayOfWeek": {
+                        "$dayOfWeek": {
+                            "$dateFromString": {
+                                "dateString": "$timestamp",
+                                "format": "%Y-%m-%d %H:%M:%S"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"reparto": "$reparto", "dayOfWeek": "$dayOfWeek"},
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$sort": {"_id.reparto": 1, "_id.dayOfWeek": 1}
+            }
+        ]
+        results = list(self.reports_collection.aggregate(pipeline))
+
+        heatmap = {}
+        for r in results:
+            rep = r["_id"]["reparto"]
+            day = r["_id"]["dayOfWeek"]
+            heatmap.setdefault(rep, {})[day] = r["count"]
+        return heatmap
+    
+    
+    def stagionalita_tipo_referto(self, start_date, end_date):
+        pipeline = [
+            {
+                "$match": {
+                    "timestamp": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    },
+                    "type": {"$exists": True, "$ne": None}   # SOLO documenti con 'type' definito e non null
+                }
+            },
+            {
+                "$project": {
+                    "type": 1,
+                    "date": {
+                        "$dateFromString": {
+                            "dateString": "$timestamp",
+                            "format": "%Y-%m-%d %H:%M:%S"
+                        }
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date"}},
+                        "type": "$type"
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$sort": {"_id.date": 1}
+            }
+        ]
+
+        results = list(self.reports_collection.aggregate(pipeline))
+        return results
+    
+    def parallel_coords_data(self, start_date, end_date):
+        pipeline = [
+            {
+                "$match": {
+                    "timestamp": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    },
+                    "dati medico.Ospedale.Reparto": {"$exists": True, "$ne": None}
+                }
+            },
+            {
+                "$project": {
+                    "reparto": "$dati medico.Ospedale.Reparto",
+                    "date": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$dateFromString": {
+                                    "dateString": "$timestamp",
+                                    "format": "%Y-%m-%d %H:%M:%S"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "reparto": "$reparto",
+                        "date": "$date"
+                    },
+                    "count_giornaliero": {"$sum": 1}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.reparto",
+                    "totale_referti": {"$sum": "$count_giornaliero"},
+                    "giorni_attivi": {"$sum": 1},
+                    "media_giornaliera": {"$avg": "$count_giornaliero"}
+                }
+            },
+            {
+                "$sort": {"totale_referti": -1}
+            }
+        ]
+
+        results = list(self.reports_collection.aggregate(pipeline))
+        return results
+
+
 
 
     
@@ -415,24 +769,43 @@ if __name__ == "__main__":
     # Esempio di utilizzo
     db = DB()    
     
-    db.insert_operator({
-        "Anagrafica": {
-            "Email": "amministratore1@gmail.com",
-            "Password": "GennyPeppeAurora123.",
-            "Nome": "Gennaro",
-            "Cognome": "Esposito",
-            "Cellulare": "3331234567",
-            "Codice Fiscale": "ESPGRN80A01H703Z",
-            "Ruolo": "Amministratore",
-            "Primo Accesso": True,  # Indica se è il primo accesso
+    # Inserimento di un referto clinico con timestamp e con il seguente dato scheda_ps.Decesso.Ora decesso = "18.30"
+
+    report = {
+        "report_id": "",
+        "patient_id": "12345",
+        "name": "Mario Rossi",
+        "dati medico": {
+            "Anagrafica": {
+                "Nome": "Mario",
+                "Cognome": "Rossi",
+                "Codice Fiscale": "RSSMRA80A01H501Z"
+            },
+            "Ospedale": {
+                "Nome Ospedale": "Ospedale San Giovanni",
+                "Città": "Roma",
+                "Provincia": "RM",
+                "CAP": "00100",
+                "Reparto": "Medici trasfusionale"
+            }
         },
-        "Ospedale": {
-            "Nome Ospedale": "Ospedale Generico",
-            "Città": "Napoli",
-            "Provincia": "NA",
-            "CAP": "80100",
-            "Reparto": "Amministrazione",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "scheda_ps": {
+            "Decesso": {
+                "Ora decesso": "18.30"
+            }
         }
     }
-)
+    
+    for i in range(10):
+        # Rimuovo il campo _id se presente per evitare duplicati
+        report.pop("_id", None)
+        # Aggiorno report_id con un nuovo UUID (se serve)
+        report["report_id"] = str(uuid.uuid4())
+        # Opzionale: aggiorno anche il timestamp
+        report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        report_id = db.insert_clinical_report(report["report_id"], report)
+        print(f"Referto inserito con ID: {report_id}")
+
     
