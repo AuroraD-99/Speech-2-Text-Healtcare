@@ -75,4 +75,4 @@ streamlit run ./Dashboard/Dashboard.py --server.runOnSave=true
 ## Autori
 - [Aurora D'Ambrosio](https://github.com/AuroraD-99)
 - [Gennaro Iannicelli](https://github.com/Gennaro2806)
-- [Giuseppe Gatta]
+- [Giuseppe Gatta](https://temp.com)
