@@ -71,4 +71,8 @@ uvicorn controller:app --host 0.0.0.0 --port 8003
 streamlit run ./Dashboard/Dashboard.py --server.runOnSave=true
 ```
 - **Attendi l'apertura dei due server uvicorn, dopodiché potrai iniziare ad utilizzare il sistema dalla dashboard streamlit**
-```
+
+## Autori
+- **[@Aurora D'Ambrosio]https://github.com/AuroraD-99**
+- **[@Gennaro Iannicelli]https://github.com/Gennaro2806**
+- **[@Giuseppe Gatta]**
