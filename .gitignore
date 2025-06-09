@@ -3,7 +3,6 @@ key.env
 *.log
 *.json
 **/*.json
-*.jsonl
 *.wav
 *.conda
 /mistral_ita-7b-Q4_K_M.gguf

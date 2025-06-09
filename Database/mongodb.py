@@ -11,6 +11,10 @@ from bson import Binary
 from bson import ObjectId
 import redis
 import datetime
+from dotenv import load_dotenv
+import json
+import random
+from datetime import datetime, timedelta
 
 
 # Struttura Trascrizioni: filename, transcription, language, timestamp, audio_filepath
@@ -44,7 +48,7 @@ class DB:
     #-------------------------------------------- TRANSCRIPTION -------------------------------------------------------------
 
     # Inserisce una trascrizione nella collezione 'transcriptions'
-    def insert_transcription(self, audio_filename, transcription, embedding_id, language, audio_filepath):
+    def insert_transcription(self, audio_filename="", transcription="", embedding_id="", language="", audio_filepath=""):
         transcription_data = {
             "transcription_id": str(uuid.uuid4()),  # Genera un ID unico per la trascrizione
             "filename": audio_filename,
@@ -114,7 +118,42 @@ class DB:
         report["report_id"] = report_id #str(uuid.uuid4())  # ID unico per il report: coincide anche con quello per gli embedding e il referto
         #VA AGGIUNTO ANCHE L'ID DEL REFERTO NEL RAG PER IL RECUPERO
         report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        report["validated"] = False
+        #report["validated"] = False
+        result = self.reports_collection.insert_one(report)
+        
+        
+        try:
+            doctor_cf = report["dati medico"]["Anagrafica"]["Codice Fiscale"]
+            self.enqueue_report_for_doctor(doctor_cf, str(result.inserted_id))  # Aggiunge il referto alla coda del medico
+            self.logger.info(f"Referto inserito nella coda per il medico con CF: {doctor_cf}")
+        except KeyError as e:
+            self.logger.error(f"Errore nell'inserimento del referto: {e}. Assicurati che il report contenga i dati del medico.")
+            raise ValueError(f"Report non valido: {e} non trovato nei dati del report.")
+        return result.inserted_id
+    
+    def insert_clinical_report_from_dataset(self, report_id, report):
+        """
+        Insert a clinical report into the 'clinical_reports' collection.
+        """
+        
+        def genera_timestamp_casuale():
+            oggi = datetime.now()
+            un_anno_fa = oggi - timedelta(days=365)
+
+            # Genera un datetime casuale tra un anno fa e oggi
+            delta_secondi = int((oggi - un_anno_fa).total_seconds())
+            timestamp_casuale = un_anno_fa + timedelta(seconds=random.randint(0, delta_secondi))
+
+            # Formatta nel formato corretto: "YYYY-MM-DD HH:MM:SS"
+            return timestamp_casuale.strftime("%Y-%m-%d %H:%M:%S")
+        #si potrebbe anche aggiungere una voce che indica la validazione del referto per facilitare l'inserimento nel RAG
+
+        # Campi obbligatori: report_id
+        timestamp = genera_timestamp_casuale()
+        report["timestamp"] = timestamp
+        report["report_id"] = report_id #str(uuid.uuid4())  # ID unico per il report: coincide anche con quello per gli embedding e il referto
+        #VA AGGIUNTO ANCHE L'ID DEL REFERTO NEL RAG PER IL RECUPERO
+        
         result = self.reports_collection.insert_one(report)
         
         
@@ -307,6 +346,7 @@ class DB:
         new_user["Anagrafica"]["Password"] = hashed_password
         result = self.operators_collection.insert_one(new_user)
         return result.inserted_id
+    
     
     def hash_password(self, password):
         """
@@ -764,48 +804,121 @@ class DB:
         self.client.close()
    
 
-
 if __name__ == "__main__":
-    # Esempio di utilizzo
-    db = DB()    
-    
-    # Inserimento di un referto clinico con timestamp e con il seguente dato scheda_ps.Decesso.Ora decesso = "18.30"
+    db = DB()
+    load_dotenv('key.env', override=True)
+    dataset_path = os.getenv("dataset_path")
 
-    report = {
-        "report_id": "",
-        "patient_id": "12345",
-        "name": "Mario Rossi",
-        "dati medico": {
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    medici_file_path = os.path.join(base_dir, "medici_unici.json")
+    medici_unici_set = set()
+    medici_unici_list = []
+
+    # Ospedale fisso senza reparto
+    ospedale_fisso_base = {
+        "Nome Ospedale": "Ospedale Maggiore",
+        "Città": "Bologna",
+        "Provincia": "BO",
+        "CAP": "40138",
+        # "Reparto": ... -> da scegliere casualmente
+    }
+
+    reparti_possibili = [
+        "Pronto Soccorso",
+        "Medicina d'urgenza",
+        "Terapia intensiva",
+        "Cardiologia",
+        "Ortopedia",
+        "Neurologia"
+    ]
+
+    try:
+        with open(dataset_path, 'r', encoding='utf-8') as file:
+            data = [json.loads(line) for line in file]
+
+        for idx, row in enumerate(data):  # Limita a 5 righe per test
+            line_number = idx + 1
+            report_str = row.get("referto")
+            transcription_str = row.get("referto_simulato")
+            report_id = row.get("report_id")
+
+            if transcription_str:
+                db.insert_transcription(transcription=transcription_str)
+            if report_str and report_id:
+                try:
+                    loaded = json.loads(report_str)
+                    report_data = loaded[0] if isinstance(loaded, list) and len(loaded) > 0 else loaded
+
+                    dati_medico = report_data.get("dati medico", {})
+                    anagrafica_keys = ["Email", "Nome", "Cognome", "Cellulare", "Codice Fiscale", "Ruolo"]
+                    anagrafica = {k: dati_medico.get(k, "N/A") for k in anagrafica_keys}
+
+                    chiave_medico = anagrafica.get("Codice Fiscale", "") + anagrafica.get("Email", "")
+                    if chiave_medico not in medici_unici_set:
+                        medici_unici_set.add(chiave_medico)
+                        # Il reparto è scelto casualmente solo qui, nei dati unici medici
+                        reparto_casuale = random.choice(reparti_possibili)
+                        ospedale_con_reparto = {**ospedale_fisso_base, "Reparto": reparto_casuale}
+                        medici_unici_list.append({
+                            "Anagrafica": anagrafica,
+                            "Ospedale": ospedale_con_reparto
+                        })
+
+                    # Ricostruisco il referto con reparto casuale
+                    reparto_casuale = random.choice(reparti_possibili)
+                    ospedale_con_reparto = {**ospedale_fisso_base, "Reparto": reparto_casuale}
+                    report_data["dati medico"] = {
+                        "Anagrafica": anagrafica,
+                        "Ospedale": ospedale_con_reparto
+                    }
+
+                    report_data["validated"] = True
+
+                    db.insert_clinical_report(report_id=report_id, report=report_data)
+                    print(f"[✔️ Riga {line_number}] Referto inserito correttamente.")
+
+                except json.JSONDecodeError as e:
+                    print(f"[Errore parsing JSON - Riga {line_number}] {e}")
+                except Exception as e:
+                    print(f"[Errore inserimento - Riga {line_number}] {e}")
+
+        with open(medici_file_path, 'w', encoding='utf-8') as f:
+            json.dump(medici_unici_list, f, indent=2, ensure_ascii=False)
+        print(f"\n✅ File medici unici salvato in: {medici_file_path}")
+        
+        # Inserimento dei medici nel database operatori
+        for medico in medici_unici_list:
+            medico["Anagrafica"]["Password"] = "Password123."
+            new_data = {
+                **medico,
+            }
+            try:
+                db.insert_operator(new_data)
+                print(f"[✔️ Operatore] Inserito: {medico['Anagrafica']['Codice Fiscale']}")
+            except Exception as e:
+                print(f"[❌ Errore inserimento operatore] {e}")
+
+    except Exception as e:
+        print(f"[❌ Errore JSON] Errore nel parsing del dataset: {e}")
+        
+    amministratore = {
             "Anagrafica": {
-                "Nome": "Mario",
-                "Cognome": "Rossi",
-                "Codice Fiscale": "RSSMRA80A01H501Z"
+                "Email": "amministratore1@gmail.com",
+                "Password": "Password123.",
+                "Nome": "Gennaro",
+                "Cognome": "Esposito",
+                "Cellulare": "3331234567",
+                "Codice Fiscale": "GNSGNN80A01H703Z",  # Esempio di CF
+                "Ruolo": "Amministratore",
+                "Primo Accesso": True
             },
             "Ospedale": {
-                "Nome Ospedale": "Ospedale San Giovanni",
-                "Città": "Roma",
-                "Provincia": "RM",
-                "CAP": "00100",
-                "Reparto": "Medici trasfusionale"
-            }
-        },
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "scheda_ps": {
-            "Decesso": {
-                "Ora decesso": "18.30"
-            }
+                "Nome Ospedale": "Ospedale Maggiore",
+                "Città": "Bologna",
+                "Provincia": "BO",
+                "CAP": "40138",
+                "Reparto": "Amministrazione",
+            },
         }
-    }
-    
-    for i in range(10):
-        # Rimuovo il campo _id se presente per evitare duplicati
-        report.pop("_id", None)
-        # Aggiorno report_id con un nuovo UUID (se serve)
-        report["report_id"] = str(uuid.uuid4())
-        # Opzionale: aggiorno anche il timestamp
-        report["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-
-        report_id = db.insert_clinical_report(report["report_id"], report)
-        print(f"Referto inserito con ID: {report_id}")
-
-    
+        
+    db.insert_operator(amministratore)

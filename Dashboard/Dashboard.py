@@ -1391,15 +1391,20 @@ class Dashboard:
 
                                     if st.session_state.get(f"download_pdf_{report_id}", False):
                                         report_to_download = self.get_report_by_id(report_id)
-                                        pdf_data, file_name = self.download_report(report_to_download)  # 👈 già convertito in str
-                                        if pdf_data:
-                                            st.download_button(
-                                                label="⬇️ Clicca per scaricare",
-                                                data=pdf_data,
-                                                file_name=file_name,
-                                                mime="application/pdf",
-                                                key=f"download_btn_{report_id}"
-                                            )
+                                        try:
+                                            pdf_data, file_name = self.download_report(report_to_download)  # 👈 già convertito in str
+                                            if pdf_data:
+                                                st.download_button(
+                                                    label="⬇️ Clicca per scaricare",
+                                                    data=pdf_data,
+                                                    file_name=file_name,
+                                                    mime="application/pdf",
+                                                    key=f"download_btn_{report_id}"
+                                                )
+                                            else:
+                                                st.warning("⚠️ Referto non disponibile. Il PDF non è stato generato correttamente.")
+                                        except Exception as e:
+                                            st.warning(f"⚠️ Referto non disponibile. Errore durante la generazione del PDF: {str(e)}")
         except Exception as e:
             st.error(f"❌ Errore nel recupero dei referti: {str(e)}")
 
@@ -1415,24 +1420,28 @@ class Dashboard:
         return ' '.join(p.capitalize() for p in parts)
 
     def download_report(self, report):
-
         try:
             exclude_keys = {"_id", "report_id", "validated", "timestamp", "type"}
 
+            # --- GESTIONE ROBUSTA DATI PAZIENTE ---
             dati_paziente = report.get("dati paziente", {})
-            nominativo = dati_paziente.get("nominativo", {})
-            nome_paziente = nominativo.get("nome", "Sconosciuto")
-            cognome_paziente = nominativo.get("cognome", "Sconosciuto")
+            if not dati_paziente and "scheda_ps" in report:
+                dati_paziente = report.get("scheda_ps", {}).get("Dati Paziente", {})
 
+            nominativo = dati_paziente.get("nominativo", {})
+            nome_paziente = nominativo.get("nome", dati_paziente.get("Nome", "Sconosciuto"))
+            cognome_paziente = nominativo.get("cognome", dati_paziente.get("Cognome", "Sconosciuto"))
+
+            # --- GESTIONE ROBUSTA DATI MEDICO ---
             dati_medico = report.get("dati medico", {})
-            nome_medico = dati_medico.get("nome", "Sconosciuto")
-            cognome_medico = dati_medico.get("cognome", "Sconosciuto")
-            codice_fiscale = dati_medico.get("codice fiscale", "Sconosciuto")
+            nome_medico = dati_medico.get("nome", dati_medico.get("Nome", "Sconosciuto"))
+            cognome_medico = dati_medico.get("cognome", dati_medico.get("Cognome", "Sconosciuto"))
+            codice_fiscale = dati_medico.get("codice fiscale", dati_medico.get("Codice Fiscale", "Sconosciuto"))
 
             # Data referto dalla stringa timestamp (formato "YYYY-MM-DD HH:MM:SS")
             timestamp_str = report.get("timestamp", "")
             try:
-                data_referto = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").date()
+                data_referto = datetime.datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").date()
             except:
                 data_referto = "data_sconosciuta"
 
@@ -1477,7 +1486,6 @@ class Dashboard:
                 [Paragraph(f"Data Referto: {str(data_referto)}", normal_style)],
             ]
 
-            # Tabelle con bordi per rettangoli
             table_medico = Table(medico_info, colWidths=[doc.width/2 - 10])
             table_medico.setStyle(TableStyle([
                 ('BOX', (0, 0), (-1, -1), 1, colors.darkblue),
@@ -1498,7 +1506,6 @@ class Dashboard:
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
             ]))
 
-            # Affiancati in una riga
             info_row = Table([[table_medico, table_paziente]], colWidths=[doc.width/2, doc.width/2])
             info_row.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
@@ -1512,25 +1519,18 @@ class Dashboard:
             # 3) Funzione ricorsiva per il contenuto con rettangoli per le macro-categorie
             def print_dict(d, level=0):
                 exclude_keys_local = exclude_keys.union({"dati paziente", "dati medico"})
-                
                 for key, value in d.items():
                     if key in exclude_keys_local:
                         continue
-
                     key_text = self.format_key_text(key)
                     indent = 10 * level
-
                     if isinstance(value, dict):
-                        # Rettangolo per macro-categoria livello 0 solo (le chiavi principali)
                         if level == 0:
                             section_content = []
                             section_content.append(Paragraph(f"<b>{key_text}</b>", section_style))
                             section_content.append(Spacer(1, 8))
-
-                            # Contenuto ricorsivo più indentato
                             inner_content = inner_print(value, level + 1)
                             section_content.extend(inner_content)
-
                             table = Table([[section_content]], colWidths=[doc.width])
                             table.setStyle(TableStyle([
                                 ('BOX', (0, 0), (-1, -1), 1.2, colors.darkblue),
@@ -1543,15 +1543,12 @@ class Dashboard:
                             ]))
                             story.append(table)
                             story.append(Spacer(1, 15))
-
                         else:
-                            # Per livelli >0 usa paragrafi con indentazione progressiva e stile più piccolo
                             story.append(Indenter(left=indent))
                             style = sub_section_style if level == 1 else normal_style
                             story.append(Paragraph(f"<b>{key_text}</b>", style))
                             print_dict(value, level + 1)
                             story.append(Indenter(left=-indent))
-
                     elif isinstance(value, list):
                         story.append(Indenter(left=indent))
                         story.append(Paragraph(f"<b>{key_text}</b>", normal_style))
@@ -1561,7 +1558,6 @@ class Dashboard:
                             else:
                                 story.append(Paragraph(f"- {str(item)}", normal_style))
                         story.append(Indenter(left=-indent))
-
                     else:
                         val_str = str(value) if value is not None else ""
                         story.append(Indenter(left=indent))
@@ -1569,21 +1565,17 @@ class Dashboard:
                         story.append(Indenter(left=-indent))
 
             def inner_print(d, level=1):
-                # Stampa ricorsiva contenuti interni senza creare rettangoli (usata dentro i rettangoli macro)
                 content = []
                 indent = 10 * level
                 for k, v in d.items():
                     if k in exclude_keys or k in ("timestamp", "type", "dati paziente", "dati medico"):
                         continue
-
                     key_text = self.format_key_text(k)
-
                     if isinstance(v, dict):
                         content.append(Indenter(left=indent))
                         content.append(Paragraph(f"<b>{key_text}</b>", sub_section_style if level == 1 else normal_style))
                         content.extend(inner_print(v, level + 1))
                         content.append(Indenter(left=-indent))
-
                     elif isinstance(v, list):
                         content.append(Indenter(left=indent))
                         content.append(Paragraph(f"<b>{key_text}</b>", normal_style))
@@ -1593,20 +1585,23 @@ class Dashboard:
                             else:
                                 content.append(Paragraph(f"- {str(item)}", normal_style))
                         content.append(Indenter(left=-indent))
-
                     else:
                         val_str = str(v) if v is not None else ""
                         content.append(Indenter(left=indent))
                         content.append(Paragraph(f"<b>{key_text}:</b> {val_str}", normal_style))
                         content.append(Indenter(left=-indent))
-
                 return content
 
-            # Filtra e stampa il contenuto del report esclusi campi interni già mostrati
-            filtered_report = {k: v for k, v in report.items() if k not in exclude_keys and k not in ("timestamp", "type")}
+            # --- SELEZIONE CONTENUTO DA STAMPARE ---
+            if report.get("type") == "Emergency" and "scheda_ps" in report:
+                filtered_report = report["scheda_ps"]
+            elif "clinical_report" in report:
+                filtered_report = report["clinical_report"]
+            else:
+                filtered_report = {k: v for k, v in report.items() if k not in exclude_keys and k not in ("timestamp", "type")}
+
             print_dict(filtered_report)
 
-            # Build PDF
             doc.build(story)
             buffer.seek(0)
             pdf_bytes = buffer.getvalue()
