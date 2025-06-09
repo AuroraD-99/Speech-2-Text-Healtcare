@@ -16,3 +16,33 @@ La documentazione clinica tradizionale si basa pesantemente sull’inserimento m
 
 ## Architettura
 ![Architettura del sistema](assets/Diagrams/architettura.jpg)
+Il sistema espone le seguenti funzioanlità principali:
+- **Dashboard Streamlit**: Interfaccia web per la gestione di referti, ricerca, visualizzazione, modifica, download PDF e analisi temporale.
+- **Registrazione audio**: Acquisizione referti tramite microfono direttamente dalla dashboard.
+- **Trascrizione e generazione referti**: Pipeline automatica per la trascrizione e la generazione di referti strutturati.
+- **Gestione utenti**: Amministratori e operatori con autenticazione e gestione anagrafica.
+- **Backend API**: Servizi REST per la gestione dei dati e delle operazioni.
+- **Controller**: Orchestrazione delle pipeline di trascrizione e generazione referti.
+- **Database MongoDB**: Persistenza dei dati clinici.
+- **Code Redis**: Gestione delle code di referti per i medici.
+- **Containerizzazione completa**: Tutto il sistema è pronto per essere eseguito tramite Docker Compose.
+
+## Guida all'installazione
+
+### Metodo 1 (Consigliato): Docker
+- **Clona il repository**
+'''sh
+git clone https://github.com/AuroraD-99/Speech-2-Voice-Healtcare.git
+'''
+
+- **Costruisci le immagini docker**
+'''sh
+docker-compose build
+'''
+
+- **Fai partire i container Docker**
+'''sh
+docker-compose up -d
+'''
+
+- **Ora il sistema è accessibile tramite la dashboard alla porta 8501**
