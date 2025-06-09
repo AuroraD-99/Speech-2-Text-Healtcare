@@ -137,7 +137,7 @@ class DB:
         """
         
         def genera_timestamp_casuale():
-            oggi = datetime.now()
+            oggi = datetime.datetime.now()
             un_anno_fa = oggi - datetime.timedelta(days=365)
 
             # Genera un datetime casuale tra un anno fa e oggi

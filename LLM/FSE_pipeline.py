@@ -370,7 +370,6 @@ def main():
 
     # Inizializzazione ChromaDB client
     logger.info("Creo client ChromaDB...")
-    chroma_client = Client()
 
     # Inizializzazione del manager
     logger.info("Inizializzo FSEManager...")

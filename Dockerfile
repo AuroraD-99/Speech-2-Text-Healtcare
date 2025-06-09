@@ -24,6 +24,9 @@ ENV LC_ALL=it_IT.UTF-8
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+# 🔽 Scarica il modello spaCy italiano
+RUN python -m spacy download it_core_news_sm
+
 # Copia tutto il codice nel container
 COPY . .
 

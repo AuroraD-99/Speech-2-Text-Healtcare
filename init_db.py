@@ -1,6 +1,5 @@
 from Database.mongodb import DB
 
-
 import os
 from dotenv import load_dotenv
 
