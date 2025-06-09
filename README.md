@@ -31,17 +31,17 @@ Il sistema espone le seguenti funzioanlità principali:
 
 ### Metodo 1 (Consigliato): Docker
 - **Clona il repository**
-'''sh
+'''
 git clone https://github.com/AuroraD-99/Speech-2-Voice-Healtcare.git
 '''
 
 - **Costruisci le immagini docker**
-'''sh
+'''
 docker-compose build
 '''
 
 - **Fai partire i container Docker**
-'''sh
+'''
 docker-compose up -d
 '''
 
