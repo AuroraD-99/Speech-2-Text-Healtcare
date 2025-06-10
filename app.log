@@ -27479,3 +27479,4 @@
 2025-06-10 14:34:59,004 [DB] - INFO - Referto inserito nella coda per il medico con CF: GRCFPP72A01H501L
 2025-06-10 14:35:03,725 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-10 14:35:43,534 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 14:37:39,038 [DB] - INFO - Connected to MongoDB successfully.
