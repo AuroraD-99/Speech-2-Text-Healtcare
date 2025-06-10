@@ -32,6 +32,7 @@ class DB:
             self.client = MongoClient(uri)
             self.db = self.client[db_name]
             # Definizione delle collezioni separate
+            self.init_flag = self.db["init_flag"]
             self.transcriptions = self.db["transcriptions"]
             self.reports_collection = self.db["clinical_reports"] #deve contenere anche l'id dell'embedding
             self.operators_collection = self.db["medical_operators"]
@@ -902,6 +903,16 @@ class DB:
         }
 
         self.insert_operator(amministratore)
+        
+    def inizializza_flag(self, dataset_path):
+        flag = self.init_flag.find_one({"initialized": True})
+        
+        if flag:
+            return
+        
+        self.popola_db(dataset_path)
+        self.init_flag.insert_one({"initialized": True})
+        
 
     
     # Chiude la connessione al database

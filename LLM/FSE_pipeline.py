@@ -6,7 +6,6 @@ import numpy as np
 from datetime import datetime
 import logging 
 import tempfile   
-from bson import ObjectId
 
 import argparse
 from dotenv import load_dotenv

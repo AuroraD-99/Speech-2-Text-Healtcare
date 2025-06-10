@@ -31,6 +31,8 @@ from Database.mongodb import DB
 
 class Dashboard:
     def __init__(self, env_file="key.env"):
+        if "user" not in st.session_state:
+            st.session_state.user = {}
         if "deleted" not in st.session_state:
             st.session_state.deleted = False
         if "db" not in st.session_state:
