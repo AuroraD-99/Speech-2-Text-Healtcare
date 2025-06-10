@@ -27483,3 +27483,69 @@
 2025-06-10 14:40:02,924 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-10 14:40:26,099 [DashboardDriver] - INFO - Running command: streamlit run
 2025-06-10 14:40:34,222 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 14:50:34,743 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 14:50:47,632 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-10 14:51:00,610 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:06:39,006 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:06:48,449 [Controller] - INFO - Creating a new clinical report
+2025-06-10 15:06:52,848 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:06:59,495 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:07:09,044 [Controller] - ERROR - Error creating new report: 500 Server Error: Internal Server Error for url: http://backend:8001/new_report
+2025-06-10 15:07:09,163 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:07:50,620 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:08:21,128 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:09:23,819 [Controller] - INFO - Creating a new clinical report
+2025-06-10 15:09:30,207 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:09:35,985 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:12:45,474 [DB] - INFO - Referto inserito nella coda per il medico con CF: QRCSNN80A41H501U
+2025-06-10 15:12:47,072 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:12:56,089 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:12:58,823 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:05,806 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:07,966 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:11,128 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:13,013 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:19,044 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:30,078 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:30,230 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:36,356 [Controller] - INFO - Retrieving clinical report with ID: 68482f4d6726d676927ceb92
+2025-06-10 15:13:36,391 [DB] - INFO - Aggiornamento del referto con ID 68482f4d6726d676927ceb92 con i nuovi dati: {'dati paziente': {'sesso': 'M', 'data_nascita': '25 maggio  1980', 'età': '45', 'luogo_nascita': {'città': 'Napoli', 'provincia': 'Napoli'}, 'residenza': {'città': 'Napoli', 'provincia': 'Napoli', 'indirizzo': 'Via di Napoli 77'}, 'recapito_telefonico': '3333333333', 'dati_dichiarati_da': 'N/A', 'nominativo': {'nome': 'Mario', 'cognome': 'Rossi'}, 'codice_fiscale': 'RSSMRA80E25F839T'}, 'clinical_report': {'Intestazione': {'Data visita': 'N/A', 'Ora visita': 'N/A', 'Ambulatorio': 'N/A', 'Medico': 'N/A'}, 'Motivo della visita': 'N/A', 'Anamnesi': {'Personale': 'N/A', 'Familiare': 'N/A', 'Evento attuale': 'N/A'}, 'Esame obiettivo': 'N/A', 'Esami eseguiti': 'N/A', 'Diagnosi': 'N/A', 'Terapia': 'N/A', 'Follow-up': 'N/A', 'Firma medico': 'N/A', 'Data redazione': 'N/A'}, 'validated': True}
+2025-06-10 15:13:36,407 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:13:38,508 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:13:51,009 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 15:14:19,079 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:14:23,961 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:23,987 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:37,135 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:37,242 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:14:40,628 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:40,648 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:45,543 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:14:48,509 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:04,589 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:08,603 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:10,272 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:12,865 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:14,582 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:27,259 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:27,417 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:27,568 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:28,959 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:45,869 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:46,027 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:51,329 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:51,480 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:52,846 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbea6
+2025-06-10 15:15:52,925 [DB] - INFO - Aggiornamento del referto con ID 6848267245a338fd409dbea6 con i nuovi dati: {'dati paziente': {'sesso': 'M', 'data_nascita': '10/10/1962', 'età': '62', 'luogo_nascita': {'città': 'Catania', 'provincia': 'Catania'}, 'residenza': {'città': 'Catania', 'provincia': 'Catania', 'indirizzo': 'Via di Catania 40'}, 'recapito_telefonico': '3333333333', 'dati_dichiarati_da': 'N/A', 'nominativo': {'nome': 'Amedeo', 'cognome': 'Olivo'}, 'codice_fiscale': 'LVOMDA62R10C351S'}, 'scheda_ps': {'Chiamata': {'data': 'N/A', 'H chiamata': 'N/A', 'H partenza': 'N/A', 'H sul posto': 'N/A', 'H partenza posto': 'N/A', 'H in PS': 'N/A', 'H libero e operativo': 'N/A', 'luogo intervento': 'Reparto di Oncologia', 'condizione riferita': 'Dolore addominale e perdita di peso'}, 'Ambulanza': {'CRI': 'N/A', 'Sel': 'N/A'}, 'Equipaggio': {'Aut.': 'N/A', 'Socc1': 'N/A', 'Socc2': 'N/A', 'IP': 'N/A', 'Medico': 'N/A'}, 'Causa trasporto non effettuato': 'N/A', 'Attivazioni/Autorità presenti': {'descrizione': 'N/A', 'referto': 'N/A'}, 'Decesso': {'Ora decesso': '', 'Firma': 'N/A'}, "Rifiuto (firma dell'interessato)": {'Firma': 'N/A'}, 'Rilevazioni': {'Parametri': {'Coscienza': 'N/A', 'Cute': 'N/A', 'Respiro': 'Difficoltà respiratorie', 'Sp02': 'N/A', 'FC bpm': 'Aumento della frequenza cardiaca', 'PA mmHg': 'N/A', 'Glic, Mg/dl': 'N/A', 'Temp. C°': 'N/A'}, 'Glasgow Coma Scale': {'Apertura occhi': 'N/A', 'Risposta verbale': 'N/A', 'Risposta motoria': 'N/A'}, 'Pupille': 'N/A', 'Lesioni riscontrate': 'Massa addominale palpabile'}, 'Provvedimenti': {'Respiro': 'Terapia antalgica', 'Circolo': 'N/A', 'Immobilizzazione': 'N/A', 'Altro': 'Laparoscopia esplorativa e biopsia epatica', 'Infusioni/Farmaci': 'Chemioterapia con FOLFOX e bevacizumab'}, 'Annotazioni': 'Paziente con carcinoma del colon retto e metastasi al fegato, sottoposto a biopsia della massa addominale e biopsia epatica. Firma del consenso informato.'}, 'validated': True}
+2025-06-10 15:15:52,938 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:15:55,034 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:01,610 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:05,657 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:05,675 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:05,770 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:06,086 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:11,237 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:11,254 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbf2c
+2025-06-10 15:16:13,772 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
+2025-06-10 15:16:13,793 [Controller] - INFO - Retrieving clinical report with ID: 6848267245a338fd409dbf2c
+2025-06-10 15:16:27,376 [DB] - INFO - Connected to MongoDB successfully.
