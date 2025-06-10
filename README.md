@@ -36,7 +36,7 @@ git clone https://github.com/AuroraD-99/Speech-2-Voice-Healtcare.git
 ```
 - **Apri la repository apena clonata su github**
 - **Apri il file entrypoint.sh e assicurati che EOL sia impostato su LF (in basso a destra, a fianco copilot)**
-- **Se così non fosse, e c'è CLRF, allora selezionalo e cambia la EOL in LF**
+- **Se così non fosse, e c'è CRLF, allora selezionalo e cambia la EOL in LF**
 
 - **Costruisci le immagini docker**
 ```
