@@ -27480,3 +27480,6 @@
 2025-06-10 14:35:03,725 [DB] - INFO - Connected to MongoDB successfully.
 2025-06-10 14:35:43,534 [DB] - INFO - Coda Redis aggiornata per il medico QRCSNN80A41H501U.
 2025-06-10 14:37:39,038 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 14:40:02,924 [DB] - INFO - Connected to MongoDB successfully.
+2025-06-10 14:40:26,099 [DashboardDriver] - INFO - Running command: streamlit run
+2025-06-10 14:40:34,222 [DB] - INFO - Connected to MongoDB successfully.
