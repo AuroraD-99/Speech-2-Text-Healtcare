@@ -48,7 +48,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-- **Ora il sistema è accessibile tramite la dashboard alla porta 8501**
+- **Ora il sistema è accessibile tramite la dashboard all'indirizzo lostalhost:8501**
 
 ### Metodo 2: installazione manuale
 - **Prerequisiti**
