@@ -75,6 +75,9 @@ streamlit run ./Dashboard/Dashboard.py --server.runOnSave=true
 ```
 - **Attendi l'apertura dei due server uvicorn, dopodiché potrai iniziare ad utilizzare il sistema dalla dashboard streamlit**
 
+## Test dell'applicazione con profili preimpostati
+Email e password per gli utenti preregistrati del sistema sono disponibili nel file utenti_big_data.txt
+
 ## Autori
 - [Aurora D'Ambrosio](https://github.com/AuroraD-99)
 - [Gennaro Iannicelli](https://github.com/Gennaro2806)

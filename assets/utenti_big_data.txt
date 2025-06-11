@@ -1,26 +1,26 @@
 MEDICI REGISTRATI
 
-ANNA QUERCIA
+ANNA QUERCIA: anna.quercia@fintoemail.it
 
-MARIO ROSSI
+MARIO ROSSI: mario.rossi@fintoemail.it
 
-PAOLO AMATO
+PAOLO AMATO paolo.amato@fintoemail.it
 
-MARIA VERDI
+MARIA VERDI maria.verdi@fintoemail.it
 
-LAURA MORETTI
+LAURA MORETTI laura.moretti@fintoemail.it
 
-ALESSANDRO CONTI
+ALESSANDRO CONTI alessandro.conti@fintoemail.it
 
-CHIARA ROSSI
+CHIARA ROSSI chiara.rossi@fintoemail.it
 
-GIUSEPPE ESPOSITO
+GIUSEPPE ESPOSITO giuseppe.esposito@fintoemail.it
 
-FILIPPO GRECO
-
-L'EMAIL DEI MEDICI è SEMPRE nome.cognome@fintoemail.it mentre la password è Password123.
-
+FILIPPO GRECO filippo.greco@fintoemail.it
 
 AMMINISTRATORI REGISTRATI
 
-email: amministratore1@gmail.com pass: Password123.
+email: amministratore1@gmail.com 
+
+
+Per tutti gli utenti la password è sempre Password123.
