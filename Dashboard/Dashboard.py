@@ -1440,7 +1440,8 @@ class Dashboard:
             cognome_paziente = nominativo.get("cognome", dati_paziente.get("Cognome", "Sconosciuto"))
 
             # --- GESTIONE ROBUSTA DATI MEDICO ---
-            dati_medico = report.get("dati medico", {})
+            dati_medico_1 = report.get("dati medico", {})
+            dati_medico = dati_medico_1.get("Anagrafica")
             nome_medico = dati_medico.get("nome", dati_medico.get("Nome", "Sconosciuto"))
             cognome_medico = dati_medico.get("cognome", dati_medico.get("Cognome", "Sconosciuto"))
             codice_fiscale = dati_medico.get("codice fiscale", dati_medico.get("Codice Fiscale", "Sconosciuto"))
